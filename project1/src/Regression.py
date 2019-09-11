@@ -20,15 +20,17 @@ from sklearn.linear_model import LinearRegression
 
 
 
-class RegressionResampling():
+class Regression():
 
-    def __init__(self, n=100, deg=5):
+    def __init__(self, x, y, z, deg=5):
 
-        self.n = n
+        self.n = len(x)
         self.deg = deg
         self.p = int((self.deg+1)*(self.deg+2)/2)
-        self.x, self.y = self.generate_xy()
-        self.z = self.franke_function()
+        self.x = x
+        self.y = y
+        self.z = z
+
         self.X = self.create_design_matrix()
 
 
@@ -72,7 +74,7 @@ class RegressionResampling():
         return X
 
 
-    def regression(self, X, z, lmd=0):
+    def regression(self, lambda_=0):
         '''
         Perform linear regression.
 
@@ -81,21 +83,23 @@ class RegressionResampling():
         lmd>0: Ridge regression.
         '''
 
-        beta = np.linalg.pinv(X.T.dot(X) + \
-            lmd*np.identity(self.p)).dot(X.T).dot(z)
-        z_tilde = X @ beta
+        X = self.X
 
-        return beta, z_tilde
+        self.beta = np.linalg.pinv(X.T.dot(X) + \
+            lambda_*np.identity(self.p)).dot(X.T).dot(self.z)
+        self.z_tilde = X @ self.beta
+        self.mse = mean_squared_error(self.z, self.z_tilde)
+        self.r2 = r2_score(self.z, self.z_tilde)
 
 
-    def lasso(self, X, z, lmd=0.1):
+    def lasso(self, lambda_=0.1):
         
-        clf_lasso = skl.Lasso(alpha=lmd).fit(X, z)
-        beta = clf_lasso.get_params()
-        z_tilde = clf_lasso.predict(X)
-
-        return beta, z_tilde
-
+        clf_lasso = skl.Lasso(alpha=lambda_).fit(self.X, self.z)
+        self.beta = clf_lasso.get_params()
+        self.z_tilde = clf_lasso.predict(self.X)
+        self.mse = mean_squared_error(self.z, self.z_tilde)
+        self.r2 = r2_score(self.z, self.z_tilde)
+        
 
     def print_error_analysis(self, z, z_tilde):
         '''Print error analysis of regression fit using scikit.'''
@@ -103,36 +107,4 @@ class RegressionResampling():
         print("Mean squared error: %.8f" % mean_squared_error(z, z_tilde))
         print('R2 score: %.8f' % r2_score(z, z_tilde))
         print('Mean absolute error: %.8f' % mean_absolute_error(z, z_tilde))
-
-
-    def cross_validation(self):
-
-        kf = KFold(n_splits=5, random_state=0, shuffle=True)
-
-        for train_index, test_index in kf.split(self.X):
-
-            beta, z_OLS = self.regression(self.X[train_index], self.z[train_index],
-                    lmd=0)
-
-            z_tilde = self.X[test_index] @ beta
-
-            self.print_error_analysis(self.z[test_index], z_tilde)
-
-
-    def plot_franke(self):
-
-        fig = plt.figure()
-        ax = fig.gca(projection='3d')
-
-        surf = ax.plot_surface(self.x, self.y, self.z,
-                cmap=cm.coolwarm,linewidth=0, antialiased=False)
-        
-        # Customize the z axis.
-        ax.set_zlim(-0.10, 1.40)
-        ax.zaxis.set_major_locator(LinearLocator(10))
-        ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
-        
-        # Add a color bar which maps values to colors.
-        fig.colorbar(surf, shrink=0.5, aspect=5)
-        plt.show()
 
