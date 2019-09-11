@@ -88,6 +88,15 @@ class RegressionResampling():
         return beta, z_tilde
 
 
+    def lasso(self, X, z, lmd=0.1):
+        
+        clf_lasso = skl.Lasso(alpha=lmd).fit(X, z)
+        beta = clf_lasso.get_params()
+        z_tilde = clf_lasso.predict(X)
+
+        return beta, z_tilde
+
+
     def print_error_analysis(self, z, z_tilde):
         '''Print error analysis of regression fit using scikit.'''
         

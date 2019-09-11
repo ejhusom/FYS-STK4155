@@ -20,9 +20,17 @@ def ex_b(model):
     model.cross_validation()
 
 
+def ex_d(model):
+
+    
+    beta, z_tilde = model.lasso(model.X, model.z, lmd=0.1)
+    model.print_error_analysis(model.z, z_tilde)
+
+
 if __name__ == '__main__': 
     project1 = RegressionResampling()
 
     ex_a(project1)
     ex_b(project1)
+    ex_d(project1)
 
