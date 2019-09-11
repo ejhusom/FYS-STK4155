@@ -27,8 +27,8 @@ class Regression():
         #if np.shape(z) > 1:
         z = np.ravel(z)
 
-        self.X = X  # design matrix
-        self.z = z  # response variable
+        self.X = X      # design matrix
+        self.z = z      # response variable
 
     def ols(self):
         '''Ordinary least squares.'''
@@ -53,16 +53,19 @@ class Regression():
         
     
     def print_error_analysis(self):
-        print(mse())
-        print(r2())
-        print(var_beta())
+        print(self.mse())
+        print(self.r2())
+        print(self.var_beta())
+
 
     def mse(self):
-        return mean_squared_error(self.z, self.z_tilde)) 
-    
+        return mean_squared_error(self.z, self.z_tilde) 
+
+
     def r2(self):
-        return r2_score(self.z, self.z_tilde)) 
-        
+        return r2_score(self.z, self.z_tilde) 
+
+
     def var_beta(self):
-        return np.var(self.z)*np.pinv(self.X.T @ self.X)
+        return np.var(self.z)*np.linalg.pinv(self.X.T @ self.X)
 

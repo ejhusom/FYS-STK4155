@@ -8,6 +8,7 @@
 #
 # ============================================================================
 from Regression import *
+from Resampling import *
 
 def generate_xy(start=0, stop=1, n=100):
     '''Generate x and y data and return at as a flat meshgrid.'''
@@ -73,11 +74,12 @@ def create_design_matrix(x, y, deg=5):
 def ex_a(model):
 
     model.ols()
+    model.print_error_analysis()
 
 
 def ex_b(model):
-    pass
-    #model.cross_validation()
+    
+    model.cross_validation() 
 
 
 def ex_d(model):
