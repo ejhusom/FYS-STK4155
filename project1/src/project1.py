@@ -9,28 +9,38 @@
 # ============================================================================
 from Regression import *
 
-def franke_function(eps = 0.05):
+def generate_xy(start=0, stop=1, n=100):
+    '''Generate x and y data and return at as a flat meshgrid.'''
+
+    x = np.linspace(start, stop, n)
+    y = np.linspace(start, stop, n)
+    x, y = np.meshgrid(x, y)
+    
+    return x, y
+
+
+def franke_function(x, y, eps = 0.05):
 
     np.random.seed(0)
 
-    x = np.reshape(self.x, (self.n, self.n))
-    y = np.reshape(self.y, (self.n, self.n))
+    n = len(x)
+    print(n)
 
     term1 = 0.75*np.exp(-(0.25*(9*x-2)**2) - 0.25*((9*y-2)**2))
     term2 = 0.75*np.exp(-((9*x+1)**2)/49.0 - 0.1*(9*y+1))
     term3 = 0.5*np.exp(-(9*x-7)**2/4.0 - 0.25*((9*y-3)**2))
     term4 = -0.2*np.exp(-(9*x-4)**2 - (9*y-7)**2)
     
-    z = term1 + term2 + term3 + term4 + eps*np.random.randn(self.n)
+    z = term1 + term2 + term3 + term4 + eps*np.random.randn(n)
 
-    return np.ravel(z)
+    return z
 
-def plot_franke(self):
+def plot_franke(x, y, z):
 
     fig = plt.figure()
     ax = fig.gca(projection='3d')
 
-    surf = ax.plot_surface(self.x, self.y, self.z,
+    surf = ax.plot_surface(x, y, z,
             cmap=cm.coolwarm,linewidth=0, antialiased=False)
     
     # Customize the z axis.
@@ -62,7 +72,12 @@ def ex_d(model):
 
 
 if __name__ == '__main__': 
-    project1 = Regression()
+
+    x, y = generate_xy(0, 1, 100)
+    franke_function(x, y, 0.05)
+
+    
+    project1 = Regression(x, y, z, deg=5)
 
     ex_a(project1)
     ex_b(project1)

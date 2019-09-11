@@ -27,38 +27,11 @@ class Regression():
         self.n = len(x)
         self.deg = deg
         self.p = int((self.deg+1)*(self.deg+2)/2)
-        self.x = x
-        self.y = y
-        self.z = z
+        self.x = np.ravel(x)
+        self.y = np.ravel(y)
+        self.z = np.ravel(z)
 
         self.X = self.create_design_matrix()
-
-
-    def franke_function(self, eps = 0.05):
-
-        np.random.seed(0)
-
-        x = np.reshape(self.x, (self.n, self.n))
-        y = np.reshape(self.y, (self.n, self.n))
-
-        term1 = 0.75*np.exp(-(0.25*(9*x-2)**2) - 0.25*((9*y-2)**2))
-        term2 = 0.75*np.exp(-((9*x+1)**2)/49.0 - 0.1*(9*y+1))
-        term3 = 0.5*np.exp(-(9*x-7)**2/4.0 - 0.25*((9*y-3)**2))
-        term4 = -0.2*np.exp(-(9*x-4)**2 - (9*y-7)**2)
-        
-        z = term1 + term2 + term3 + term4 + eps*np.random.randn(self.n)
-
-        return np.ravel(z)
-
-
-    def generate_xy(self, start = 0, stop = 1):
-        '''Generate x and y data and return at as a flat meshgrid.'''
-
-        x = np.linspace(start, stop, self.n)
-        y = np.linspace(start, stop, self.n)
-        x, y = np.meshgrid(x, y)
-        
-        return np.ravel(x), np.ravel(y)
 
 
     def create_design_matrix(self):
