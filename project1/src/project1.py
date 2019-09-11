@@ -121,19 +121,19 @@ class RegressionResampling():
         plt.show()
 
 
-    def ex_a(self):
+def ex_a(model):
 
-        beta, z_tilde = self.regression(self.X, self.z, _lambda=0)
-        self.print_error_analysis(self.z, z_tilde)
+    beta, z_tilde = model.regression(self.X, self.z, _lambda=0)
+    model.print_error_analysis(self.z, z_tilde)
 
 
-    def ex_b(self):
+def ex_b(model):
 
-        self.cross_validation()
+    model.cross_validation()
 
 
 if __name__ == '__main__': 
     project1 = RegressionResampling()
 
-    project1.ex_a()
-    project1.ex_b()
+    ex_a(project1)
+    ex_b(project1)
