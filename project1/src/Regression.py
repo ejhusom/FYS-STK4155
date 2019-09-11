@@ -22,48 +22,33 @@ from sklearn.linear_model import LinearRegression
 
 class Regression():
 
-    def __init__(self, x, y, z, deg=5):
+    def __init__(self, X, z):
 
-        self.n = len(x)
-        self.deg = deg
-        self.p = int((self.deg+1)*(self.deg+2)/2)
-        self.x = np.ravel(x)
-        self.y = np.ravel(y)
-        self.z = np.ravel(z)
-
-        self.X = self.create_design_matrix()
+        #if np.shape(z) > 1:
+        z = np.ravel(z)
 
 
-    def create_design_matrix(self):
+        self.X = X
+        self.z = z
 
-        N = len(self.x)
-        X = np.ones((N,self.p))
-
-        for i in range(1, self.deg+1):
-            q = int((i)*(i+1)/2)
-            for k in range(i+1):
-                X[:,q+k] = self.x**(i-k) * self.y**k
-
-        return X
-
-
-    def regression(self, lambda_=0):
+    def ols(self):
         X = self.X
+        self.beta = np.linalg.pinv(X.T.dot(X)).dot(X.T).dot(self.z)
+        self.z_tilde = X @ self.beta
 
+
+    def ridge(self, lambda_=0.1):
+
+        X = self.X
         self.beta = np.linalg.pinv(X.T.dot(X) + \
             lambda_*np.identity(self.p)).dot(X.T).dot(self.z)
         self.z_tilde = X @ self.beta
-        self.mse = mean_squared_error(self.z, self.z_tilde)
-        self.r2 = r2_score(self.z, self.z_tilde)
-
 
     def lasso(self, lambda_=0.1):
         
         clf_lasso = skl.Lasso(alpha=lambda_).fit(self.X, self.z)
         self.beta = clf_lasso.get_params()
         self.z_tilde = clf_lasso.predict(self.X)
-        self.mse = mean_squared_error(self.z, self.z_tilde)
-        self.r2 = r2_score(self.z, self.z_tilde)
         
     
     def print_error_analysis(self):

@@ -53,10 +53,27 @@ def plot_franke(x, y, z):
     plt.show()
 
 
+def create_design_matrix(x, y, deg=5):
+
+    n = len(x)
+    p = int((deg+1)*(deg+2)/2)
+    x = np.ravel(x)
+    y = np.ravel(y)
+
+    N = len(x)
+    X = np.ones((N,p))
+
+    for i in range(1, deg+1):
+        q = int((i)*(i+1)/2)
+        for k in range(i+1):
+            X[:,q+k] = x**(i-k) * y**k
+
+    return X
+
 def ex_a(model):
 
-    model.regression(lambda_=0)
-    model.print_error_analysis(model.z, model.z_tilde)
+    model.ols()
+    model.print_error_analysis()
 
 
 def ex_b(model):
@@ -67,17 +84,18 @@ def ex_b(model):
 def ex_d(model):
 
     
-    model.lasso(lambda_=0.1)
-    model.print_error_analysis(model.z, model.z_tilde)
+    model.lasso()
+    model.print_error_analysis()
 
 
 if __name__ == '__main__': 
 
     x, y = generate_xy(0, 1, 100)
     z = franke_function(x, y, 0.05)
+    X = create_design_matrix(x, y, deg=5)
 
     
-    project1 = Regression(x, y, z, deg=5)
+    project1 = Regression(X, z)
 
     ex_a(project1)
     ex_b(project1)
