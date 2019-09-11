@@ -1,4 +1,4 @@
-\documentclass[10pt, a4paper]{amsart}
+\documentclass[10pt, a4paper]{article}
 %\usepackage[english,norsk]{babel}
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
@@ -52,16 +52,19 @@
 \lstset{style=mystyle}
 
 
-\title[Title]{Title \\ \large
-Title}
-\author[Husom]{Erik Johannes B. L. G. Husom \\ \\ \today}
+\title{Title}
+\author{Erik Johannes B. L. G. Husom}
+\date{\today}
 
 
 \begin{document}
+
+
+\maketitle
+
 \begin{abstract}
 
 \end{abstract}
-\maketitle
 
 %\begin{center}
 %    Source code found in GitHub repository at \url{https://github.com/ejhusom/FYS-STK4155/}
@@ -75,7 +78,7 @@ The aim of this project is to...
 
 
 \section{Theory}
-In this section I will provide the theoretical grounds...\cite{jensen}.
+    In this section I will provide the theoretical grounds...
 
 
 \section{Methods}
@@ -87,7 +90,7 @@ In this section I will provide the theoretical grounds...\cite{jensen}.
 \section{Conclusion}
 The main goal of the project was to...
 
-\bibliographystyle{unsrt}
+%\bibliographystyle{unsrt}
 \bibliography{references}
 
 %\end{multicols}
