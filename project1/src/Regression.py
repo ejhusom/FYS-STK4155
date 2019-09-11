@@ -48,14 +48,6 @@ class Regression():
 
 
     def regression(self, lambda_=0):
-        '''
-        Perform linear regression.
-
-        lmd indicates type of regression:
-        lmd=0: Ordinary least squares.
-        lmd>0: Ridge regression.
-        '''
-
         X = self.X
 
         self.beta = np.linalg.pinv(X.T.dot(X) + \
@@ -73,11 +65,14 @@ class Regression():
         self.mse = mean_squared_error(self.z, self.z_tilde)
         self.r2 = r2_score(self.z, self.z_tilde)
         
-
-    def print_error_analysis(self, z, z_tilde):
+    
+    def print_error_analysis(self):
         '''Print error analysis of regression fit using scikit.'''
         
-        print("Mean squared error: %.8f" % mean_squared_error(z, z_tilde))
-        print('R2 score: %.8f' % r2_score(z, z_tilde))
-        print('Mean absolute error: %.8f' % mean_absolute_error(z, z_tilde))
+        print("Mean squared error: %.8f" % mean_squared_error(self.z,
+            self.z_tilde)) 
+        print('R2 score: %.8f' % r2_score(self.z,
+                self.z_tilde)) 
+        print('Mean absolute error: %.8f' %
+                        mean_absolute_error(self.z, self.z_tilde))
 
