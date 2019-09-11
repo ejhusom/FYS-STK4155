@@ -24,7 +24,6 @@ def franke_function(x, y, eps = 0.05):
     np.random.seed(0)
 
     n = len(x)
-    print(n)
 
     term1 = 0.75*np.exp(-(0.25*(9*x-2)**2) - 0.25*((9*y-2)**2))
     term2 = 0.75*np.exp(-((9*x+1)**2)/49.0 - 0.1*(9*y+1))
@@ -34,6 +33,7 @@ def franke_function(x, y, eps = 0.05):
     z = term1 + term2 + term3 + term4 + eps*np.random.randn(n)
 
     return z
+
 
 def plot_franke(x, y, z):
 
@@ -55,26 +55,26 @@ def plot_franke(x, y, z):
 
 def ex_a(model):
 
-    model.regression(model.X, model.z, lambda_=0)
-    model.print_error_analysis(model.z, z_tilde)
+    model.regression(lambda_=0)
+    model.print_error_analysis(model.z, model.z_tilde)
 
 
 def ex_b(model):
-
-    model.cross_validation()
+    pass
+    #model.cross_validation()
 
 
 def ex_d(model):
 
     
-    model.lasso(model.X, model.z, lambda_=0.1)
-    model.print_error_analysis(model.z, z_tilde)
+    model.lasso(lambda_=0.1)
+    model.print_error_analysis(model.z, model.z_tilde)
 
 
 if __name__ == '__main__': 
 
     x, y = generate_xy(0, 1, 100)
-    franke_function(x, y, 0.05)
+    z = franke_function(x, y, 0.05)
 
     
     project1 = Regression(x, y, z, deg=5)
