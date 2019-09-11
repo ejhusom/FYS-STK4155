@@ -73,7 +73,6 @@ def create_design_matrix(x, y, deg=5):
 def ex_a(model):
 
     model.ols()
-    model.print_error_analysis()
 
 
 def ex_b(model):
@@ -85,7 +84,6 @@ def ex_d(model):
 
     
     model.lasso()
-    model.print_error_analysis()
 
 
 if __name__ == '__main__': 

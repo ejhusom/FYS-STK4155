@@ -27,11 +27,12 @@ class Regression():
         #if np.shape(z) > 1:
         z = np.ravel(z)
 
-
-        self.X = X
-        self.z = z
+        self.X = X  # design matrix
+        self.z = z  # response variable
 
     def ols(self):
+        '''Ordinary least squares.'''
+
         X = self.X
         self.beta = np.linalg.pinv(X.T.dot(X)).dot(X.T).dot(self.z)
         self.z_tilde = X @ self.beta
@@ -52,12 +53,16 @@ class Regression():
         
     
     def print_error_analysis(self):
-        '''Print error analysis of regression fit using scikit.'''
+        print(mse())
+        print(r2())
+        print(var_beta())
+
+    def mse(self):
+        return mean_squared_error(self.z, self.z_tilde)) 
+    
+    def r2(self):
+        return r2_score(self.z, self.z_tilde)) 
         
-        print("Mean squared error: %.8f" % mean_squared_error(self.z,
-            self.z_tilde)) 
-        print('R2 score: %.8f' % r2_score(self.z,
-                self.z_tilde)) 
-        print('Mean absolute error: %.8f' %
-                        mean_absolute_error(self.z, self.z_tilde))
+    def var_beta(self):
+        return np.var(self.z)*np.pinv(self.X.T @ self.X)
 
