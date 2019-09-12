@@ -82,27 +82,39 @@ def create_design_matrix(x, y, deg=5):
 
 
 
-def analyze_regression(x, y, z):
+def analyze_regression(x, y, z, method='ols', n_folds=5):
 
     max_degree = 6
     n_lambdas = 5
     lambdas = np.logspace(-3, 1, n_lambdas)
 
-    error_scores = pd.DataFrame(columns=['degree', 'lambda', 'MSE', 'R2'])
+    error_scores = pd.DataFrame(columns=['degree', 'lambda', 'MSE_train',
+        'MSE_test', 'R2_train', 'R2_test'])
+
+    if method=='ols':
+        lambdas = [0]
+
 
     for lambda_ in lambdas:
-        for deg in range(1, max_degree):
-            X = create_design_matrix(x, y, deg=deg)
-            model = Regression(X, z)
+        for deg in range(1, max_degree+1):
 
-            model.ridge()
-            error_scores = error_scores.append({'degree': deg, 'lambda': lambda_, 'MSE':
-                model.mse(), 'R2': model.r2()}, ignore_index=True)
+            X = create_design_matrix(x, y, deg=deg)
+            model = Resampling(X, z)
+
+            model.cross_validation(n_folds, method, lambda_)
+
+            error_scores = error_scores.append({'degree': deg, 
+                                                'lambda': lambda_, 
+                                                'MSE_train': model.mse_train, 
+                                                'MSE_test': model.mse_test,
+                                                'R2_train': model.r2_train, 
+                                                'R2_test': model.r2_test},
+                                                ignore_index=True)
 
     
 
     print(error_scores)
-    error_scores.to_csv('ridge_error_scores.csv')
+    error_scores.to_csv(f'error_scores_{method}.csv')
 
 
 def terrain_regression(terrain_file, plot=0):
@@ -114,16 +126,17 @@ def terrain_regression(terrain_file, plot=0):
         plt.imshow(terrain, cmap='gray')
         plt.show()
 
+
 def franke_regression():
 
     x, y = generate_xy(0, 1, 100)
     z = franke_function(x, y, 0.05)
 
-    analyze_regression(x, y, x)
+    analyze_regression(x, y, z, 'ridge')
     
 
 
 if __name__ == '__main__': 
 
-    #terrain_regression('dat/n27_e086_1arc_v3.tif')
-    franke_regression()
+    terrain_regression('dat/n27_e086_1arc_v3.tif', plot=1)
+    #franke_regression()
