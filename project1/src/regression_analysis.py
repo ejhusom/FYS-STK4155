@@ -14,6 +14,7 @@ from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 from imageio import imread
+import pandas as pd
 
 
 def generate_xy(start=0, stop=1, n=100):
@@ -80,34 +81,28 @@ def create_design_matrix(x, y, deg=5):
 
 
 
-def read_terrain(terrain_file, plot=0):
 
+def analyze_regression(x, y, z):
 
-def analyze_ols(model):
+    max_degree = 6
+    n_lambdas = 5
+    lambdas = np.logspace(-3, 1, n_lambdas)
 
-    model.ols()
-    model.print_error_analysis()
+    error_scores = pd.DataFrame(columns=['degree', 'lambda', 'MSE', 'R2'])
 
+    for lambda_ in lambdas:
+        for deg in range(1, max_degree):
+            X = create_design_matrix(x, y, deg=deg)
+            model = Regression(X, z)
 
-def ex_b(model):
-    
-    model.cross_validation(n_folds=5, method=0) 
-
-
-def ex_d(model):
-
-    
-    model.lasso()
-
-def franke_regression():
-
-
-    x, y = generate_xy(0, 1, 100)
-    z = franke_function(x, y, 0.05)
-    X = create_design_matrix(x, y, deg=5)
+            model.ridge()
+            error_scores = error_scores.append({'degree': deg, 'lambda': lambda_, 'MSE':
+                model.mse(), 'R2': model.r2()}, ignore_index=True)
 
     
-    franke_model = Resampling(X, z)
+
+    print(error_scores)
+    error_scores.to_csv('ridge_error_scores.csv')
 
 
 def terrain_regression(terrain_file, plot=0):
@@ -119,9 +114,16 @@ def terrain_regression(terrain_file, plot=0):
         plt.imshow(terrain, cmap='gray')
         plt.show()
 
+def franke_regression():
+
+    x, y = generate_xy(0, 1, 100)
+    z = franke_function(x, y, 0.05)
+
+    analyze_regression(x, y, x)
+    
 
 
 if __name__ == '__main__': 
 
-    terrain_regression('dat/n27_e086_1arc_v3.tif')
-
+    #terrain_regression('dat/n27_e086_1arc_v3.tif')
+    franke_regression()
