@@ -11,15 +11,20 @@ from Regression import *
 
 class Resampling(Regression):
 
-    def cross_validation(self):
 
-        kf = KFold(n_splits=5, random_state=0, shuffle=True)
+    def cross_validation(self, n_folds, method=0):
+
+        kf = KFold(n_splits=n_folds, random_state=0, shuffle=True)
 
         for train_index, test_index in kf.split(self.X):
 
-            beta, z_OLS = self.regression(self.X[train_index], self.z[train_index],
-                    lmd=0)
+            if method==0:
+                self.ols()
+            elif method==1:
+                self.ridge()
+            else:
+                self.lasso()
 
-            z_tilde = self.X[test_index] @ beta
+            z_tilde = self.X[test_index] @ self.beta
 
-            self.print_error_analysis(self.z[test_index], z_tilde)
+            self.print_error_analysis()
