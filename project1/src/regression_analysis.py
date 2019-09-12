@@ -81,14 +81,6 @@ def create_design_matrix(x, y, deg=5):
 
 
 def read_terrain(terrain_file, plot=0):
-    terrain = imread(terrain_file)
-
-    if plot==1:
-        plt.figure()
-        plt.imshow(terrain, cmap='gray')
-        plt.show()
-
-    return terrain
 
 
 def analyze_ols(model):
@@ -107,8 +99,8 @@ def ex_d(model):
     
     model.lasso()
 
+def franke_regression():
 
-if __name__ == '__main__': 
 
     x, y = generate_xy(0, 1, 100)
     z = franke_function(x, y, 0.05)
@@ -117,10 +109,19 @@ if __name__ == '__main__':
     
     franke_model = Resampling(X, z)
 
-    #ex_a(project1)
-    #ex_b(project1)
-    #ex_d(project1)
 
-    terrain = read_terrain('dat/n27_e086_1arc_v3.tif')
-    print(np.max(terrain))
+def terrain_regression(terrain_file, plot=0):
+
+    terrain = imread(terrain_file)
+
+    if plot==1:
+        plt.figure()
+        plt.imshow(terrain, cmap='gray')
+        plt.show()
+
+
+
+if __name__ == '__main__': 
+
+    terrain_regression('dat/n27_e086_1arc_v3.tif')
 
