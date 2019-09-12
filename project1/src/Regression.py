@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ============================================================================
-# File:     RegressionResampling.py
+# File:     Regression.py
 # Author:   Erik Johannes Husom
 # Created:  2019-09-11
 # ----------------------------------------------------------------------------
@@ -8,10 +8,6 @@
 # Class for linear regression and resampling methods
 # ============================================================================
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib import cm
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import sklearn.linear_model as skl
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 from sklearn.preprocessing import PolynomialFeatures
@@ -24,8 +20,8 @@ class Regression():
 
     def __init__(self, X, z):
 
-        #if np.shape(z) > 1:
-        z = np.ravel(z)
+        if len(np.shape(z)) > 1:
+            z = np.ravel(z)
 
         self.X = X      # design matrix
         self.z = z      # response variable
@@ -55,7 +51,7 @@ class Regression():
     def print_error_analysis(self):
         print(self.mse())
         print(self.r2())
-        print(self.var_beta())
+        #print(self.var_beta())
 
 
     def mse(self):
