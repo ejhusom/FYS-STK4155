@@ -12,7 +12,6 @@ import sklearn.linear_model as skl
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.model_selection import train_test_split, KFold
-from sklearn.linear_model import LinearRegression
 
 
 
@@ -38,14 +37,16 @@ class Regression():
 
         X = self.X
         self.beta = np.linalg.pinv(X.T.dot(X) + \
-            lambda_*np.identity(self.p)).dot(X.T).dot(self.z)
+            lambda_*np.identity(np.shape(self.X)[1])).dot(X.T).dot(self.z)
         self.z_tilde = X @ self.beta
 
     def lasso(self, lambda_=0.1):
-        
-        clf_lasso = skl.Lasso(alpha=lambda_).fit(self.X, self.z)
-        self.beta = clf_lasso.get_params()
+        print(self.z) 
+        clf_lasso = skl.Lasso(alpha=lambda_)
+        clf_lasso.fit(self.X, self.z)
+        self.beta = clf_lasso.coef_
         self.z_tilde = clf_lasso.predict(self.X)
+        print(self.z_tilde)
         
     
     def print_error_analysis(self):
