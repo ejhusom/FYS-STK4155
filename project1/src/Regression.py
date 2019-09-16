@@ -96,14 +96,13 @@ class Regression():
             self.skl_model = skl.Lasso(alpha=self.lambda_)
 
         self.skl_model.fit(self.X, self.z)
-        self.z_tilde = np.ravel(self.skl_model.predict(X))
         self.beta = self.skl_model.coef_[0]
         self.beta[0] = self.skl_model.intercept_
 
 
     def skl_predict(self, X):
 
-        self.z_tilde = np.ravel(self.skl_model.predict(X))
+        self.z_tilde = np.ravel(self.skl_model.predict(X) - self.beta[0])
 
 
     def lasso(self):

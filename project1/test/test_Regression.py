@@ -17,7 +17,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 from Regression import *
 
 
-def test_Regression_fit():
+def test_Regression_fit(method='ols'):
     
     # Data generation
     N = 5 # data size
@@ -34,7 +34,7 @@ def test_Regression_fit():
         X[:,i] = x[:,0]**i
 
 
-    test_model = Regression(method='ols')
+    test_model = Regression(method=method)
 
     # Manual
     test_model.fit(X, y)
@@ -47,7 +47,7 @@ def test_Regression_fit():
     # Scikit-learn
     test_model.skl_fit(X, y)
     beta_skl = test_model.beta
-    #test_model.skl_predict(X)
+    test_model.skl_predict(X)
     y_tilde_skl = test_model.z_tilde
     print(test_model.get_r2())
 
@@ -56,7 +56,7 @@ def test_Regression_fit():
     print(y_tilde)
     print(y_tilde_skl)
 
-    tol = 1e-8
+    tol = 1e-10
 
     assert np.max(abs(beta - beta_skl)) < tol
     assert np.max(abs(y_tilde - y_tilde_skl)) < tol
@@ -64,4 +64,5 @@ def test_Regression_fit():
 
 if __name__ == '__main__':
 
-    test_Regression_fit()
+    test_Regression_fit('ols')
+    test_Regression_fit('ridge')
