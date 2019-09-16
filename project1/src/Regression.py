@@ -10,33 +10,69 @@
 import numpy as np
 import sklearn.linear_model as skl
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
-from sklearn.model_selection import KFold
 
 
 
 class Regression():
 
-    def __init__(self, X, z):
+    def __init__(self, method='ols'):
 
+
+        self.method = method
+
+        self.X = None
+        self.z = None
+        self.lambda_ = 0
+
+
+        self.z_tilde = None
+        self.beta = None
+        self.mse = None
+        self.r2 = None
+        self.beta_var = None
+
+        self.skl_model = None
+
+
+    def set_lambda(self, lambda_):
+        self.lambda_ = lambda_
+
+    def fit(self, X, z):
+        
         if len(np.shape(z)) > 1:
             z = np.ravel(z)
 
-        self.X = X      # design matrix
-        self.z = z      # response variable
+        self.X = X
+        self.z = z
+
+        if self.method == 'ols':
+            self.ols()
+        elif self.method == 'ridge':
+            self.ridge()
+        elif self.method == 'lasso':
+            self.lasso()
+
+
+    def predict(self, X):
+
+        self.z_tilde = X @ self.beta
+        
+        if self.method == 'ridge':
+            self.z_tilde += np.mean(self.z)
+
 
     def ols(self):
         '''Ordinary least squares.'''
-
+        #X += 0.1
         X = self.X
-        XTX = X.T.dot(X)
-        Xinv = np.linalg.pinv(XTX)
-        XinvXT = Xinv @ X.T
-        self.beta = XinvXT @ self.z
-        #self.beta = np.linalg.pinv(X.T.dot(X)).dot(X.T).dot(self.z)
-        self.z_tilde = X @ self.beta
+        #XTX = X.T.dot(X)
+        #Xinv = np.linalg.pinv(XTX)
+        #XinvXT = Xinv @ X.T
+        #self.beta = XinvXT @ self.z
+        self.beta = np.linalg.pinv(X.T.dot(X)).dot(X.T).dot(self.z)
 
 
-    def ridge(self, lambda_=0.1):
+    def ridge(self):
 
         self.X -= np.mean(self.X, axis=0)
         self.z -= np.mean(self.z)
@@ -44,28 +80,42 @@ class Regression():
 
         X = self.X
         self.beta = np.linalg.pinv(X.T.dot(X) + \
-            lambda_*np.identity(np.shape(self.X)[1])).dot(X.T).dot(self.z)
-        self.z_tilde = X @ self.beta + np.mean(self.z)
-        print(self.beta)
+            self.lambda_*np.identity(np.shape(self.X)[1])).dot(X.T) @ self.z
+
+    def skl_fit(self, X, z):
 
 
+        self.X = X
+        self.z = z
 
-    def skl_ridge(self):
+        if self.method == 'ols':
+            self.skl_model = skl.LinearRegression()
+        elif self.method == 'ridge':
+            self.skl_model = skl.Ridge(alpha=self.lambda_)
+        elif self.method == 'lasso':
+            self.skl_model = skl.Lasso(alpha=self.lambda_)
 
-        lambda_ = 0.1
-        clf_ridge = skl.Ridge(alpha=lambda_)
-        clf_ridge.fit(self.X, self.z)
-        self.beta = clf_ridge.coef_
-        print(self.beta)
-        self.z_tilde = clf_ridge.predict(self.X)
+        self.skl_model.fit(self.X, self.z)
+        self.z_tilde = np.ravel(self.skl_model.predict(X))
+        self.beta = self.skl_model.coef_[0]
+        self.beta[0] = self.skl_model.intercept_
 
 
-    def lasso(self, lambda_=0.1):
+    def skl_predict(self, X):
 
-        clf_lasso = skl.Lasso(alpha=lambda_, fit_intercept=False)
+        self.z_tilde = np.ravel(self.skl_model.predict(X))
+
+
+    def lasso(self):
+
+#       self.X = np.delete(self.X, 0, 1)
+#        self.X -= np.mean(self.X, axis=0)
+#        self.z -= np.mean(self.z)
+
+
+        clf_lasso = skl.Lasso(alpha=self.lambda_, max_iter=100000)
         clf_lasso.fit(self.X, self.z)
         self.beta = clf_lasso.coef_
-        print(self.beta)
         self.z_tilde = clf_lasso.predict(self.X)
         
     

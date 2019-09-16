@@ -107,15 +107,10 @@ def analyze(x, y, z, method='ols'):
 
     for deg in range(1, max_degree+1):
         X = create_design_matrix(x, y, deg=deg)
-        model = Regression(X, z)
-
-        if method=='ridge':
-            model.ridge()
-            #model.skl_ridge()
-        elif method=='lasso':
-            model.lasso()
-        else:
-            model.ols()
+        model = Regression(method)
+        model.set_lambda(0.1)
+        model.fit(X, z)
+        model.predict(X)
 
         error_scores = error_scores.append({'degree': deg, 
                                             'MSE': model.get_mse(), 
@@ -148,10 +143,10 @@ def analyze_regression(x, y, z, method='ols', n_folds=5, data_name='data'):
     for lambda_ in lambdas:
         for deg in range(1, max_degree+1):
             #print(deg)
-            X = create_design_matrix2(x, y, deg=deg)
-            model = Resampling(X, z)
+            X = create_design_matrix(x, y, deg=deg)
+            model = Resampling(method)
 
-            model.cross_validation(n_folds, method, lambda_)
+            model.cross_validation(X, z, n_folds, lambda_)
 
             error_scores = error_scores.append({'degree': deg, 
                                                 'lambda': lambda_, 
@@ -179,11 +174,11 @@ def terrain_regression(terrain_file, plot=0):
 
 def franke_regression():
 
-    x, y = generate_xy(0, 1, 6)
+    x, y = generate_xy(0, 1, 5)
     z = franke_function(x, y, 0.05)
 
-    #analyze_regression(x, y, z, 'ridge', data_name='franke')
-    analyze(x, y, z, method='ridge')
+    #analyze_regression(x, y, z, 'ols', data_name='franke')
+    analyze(x, y, z, method='ols')
     
 
 

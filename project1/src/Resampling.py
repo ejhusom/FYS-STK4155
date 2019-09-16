@@ -8,36 +8,39 @@
 #
 # ============================================================================
 from Regression import *
+from sklearn.model_selection import KFold
 
 class Resampling(Regression):
 
 
-    def cross_validation(self, n_folds, method='ols', lambda_=0.1):
+    def cross_validation(self, X, z, n_folds, lambda_=0.1):
+
+        
+        if len(np.shape(z)) > 1:
+            z = np.ravel(z)
+
+        self.set_lambda_ = lambda_
 
         kf = KFold(n_splits=n_folds, random_state=0, shuffle=True)
 
         mse = np.zeros((n_folds, 2))
         r2 = np.zeros((n_folds, 2))
 
+        
+
         i = 0
-        for train_index, test_index in kf.split(self.X):
+        for train_index, test_index in kf.split(X):
+            
+            self.fit(X[train_index], z[train_index])
 
-            if method=='ridge':
-                self.ridge(lambda_)
-            elif method=='lasso':
-                self.lasso(lambda_)
-            else:
-                self.ols()
+            z_tilde_train = self.z_tilde
+            z_tilde_test = X[test_index] @ self.beta
 
 
-            z_tilde_train = self.X[train_index] @ self.beta
-            z_tilde_test = self.X[test_index] @ self.beta
-
-
-            mse[i][0] = mean_squared_error(self.z[train_index], z_tilde_train)
-            mse[i][1] = mean_squared_error(self.z[test_index], z_tilde_test)
-            r2[i][0] = r2_score(self.z[train_index], z_tilde_train)
-            r2[i][1] = r2_score(self.z[test_index], z_tilde_test)
+            mse[i][0] = mean_squared_error(z[train_index], z_tilde_train)
+            mse[i][1] = mean_squared_error(z[test_index], z_tilde_test)
+            r2[i][0] = r2_score(z[train_index], z_tilde_train)
+            r2[i][1] = r2_score(z[test_index], z_tilde_test)
 
             i += 1
 
