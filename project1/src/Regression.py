@@ -28,40 +28,61 @@ class Regression():
         '''Ordinary least squares.'''
 
         X = self.X
-        self.beta = np.linalg.pinv(X.T.dot(X)).dot(X.T).dot(self.z)
+        XTX = X.T.dot(X)
+        Xinv = np.linalg.pinv(XTX)
+        XinvXT = Xinv @ X.T
+        self.beta = XinvXT @ self.z
+        #self.beta = np.linalg.pinv(X.T.dot(X)).dot(X.T).dot(self.z)
         self.z_tilde = X @ self.beta
 
 
     def ridge(self, lambda_=0.1):
 
+        self.X -= np.mean(self.X, axis=0)
+        self.z -= np.mean(self.z)
+
+
         X = self.X
         self.beta = np.linalg.pinv(X.T.dot(X) + \
             lambda_*np.identity(np.shape(self.X)[1])).dot(X.T).dot(self.z)
-        self.z_tilde = X @ self.beta
+        self.z_tilde = X @ self.beta + np.mean(self.z)
+        print(self.beta)
+
+
+
+    def skl_ridge(self):
+
+        lambda_ = 0.1
+        clf_ridge = skl.Ridge(alpha=lambda_)
+        clf_ridge.fit(self.X, self.z)
+        self.beta = clf_ridge.coef_
+        print(self.beta)
+        self.z_tilde = clf_ridge.predict(self.X)
+
 
     def lasso(self, lambda_=0.1):
-        print(self.z) 
-        clf_lasso = skl.Lasso(alpha=lambda_)
+
+        clf_lasso = skl.Lasso(alpha=lambda_, fit_intercept=False)
         clf_lasso.fit(self.X, self.z)
         self.beta = clf_lasso.coef_
+        print(self.beta)
         self.z_tilde = clf_lasso.predict(self.X)
-        print(self.z_tilde)
         
     
     def print_error_analysis(self):
-        print(self.mse())
-        print(self.r2())
-        #print(self.var_beta())
+        print(self.get_mse())
+        print(self.get_r2())
+        #print(self.get_var_beta())
 
 
-    def mse(self):
+    def get_mse(self):
         return mean_squared_error(self.z, self.z_tilde) 
 
 
-    def r2(self):
+    def get_r2(self):
         return r2_score(self.z, self.z_tilde) 
 
 
-    def var_beta(self):
+    def get_var_beta(self):
         return np.var(self.z)*np.linalg.pinv(self.X.T @ self.X)
 
