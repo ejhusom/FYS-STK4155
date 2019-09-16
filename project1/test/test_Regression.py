@@ -10,6 +10,7 @@
 import os
 import sys
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Add the source code directory to python path in order to import the code
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
@@ -20,7 +21,7 @@ from Regression import *
 def test_Regression_fit(method='ols'):
     
     # Data generation
-    N = 5 # data size
+    N = 6 # data size
     p = 2   # polynomial degree
 
     np.random.seed(0)
@@ -34,7 +35,7 @@ def test_Regression_fit(method='ols'):
         X[:,i] = x[:,0]**i
 
 
-    test_model = Regression(method=method)
+    test_model = Regression(method=method, lambda_=0.1)
 
     # Manual
     test_model.fit(X, y)
@@ -61,8 +62,21 @@ def test_Regression_fit(method='ols'):
     assert np.max(abs(beta - beta_skl)) < tol
     assert np.max(abs(y_tilde - y_tilde_skl)) < tol
 
+    plot_regression(x, y, x, y_tilde)
+
+
+
+def plot_regression(x, y, x_fit, y_fit, y_label='model fit'):
+    '''Plot data and model fit in one figure.'''
+    plt.figure()
+    plt.plot(x, y, '.', label='random data')
+    plt.plot(x_fit, y_fit, '-', label=y_label)
+    plt.legend()
+    plt.show()
+
 
 if __name__ == '__main__':
 
     test_Regression_fit('ols')
     test_Regression_fit('ridge')
+    test_Regression_fit('lasso')

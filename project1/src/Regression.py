@@ -15,14 +15,14 @@ from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 
 class Regression():
 
-    def __init__(self, method='ols'):
+    def __init__(self, method='ols', lambda_=0):
 
 
         self.method = method
 
         self.X = None
         self.z = None
-        self.lambda_ = 0
+        self.lambda_ = lambda_
 
 
         self.z_tilde = None
@@ -50,7 +50,7 @@ class Regression():
         elif self.method == 'ridge':
             self.ridge()
         elif self.method == 'lasso':
-            self.lasso()
+            self.skl_fit(X, z)
 
 
     def predict(self, X):
@@ -96,7 +96,10 @@ class Regression():
             self.skl_model = skl.Lasso(alpha=self.lambda_)
 
         self.skl_model.fit(self.X, self.z)
-        self.beta = self.skl_model.coef_[0]
+        if len(np.shape(self.skl_model.coef_)) > 1:
+            self.beta = self.skl_model.coef_[0]
+        else:
+            self.beta = self.skl_model.coef_
         self.beta[0] = self.skl_model.intercept_
 
 
@@ -105,18 +108,6 @@ class Regression():
         self.z_tilde = np.ravel(self.skl_model.predict(X) - self.beta[0])
 
 
-    def lasso(self):
-
-#       self.X = np.delete(self.X, 0, 1)
-#        self.X -= np.mean(self.X, axis=0)
-#        self.z -= np.mean(self.z)
-
-
-        clf_lasso = skl.Lasso(alpha=self.lambda_, max_iter=100000)
-        clf_lasso.fit(self.X, self.z)
-        self.beta = clf_lasso.coef_
-        self.z_tilde = clf_lasso.predict(self.X)
-        
     
     def print_error_analysis(self):
         print(self.get_mse())
@@ -125,8 +116,9 @@ class Regression():
 
 
     def get_mse(self):
-        return mean_squared_error(self.z, self.z_tilde) 
+        self.mse = np.sum((self.z - self.z_tilde)**2) / self.z.size
 
+        return self.mse
 
     def get_r2(self):
         return r2_score(self.z, self.z_tilde) 
