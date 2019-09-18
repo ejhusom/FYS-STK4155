@@ -24,7 +24,7 @@ from designmatrix import *
 
 def analyze_regression(x1, x2, y, method='ridge'):
 
-    max_degree = 5
+    max_degree = 10
 
 
     error_scores = pd.DataFrame(columns=['degree', 'MSE', 'R2'])
@@ -55,7 +55,7 @@ def analyze_regression(x1, x2, y, method='ridge'):
 
 def analyze_regression_cv(x1, x2, y, method='ols', n_folds=5, data_name='data'):
 
-    max_degree = 5
+    max_degree = 10
     n_lambdas = 6
     lambdas = np.logspace(-3, 0, n_lambdas)
 
@@ -90,9 +90,9 @@ def analyze_regression_cv(x1, x2, y, method='ols', n_folds=5, data_name='data'):
 
 def franke_regression():
     x1, x2 = generate_mesh(0, 1, 100)
-    y = franke_function(x1, x2, eps=0.00)
+    y = franke_function(x1, x2, eps=1)
 
-    analyze_regression_cv(x1, x2, y, method='ols', data_name='franke')
+    analyze_regression_cv(x1, x2, y, method='ridge', data_name='franke')
     #analyze_regression(x1, x2, y, method='ols')
     
 
@@ -106,7 +106,23 @@ def terrain_regression(terrain_file, plot=0):
         plt.show()
 
 
+def plot_regression_analysis(filename):
+    df = pd.read_csv(filename)
+
+    plt.figure()
+
+    plt.plot(df['degree'], df['MSE_train'], label='train')
+    plt.plot(df['degree'], df['MSE_test'], label='test')
+
+    plt.legend()
+
+    plt.show()
+   
+
+
+
 if __name__ == '__main__': 
 
     #terrain_regression('dat/n27_e086_1arc_v3.tif', plot=1)
     franke_regression()
+    plot_regression_analysis('error_scores_franke_ridge_cv.csv')
