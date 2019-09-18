@@ -67,15 +67,13 @@ def test_Regression_fit(method='ols'):
     print('y:')
     print(y_pred)
     print(y_pred_skl)
+    print('mse:')
+    print(mse)
+    print(mse_skl)
 
     tol = 1e-15
 
     
-    print(r2)
-    print(skl_r2)
-    print(mse)
-    print(skl_mse)
-
     assert mean_squared_error(y_pred, y_pred_skl) < tol
     assert mean_squared_error(beta, beta_skl) < tol
 

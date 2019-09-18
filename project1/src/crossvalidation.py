@@ -19,6 +19,8 @@ def cross_validation(X, y, n_folds, method='ols', lambda_=0.01):
 
     mse = np.zeros((n_folds, 2))
     r2 = np.zeros((n_folds, 2))
+    b = np.zeros((n_folds, 2))
+    var = np.zeros((n_folds, 2))
 
     
 
@@ -38,6 +40,10 @@ def cross_validation(X, y, n_folds, method='ols', lambda_=0.01):
         mse[i][1] = mean_squared_error(y[test_index], y_pred_test)
         r2[i][0] = r2_score(y[train_index], y_pred_train)
         r2[i][1] = r2_score(y[test_index], y_pred_test)
+        b[i][0] = bias(y[train_index], y_pred_train)
+        b[i][1] = bias(y[test_index], y_pred_test)
+        var[i][0] = np.var(y_pred_train)
+        var[i][1] = np.var(y_pred_test)
 
         i += 1
 
@@ -45,6 +51,10 @@ def cross_validation(X, y, n_folds, method='ols', lambda_=0.01):
     mse_test = np.mean(mse[:,1])
     r2_train = np.mean(r2[:,0])
     r2_test = np.mean(r2[:,1])
+    b_train = np.mean(b[:,0])
+    b_test = np.mean(b[:,1])
+    var_train = np.mean(var[:,0])
+    var_test = np.mean(var[:,1])
 
 
-    return mse_train, mse_test, r2_train, r2_test
+    return mse_train, mse_test, r2_train, r2_test, b_train, b_test, var_train, var_test

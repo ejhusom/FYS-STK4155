@@ -23,7 +23,6 @@ class Regression():
         self.y = None
         self.lambda_ = lambda_
 
-
         self.y_pred = None
         self.beta = None
 
@@ -118,9 +117,6 @@ class Regression():
 
 def bias(y_true, y_pred):
     return np.mean((y_true - np.mean(y_pred))**2)
-
-def variance(y):
-    return np.mean(np.var(y))
 
 
 #def var_beta():
