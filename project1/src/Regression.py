@@ -9,8 +9,7 @@
 # ============================================================================
 import numpy as np
 import sklearn.linear_model as skl
-from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
-
+from sklearn.metrics import mean_squared_error, r2_score
 
 
 class Regression():
@@ -25,14 +24,11 @@ class Regression():
         self.lambda_ = lambda_
 
 
-        self.y_predict = None
+        self.y_pred = None
         self.beta = None
 
         self.skl_model = None
 
-
-    def set_lambda(self, lambda_):
-        self.lambda_ = lambda_
 
     def fit(self, X, y):
         
@@ -55,11 +51,11 @@ class Regression():
         
         if self.method == 'ridge':
             X = X - np.mean(self.X, axis=0)
-            self.y_predict = X @ self.beta + np.mean(self.y)
+            self.y_pred = X @ self.beta + np.mean(self.y)
         elif self.method == 'lasso':
             skl_predict(X)
         else:
-            self.y_predict = X @ self.beta
+            self.y_pred = X @ self.beta
 
     def ols(self):
         '''Ordinary least squares.'''
@@ -118,16 +114,27 @@ class Regression():
 
     def skl_predict(self, X):
 
-        self.y_predict = np.ravel(self.skl_model.predict(X) - self.beta[0])
+        self.y_pred = np.ravel(self.skl_model.predict(X) - self.beta[0])
 
-
+#def MSE(y_true, y_pred):
+#    return np.mean((y_true - y_pred)**2)
+#
+#def r_squared(y_true, y_pred):
+#    y_mean = np.mean(y_true)
+#    TSS = np.sum(y_true - y_mean)**2
+#    RSS = np.sum(y_pred - y_mean)**2
+#    return 1.0 - TSS/RSS
     
-    def print_error_analysis(self):
-        print(self.get_mse())
-        print(self.get_r2())
-        #print(self.get_var_beta())
 
 
-    def var_beta(self):
-        return np.var(self.y)*np.linalg.pinv(self.X.T @ self.X)
+
+def bias(y_true, y_pred):
+    return np.mean((y_true - np.mean(y_pred))**2)
+
+def variance(y):
+    return np.mean(np.var(y))
+
+
+#def var_beta():
+#    return np.var(self.y)*np.linalg.pinv(self.X.T @ self.X)
 

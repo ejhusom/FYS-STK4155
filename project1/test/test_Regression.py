@@ -11,6 +11,7 @@ import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.metrics import r2_score, mean_squared_error
 
 # Add the source code directory to python path in order to import the code
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
@@ -47,29 +48,38 @@ def test_Regression_fit(method='ols'):
     test_model.fit(X, y)
     beta = test_model.beta
     test_model.predict(X)
-    y_predict = test_model.y_predict
-    r2 = test_model.get_r2()
+    y_pred = test_model.y_pred
+    r2 = r2_score(test_model.y, test_model.y_pred)
+    mse = mean_squared_error(test_model.y, test_model.y_pred)
+
 
     # Scikit-learn
     test_model.skl_fit(X, y)
     beta_skl = test_model.beta
     test_model.skl_predict(X)
-    y_predict_skl = test_model.y_predict
-    r2_skl = test_model.get_r2()
+    y_pred_skl = test_model.y_pred
+    r2_skl = r2_score(test_model.y, test_model.y_pred)
+    mse_skl = mean_squared_error(test_model.y, test_model.y_pred)
 
     print('Beta:')
     print(beta)
     print(beta_skl)
     print('y:')
-    print(y_predict)
-    print(y_predict_skl)
+    print(y_pred)
+    print(y_pred_skl)
 
     tol = 1e-15
 
-    assert mean_squared_error(y_predict, y_predict_skl) < tol
+    
+    print(r2)
+    print(skl_r2)
+    print(mse)
+    print(skl_mse)
+
+    assert mean_squared_error(y_pred, y_pred_skl) < tol
     assert mean_squared_error(beta, beta_skl) < tol
 
-    #plot_regression(x, y, x, y_predict)
+    #plot_regression(x, y, x, y_pred)
 
 
 

@@ -40,16 +40,16 @@ class Resampling():
             model.fit(X[train_index], y[train_index])
 
             model.predict(X[train_index])
-            y_predict_train = model.y_predict
+            y_pred_train = model.y_pred
             
             model.predict(X[test_index])
-            y_predict_test = model.y_predict
+            y_pred_test = model.y_pred
 
 
-            mse[i][0] = mean_squared_error(y[train_index], y_predict_train)
-            mse[i][1] = mean_squared_error(y[test_index], y_predict_test)
-            r2[i][0] = r2_score(y[train_index], y_predict_train)
-            r2[i][1] = r2_score(y[test_index], y_predict_test)
+            mse[i][0] = mean_squared_error(y[train_index], y_pred_train)
+            mse[i][1] = mean_squared_error(y[test_index], y_pred_test)
+            r2[i][0] = r2_score(y[train_index], y_pred_train)
+            r2[i][1] = r2_score(y[test_index], y_pred_test)
 
             i += 1
 

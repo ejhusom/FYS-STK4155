@@ -27,7 +27,8 @@ def analyze_regression(x1, x2, y, method='ridge'):
     max_degree = 10
 
 
-    error_scores = pd.DataFrame(columns=['degree', 'MSE', 'R2'])
+    error_scores = pd.DataFrame(columns=['degree', 'MSE', 'R2', 'bias',
+    'variance'])
 
     for deg in range(1, max_degree+1):
 
@@ -38,9 +39,13 @@ def analyze_regression(x1, x2, y, method='ridge'):
 
         error_scores = error_scores.append({'degree': deg, 
                                             'MSE': mean_squared_error(model.y,
-                                                model.y_predict), 
+                                                model.y_pred), 
                                             'R2': r2_score(model.y,
-                                                model.y_predict)},
+                                                model.y_pred),
+                                            'bias': bias(model.y,
+                                                model.y_pred),
+                                            'variance':
+                                            variance(model.y_pred)},
                                             ignore_index=True)
 
     
@@ -60,7 +65,7 @@ def analyze_regression_cv(x1, x2, y, method='ols', n_folds=5, data_name='data'):
     lambdas = np.logspace(-3, 0, n_lambdas)
 
     error_scores = pd.DataFrame(columns=['degree', 'lambda', 'MSE_train',
-        'MSE_test', 'R2_train', 'R2_test'])
+        'MSE_test', 'R2_train', 'R2_test', 'bias', 'variance'])
 
     if method=='ols':
         lambdas = [0]
@@ -92,8 +97,8 @@ def franke_regression():
     x1, x2 = generate_mesh(0, 1, 100)
     y = franke_function(x1, x2, eps=1)
 
-    analyze_regression_cv(x1, x2, y, method='ridge', data_name='franke')
-    #analyze_regression(x1, x2, y, method='ols')
+    #analyze_regression_cv(x1, x2, y, method='ridge', data_name='franke')
+    analyze_regression(x1, x2, y, method='ols')
     
 
 def terrain_regression(terrain_file, plot=0):
