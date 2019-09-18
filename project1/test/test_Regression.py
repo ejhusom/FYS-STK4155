@@ -36,10 +36,10 @@ def test_Regression_fit(method='ols'):
 #    for i in range(1, p + 1):
 #        X[:,i] = x[:,0]**i
 #
-    x, y = franke.generate_xy(0, 1, 100)
-    z = franke.franke_function(x, y, eps=0.00)
+    x, y = generate_xy(0, 1, 100)
+    z = franke_function(x, y, eps=0.00)
 
-    X = designmatrix.create_design_matrix(x, y, deg=5)
+    X = create_design_matrix(x, y, deg=5)
     
     test_model = Regression(method=method, lambda_=0.01)
 

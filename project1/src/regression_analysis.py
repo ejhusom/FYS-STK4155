@@ -19,22 +19,6 @@ import pandas as pd
 from franke import *
 from designmatrix import *
 
-def plot_franke(x, y, z):
-
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
-
-    surf = ax.plot_surface(x, y, z,
-            cmap=cm.coolwarm,linewidth=0, antialiased=False)
-    
-    # Customize the z axis.
-    ax.set_zlim(-0.10, 1.40)
-    ax.zaxis.set_major_locator(LinearLocator(10))
-    ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
-    
-    # Add a color bar which maps values to colors.
-    fig.colorbar(surf, shrink=0.5, aspect=5)
-    plt.show()
 
 
 
@@ -42,15 +26,14 @@ def franke_regression(method='ols'):
 
     max_degree = 5
 
-    x, y = franke.generate_xy(0, 1, 100)
-    z = franke.franke_function(x, y, 0.00)
+    x, y = generate_xy(0, 1, 100)
+    z = franke_function(x, y, 0.00)
 
-    analyze_regression(x, y, z, 'ridge')
     error_scores = pd.DataFrame(columns=['degree', 'MSE', 'R2'])
 
     for deg in range(1, max_degree+1):
 
-        X = designmatrix.create_design_matrix(x, y, deg=deg)
+        X = create_design_matrix(x, y, deg=deg)
         model = Regression(method)
         model.set_lambda(0.01)
 #        model.fit(X, z)
