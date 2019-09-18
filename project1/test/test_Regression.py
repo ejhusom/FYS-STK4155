@@ -16,53 +16,62 @@ import matplotlib.pyplot as plt
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from Regression import *
+from franke import *
+from designmatrix import *
 
 
 def test_Regression_fit(method='ols'):
     
     # Data generation
-    N = 6 # data size
-    p = 2   # polynomial degree
+#    N = 100 # data size
+#    p = 5   # polynomial degree
+#
+#    np.random.seed(0)
+#    x = np.random.rand(N, 1)
+#    y = 5*x*x + 0.1*np.random.randn(N, 1)
+#
+#
+#    # Creating design matrix X
+#    X = np.ones((N, p + 1))
+#    for i in range(1, p + 1):
+#        X[:,i] = x[:,0]**i
+#
+    x, y = franke.generate_xy(0, 1, 100)
+    z = franke.franke_function(x, y, eps=0.00)
 
-    np.random.seed(0)
-    x = np.random.rand(N, 1)
-    y = 5*x*x + 0.1*np.random.randn(N, 1)
-
-
-    # Creating design matrix X
-    X = np.ones((N, p + 1))
-    for i in range(1, p + 1):
-        X[:,i] = x[:,0]**i
-
-
-    test_model = Regression(method=method, lambda_=0.1)
+    X = designmatrix.create_design_matrix(x, y, deg=5)
+    
+    test_model = Regression(method=method, lambda_=0.01)
 
     # Manual
     test_model.fit(X, y)
     beta = test_model.beta
     test_model.predict(X)
-    y_tilde = test_model.z_tilde
-
+    y_predict = test_model.z_predict
+    print('R2 manual:')
     print(test_model.get_r2())
 
     # Scikit-learn
     test_model.skl_fit(X, y)
     beta_skl = test_model.beta
     test_model.skl_predict(X)
-    y_tilde_skl = test_model.z_tilde
+    y_predict_skl = test_model.z_predict
+    print('R2 scikit:')
     print(test_model.get_r2())
 
+    print('Beta:')
     print(beta)
     print(beta_skl)
-    print(y_tilde)
-    print(y_tilde_skl)
+    print('y:')
+    print(y_predict)
+    print(y_predict_skl)
 
-    tol = 1e-10
+    tol = 1e-8
 
     assert np.max(abs(beta - beta_skl)) < tol
-    assert np.max(abs(y_tilde - y_tilde_skl)) < tol
+    assert np.max(abs(y_predict - y_predict_skl)) < tol
 
-    plot_regression(x, y, x, y_tilde)
+    #plot_regression(x, y, x, y_predict)
 
 
 

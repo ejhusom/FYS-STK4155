@@ -16,32 +16,8 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 from imageio import imread
 import pandas as pd
 
-
-def generate_xy(start=0, stop=1, n=100):
-    '''Generate x and y data and return at as a flat meshgrid.'''
-
-    x = np.linspace(start, stop, n)
-    y = np.linspace(start, stop, n)
-    x, y = np.meshgrid(x, y)
-    
-    return x, y
-
-
-def franke_function(x, y, eps = 0.05):
-
-    np.random.seed(0)
-
-    n = len(x)
-
-    term1 = 0.75*np.exp(-(0.25*(9*x-2)**2) - 0.25*((9*y-2)**2))
-    term2 = 0.75*np.exp(-((9*x+1)**2)/49.0 - 0.1*(9*y+1))
-    term3 = 0.5*np.exp(-(9*x-7)**2/4.0 - 0.25*((9*y-3)**2))
-    term4 = -0.2*np.exp(-(9*x-4)**2 - (9*y-7)**2)
-    
-    z = term1 + term2 + term3 + term4 + eps*np.random.randn(n)
-
-    return z
-
+from franke import *
+from designmatrix import *
 
 def plot_franke(x, y, z):
 
@@ -61,56 +37,36 @@ def plot_franke(x, y, z):
     plt.show()
 
 
-def create_design_matrix(x, y, deg=5):
 
-    n = len(x)
-    p = int((deg+1)*(deg+2)/2)
-    x = np.ravel(x)
-    y = np.ravel(y)
-
-    N = len(x)
-    X = np.ones((N,p))
-
-    for i in range(1, deg+1):
-        q = int((i)*(i+1)/2)
-        for k in range(i+1):
-            X[:,q+k] = x**(i-k) * y**k
-
-    return X
-
-
-def create_design_matrix2(x, y, deg=5):
-
-    n = len(x)
-    p = int((deg+1)*(deg+2)/2) - 1
-    x = np.ravel(x)
-    y = np.ravel(y)
-
-    N = len(x)
-    X = np.ones((N,p))
-
-    for i in range(1, deg+1):
-        q = int((i)*(i+1)/2) - 1
-        for k in range(i+1):
-            X[:,q+k] = x**(i-k) * y**k
-            
-
-    return X
-
-
-
-def analyze(x, y, z, method='ols'):
+def franke_regression(method='ols'):
 
     max_degree = 5
 
+    x, y = franke.generate_xy(0, 1, 100)
+    z = franke.franke_function(x, y, 0.00)
+
+    analyze_regression(x, y, z, 'ridge')
     error_scores = pd.DataFrame(columns=['degree', 'MSE', 'R2'])
 
     for deg in range(1, max_degree+1):
-        X = create_design_matrix(x, y, deg=deg)
+
+        X = designmatrix.create_design_matrix(x, y, deg=deg)
         model = Regression(method)
-        model.set_lambda(0.1)
-        model.fit(X, z)
-        model.predict(X)
+        model.set_lambda(0.01)
+#        model.fit(X, z)
+#        model.predict(X)
+        model.skl_fit(X, z)
+        model.skl_predict(X)
+
+        beta = model.beta
+        y_predict = model.z_predict
+        print(model.get_r2())
+
+        print(beta)
+        print(y_predict)
+
+
+
 
         error_scores = error_scores.append({'degree': deg, 
                                             'MSE': model.get_mse(), 
@@ -120,14 +76,14 @@ def analyze(x, y, z, method='ols'):
     
     print(f'Analyzing {method}:')
     print(error_scores)
-    error_scores.to_csv(f'error_scores_ols.csv')
+    error_scores.to_csv(f'error_scores_{method}.csv')
 
 
 
 
 
 
-def analyze_regression(x, y, z, method='ols', n_folds=5, data_name='data'):
+def analyze_regression_cv(x, y, z, method='ols', n_folds=5, data_name='data'):
 
     max_degree = 5
     n_lambdas = 6
@@ -170,16 +126,6 @@ def terrain_regression(terrain_file, plot=0):
         plt.figure()
         plt.imshow(terrain, cmap='gray')
         plt.show()
-
-
-def franke_regression():
-
-    x, y = generate_xy(0, 1, 5)
-    z = franke_function(x, y, 0.05)
-
-    #analyze_regression(x, y, z, 'ols', data_name='franke')
-    analyze(x, y, z, method='ols')
-    
 
 
 if __name__ == '__main__': 

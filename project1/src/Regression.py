@@ -55,11 +55,13 @@ class Regression():
 
     def predict(self, X):
 
-        self.z_predict = X @ self.beta
         
         if self.method == 'ridge':
-            self.z_predict += np.mean(self.z)
-
+            #X -= np.mean(self.X, axis=0)
+            print(np.mean(self.X, axis=0))
+            self.z_predict = X @ self.beta + np.mean(self.z)
+        else:
+            self.z_predict = X @ self.beta
 
     def ols(self):
         '''Ordinary least squares.'''
@@ -96,6 +98,10 @@ class Regression():
 
 
         self.X = X
+        
+        if len(z.shape) > 1:
+            z = np.ravel(z)
+        
         self.z = z
 
         if self.method == 'ols':
