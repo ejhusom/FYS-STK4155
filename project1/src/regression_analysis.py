@@ -22,16 +22,14 @@ from designmatrix import *
 
 
 
-def franke_regression(method='ridge'):
+def analyze_regression(x1, x2, y, method='ridge'):
 
     max_degree = 5
 
-    x1, x2 = generate_mesh(0, 1, 100)
-    y = franke_function(x1, x2, eps=0.00)
 
     error_scores = pd.DataFrame(columns=['degree', 'MSE', 'R2'])
 
-    for deg in range(5, max_degree+1):
+    for deg in range(1, max_degree+1):
 
         X = create_design_matrix(x1, x2, deg=deg)
         model = Regression(method, lambda_=0.01)
@@ -39,8 +37,10 @@ def franke_regression(method='ridge'):
         model.predict(X)
 
         error_scores = error_scores.append({'degree': deg, 
-                                            'MSE': model.get_mse(), 
-                                            'R2': model.get_r2()},
+                                            'MSE': mean_squared_error(model.y,
+                                                model.y_predict), 
+                                            'R2': r2_score(model.y,
+                                                model.y_predict)},
                                             ignore_index=True)
 
     
@@ -70,9 +70,9 @@ def analyze_regression_cv(x1, x2, y, method='ols', n_folds=5, data_name='data'):
         for deg in range(1, max_degree+1):
             #print(deg)
             X = create_design_matrix(x1, x2, deg=deg)
-            model = Resampling(method)
+            model = Resampling(method, lambda_)
 
-            model.cross_validation(X, y, n_folds, lambda_)
+            model.cross_validation(X, y, n_folds)
 
             error_scores = error_scores.append({'degree': deg, 
                                                 'lambda': lambda_, 
@@ -87,6 +87,14 @@ def analyze_regression_cv(x1, x2, y, method='ols', n_folds=5, data_name='data'):
     print(error_scores)
     error_scores.to_csv(f'error_scores_{data_name}_{method}_cv.csv')
 
+
+def franke_regression():
+    x1, x2 = generate_mesh(0, 1, 100)
+    y = franke_function(x1, x2, eps=0.00)
+
+    analyze_regression_cv(x1, x2, y, method='ols', data_name='franke')
+    #analyze_regression(x1, x2, y, method='ols')
+    
 
 def terrain_regression(terrain_file, plot=0):
 

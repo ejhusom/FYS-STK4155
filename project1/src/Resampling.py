@@ -10,23 +10,22 @@
 from Regression import *
 from sklearn.model_selection import KFold
 
-class Resampling(Regression):
+class Resampling():
 
-    def __init__(self):
+    def __init__(self, method='ols', lambda_=0):
 
+        self.method = method
+        self.lambda_ = lambda_
         self.mse_train = None 
         self.mse_test = None 
         self.r2_train = None
         self.r2_test = None
 
 
-    def cross_validation(self, X, z, n_folds, lambda_=0.1):
+    def cross_validation(self, X, y, n_folds):
 
-        
-        if len(np.shape(z)) > 1:
-            z = np.ravel(z)
-
-        self.set_lambda_ = lambda_
+        if len(y.shape) > 1:
+            y = np.ravel(y)
 
         kf = KFold(n_splits=n_folds, random_state=0, shuffle=True)
 
@@ -37,17 +36,20 @@ class Resampling(Regression):
 
         i = 0
         for train_index, test_index in kf.split(X):
+            model = Regression(self.method, self.lambda_)
+            model.fit(X[train_index], y[train_index])
+
+            model.predict(X[train_index])
+            y_predict_train = model.y_predict
             
-            self.fit(X[train_index], z[train_index])
-
-            z_predict_train = self.z_predict
-            z_predict_test = X[test_index] @ self.beta
+            model.predict(X[test_index])
+            y_predict_test = model.y_predict
 
 
-            mse[i][0] = mean_squared_error(z[train_index], z_predict_train)
-            mse[i][1] = mean_squared_error(z[test_index], z_predict_test)
-            r2[i][0] = r2_score(z[train_index], z_predict_train)
-            r2[i][1] = r2_score(z[test_index], z_predict_test)
+            mse[i][0] = mean_squared_error(y[train_index], y_predict_train)
+            mse[i][1] = mean_squared_error(y[test_index], y_predict_test)
+            r2[i][0] = r2_score(y[train_index], y_predict_train)
+            r2[i][1] = r2_score(y[test_index], y_predict_test)
 
             i += 1
 

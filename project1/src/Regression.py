@@ -27,9 +27,6 @@ class Regression():
 
         self.y_predict = None
         self.beta = None
-        self.mse = None
-        self.r2 = None
-        self.beta_var = None
 
         self.skl_model = None
 
@@ -59,6 +56,8 @@ class Regression():
         if self.method == 'ridge':
             X = X - np.mean(self.X, axis=0)
             self.y_predict = X @ self.beta + np.mean(self.y)
+        elif self.method == 'lasso':
+            skl_predict(X)
         else:
             self.y_predict = X @ self.beta
 
@@ -129,15 +128,6 @@ class Regression():
         #print(self.get_var_beta())
 
 
-    def get_mse(self):
-        self.mse = np.sum((self.y - self.y_predict)**2) / self.y.size
-
-        return self.mse
-
-    def get_r2(self):
-        return r2_score(self.y, self.y_predict) 
-
-
-    def get_var_beta(self):
+    def var_beta(self):
         return np.var(self.y)*np.linalg.pinv(self.X.T @ self.X)
 
