@@ -22,33 +22,21 @@ from designmatrix import *
 
 
 
-def franke_regression(method='ols'):
+def franke_regression(method='ridge'):
 
     max_degree = 5
 
-    x, y = generate_mesh(0, 1, 100)
-    z = franke_function(x, y, eps=0.00)
+    x1, x2 = generate_mesh(0, 1, 100)
+    y = franke_function(x1, x2, eps=0.00)
 
     error_scores = pd.DataFrame(columns=['degree', 'MSE', 'R2'])
 
-    for deg in range(1, max_degree+1):
+    for deg in range(5, max_degree+1):
 
-        X = create_design_matrix(x, y, deg=deg)
+        X = create_design_matrix(x1, x2, deg=deg)
         model = Regression(method, lambda_=0.01)
-        model.fit(X, z)
+        model.fit(X, y)
         model.predict(X)
-#        model.skl_fit(X, z)
-#        model.skl_predict(X)
-
-        beta = model.beta
-        y_predict = model.z_predict
-        print(model.get_r2())
-
-        print(beta)
-        print(y_predict)
-
-
-
 
         error_scores = error_scores.append({'degree': deg, 
                                             'MSE': model.get_mse(), 
@@ -65,7 +53,7 @@ def franke_regression(method='ols'):
 
 
 
-def analyze_regression_cv(x, y, z, method='ols', n_folds=5, data_name='data'):
+def analyze_regression_cv(x1, x2, y, method='ols', n_folds=5, data_name='data'):
 
     max_degree = 5
     n_lambdas = 6
@@ -81,10 +69,10 @@ def analyze_regression_cv(x, y, z, method='ols', n_folds=5, data_name='data'):
     for lambda_ in lambdas:
         for deg in range(1, max_degree+1):
             #print(deg)
-            X = create_design_matrix(x, y, deg=deg)
+            X = create_design_matrix(x1, x2, deg=deg)
             model = Resampling(method)
 
-            model.cross_validation(X, z, n_folds, lambda_)
+            model.cross_validation(X, y, n_folds, lambda_)
 
             error_scores = error_scores.append({'degree': deg, 
                                                 'lambda': lambda_, 

@@ -57,8 +57,7 @@ class Regression():
 
         
         if self.method == 'ridge':
-            #X -= np.mean(self.X, axis=0)
-            print(np.mean(self.X, axis=0))
+            X = X - np.mean(self.X, axis=0)
             self.y_predict = X @ self.beta + np.mean(self.y)
         else:
             self.y_predict = X @ self.beta
@@ -76,9 +75,8 @@ class Regression():
 
     def ridge(self):
 
-        # Centering data
-        self.X -= np.mean(self.X, axis=0)
-        self.y -= np.mean(self.y)
+        X_center = self.X - np.mean(self.X, axis=0)
+        y_center = self.y - np.mean(self.y)
 
 # TODO: Normalize
 #        col_var = np.var(self.X, axis=0)
@@ -90,9 +88,9 @@ class Regression():
 #        self.y /= np.var(self.y)
 
 
-        X = self.X
+        X = X_center
         self.beta = np.linalg.pinv(X.T.dot(X) + \
-            self.lambda_*np.identity(np.shape(self.X)[1])).dot(X.T) @ self.y
+            self.lambda_*np.identity(np.shape(self.X)[1])) @ X.T @ y_center
 
     def skl_fit(self, X, y):
 
@@ -116,12 +114,12 @@ class Regression():
             self.beta = self.skl_model.coef_[0]
         else:
             self.beta = self.skl_model.coef_
-        self.beta[0] = self.skl_model.intercept_
+        #self.beta[0] = self.skl_model.intercept_
 
 
     def skl_predict(self, X):
 
-        self.y_predict = np.ravel(self.skl_model.predict(X)) #- self.beta[0])
+        self.y_predict = np.ravel(self.skl_model.predict(X) - self.beta[0])
 
 
     

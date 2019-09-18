@@ -47,17 +47,15 @@ def test_Regression_fit(method='ols'):
     test_model.fit(X, y)
     beta = test_model.beta
     test_model.predict(X)
-    y_predict = test_model.z_predict
-    print('R2 manual:')
-    print(test_model.get_r2())
+    y_predict = test_model.y_predict
+    r2 = test_model.get_r2()
 
     # Scikit-learn
     test_model.skl_fit(X, y)
     beta_skl = test_model.beta
     test_model.skl_predict(X)
-    y_predict_skl = test_model.z_predict
-    print('R2 scikit:')
-    print(test_model.get_r2())
+    y_predict_skl = test_model.y_predict
+    r2_skl = test_model.get_r2()
 
     print('Beta:')
     print(beta)
@@ -66,10 +64,10 @@ def test_Regression_fit(method='ols'):
     print(y_predict)
     print(y_predict_skl)
 
-    tol = 1e-8
+    tol = 1e-15
 
-    assert np.max(abs(beta - beta_skl)) < tol
-    assert np.max(abs(y_predict - y_predict_skl)) < tol
+    assert mean_squared_error(y_predict, y_predict_skl) < tol
+    assert mean_squared_error(beta, beta_skl) < tol
 
     #plot_regression(x, y, x, y_predict)
 
