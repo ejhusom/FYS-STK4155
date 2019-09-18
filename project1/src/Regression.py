@@ -25,7 +25,7 @@ class Regression():
         self.lambda_ = lambda_
 
 
-        self.z_tilde = None
+        self.z_predict = None
         self.beta = None
         self.mse = None
         self.r2 = None
@@ -55,10 +55,10 @@ class Regression():
 
     def predict(self, X):
 
-        self.z_tilde = X @ self.beta
+        self.z_predict = X @ self.beta
         
         if self.method == 'ridge':
-            self.z_tilde += np.mean(self.z)
+            self.z_predict += np.mean(self.z)
 
 
     def ols(self):
@@ -74,8 +74,18 @@ class Regression():
 
     def ridge(self):
 
+        # Centering data
         self.X -= np.mean(self.X, axis=0)
         self.z -= np.mean(self.z)
+
+# TODO: Normalize
+#        col_var = np.var(self.X, axis=0)
+#
+#        for i in range(1, len(self.X[0,:])):
+#            self.X[:,i] /= col_var[i]
+#
+#        self.X /= np.var(self.X, axis=0)
+#        self.z /= np.var(self.z)
 
 
         X = self.X
@@ -91,9 +101,9 @@ class Regression():
         if self.method == 'ols':
             self.skl_model = skl.LinearRegression()
         elif self.method == 'ridge':
-            self.skl_model = skl.Ridge(alpha=self.lambda_)
+            self.skl_model = skl.Ridge(alpha=self.lambda_, fit_intercept=True)
         elif self.method == 'lasso':
-            self.skl_model = skl.Lasso(alpha=self.lambda_)
+            self.skl_model = skl.Lasso(alpha=self.lambda_, fit_intercept=True)
 
         self.skl_model.fit(self.X, self.z)
         if len(np.shape(self.skl_model.coef_)) > 1:
@@ -105,7 +115,7 @@ class Regression():
 
     def skl_predict(self, X):
 
-        self.z_tilde = np.ravel(self.skl_model.predict(X) - self.beta[0])
+        self.z_predict = np.ravel(self.skl_model.predict(X)) #- self.beta[0])
 
 
     
@@ -116,12 +126,12 @@ class Regression():
 
 
     def get_mse(self):
-        self.mse = np.sum((self.z - self.z_tilde)**2) / self.z.size
+        self.mse = np.sum((self.z - self.z_predict)**2) / self.z.size
 
         return self.mse
 
     def get_r2(self):
-        return r2_score(self.z, self.z_tilde) 
+        return r2_score(self.z, self.z_predict) 
 
 
     def get_var_beta(self):

@@ -12,6 +12,13 @@ from sklearn.model_selection import KFold
 
 class Resampling(Regression):
 
+    def __init__(self):
+
+        self.mse_train = None 
+        self.mse_test = None 
+        self.r2_train = None
+        self.r2_test = None
+
 
     def cross_validation(self, X, z, n_folds, lambda_=0.1):
 
@@ -33,14 +40,14 @@ class Resampling(Regression):
             
             self.fit(X[train_index], z[train_index])
 
-            z_tilde_train = self.z_tilde
-            z_tilde_test = X[test_index] @ self.beta
+            z_predict_train = self.z_predict
+            z_predict_test = X[test_index] @ self.beta
 
 
-            mse[i][0] = mean_squared_error(z[train_index], z_tilde_train)
-            mse[i][1] = mean_squared_error(z[test_index], z_tilde_test)
-            r2[i][0] = r2_score(z[train_index], z_tilde_train)
-            r2[i][1] = r2_score(z[test_index], z_tilde_test)
+            mse[i][0] = mean_squared_error(z[train_index], z_predict_train)
+            mse[i][1] = mean_squared_error(z[test_index], z_predict_test)
+            r2[i][0] = r2_score(z[train_index], z_predict_train)
+            r2[i][1] = r2_score(z[test_index], z_predict_test)
 
             i += 1
 

@@ -77,6 +77,6 @@ def plot_regression(x, y, x_fit, y_fit, y_label='model fit'):
 
 if __name__ == '__main__':
 
-    test_Regression_fit('ols')
+    #test_Regression_fit('ols')
     test_Regression_fit('ridge')
-    test_Regression_fit('lasso')
+    #test_Regression_fit('lasso')
