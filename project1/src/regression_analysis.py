@@ -109,10 +109,18 @@ def terrain_regression(terrain_file, plot=0):
 def plot_regression_analysis(filename):
     df = pd.read_csv(filename)
 
+
+    lambdas = df['lambda'].unique()
+
+
     plt.figure()
 
-    plt.plot(df['degree'], df['MSE_train'], label='train')
-    plt.plot(df['degree'], df['MSE_test'], label='test')
+    for lambda_ in lambdas:
+        dfl = df.loc[df['lambda'] == lambda_]
+        plt.plot(dfl['degree'], dfl['MSE_train'], label=f'train, \
+                lambda={lambda_}')
+        plt.plot(dfl['degree'], dfl['MSE_test'], label=f'test, \
+                lambda={lambda_}')
 
     plt.legend()
 
