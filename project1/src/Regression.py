@@ -109,23 +109,11 @@ class Regression():
             self.beta = self.skl_model.coef_[0]
         else:
             self.beta = self.skl_model.coef_
-        #self.beta[0] = self.skl_model.intercept_
 
 
     def skl_predict(self, X):
 
         self.y_pred = np.ravel(self.skl_model.predict(X) - self.beta[0])
-
-#def MSE(y_true, y_pred):
-#    return np.mean((y_true - y_pred)**2)
-#
-#def r_squared(y_true, y_pred):
-#    y_mean = np.mean(y_true)
-#    TSS = np.sum(y_true - y_mean)**2
-#    RSS = np.sum(y_pred - y_mean)**2
-#    return 1.0 - TSS/RSS
-    
-
 
 
 def bias(y_true, y_pred):

@@ -7,8 +7,6 @@
 # Description:
 # Analyzing regression methods.
 # ============================================================================
-from Regression import *
-from Resampling import *
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
@@ -16,6 +14,8 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 from imageio import imread
 import pandas as pd
 
+from Regression import *
+from crossvalidation import *
 from franke import *
 from designmatrix import *
 
@@ -75,16 +75,27 @@ def analyze_regression_cv(x1, x2, y, method='ols', n_folds=5, data_name='data'):
         for deg in range(1, max_degree+1):
             #print(deg)
             X = create_design_matrix(x1, x2, deg=deg)
-            model = Resampling(method, lambda_)
 
-            model.cross_validation(X, y, n_folds)
+            if n_folds > 1:
+                mse_train, mse_test, r2_train, r2_test = cross_validation(X, y,
+                        n_folds)
+
+            else:
+                model = Regression(method, lambda_=0.01)
+                model.fit(X, y)
+                model.predict(X)
+                mse_train = mean_squared_error(model.y, model.y_pred)
+                r2_train = r2_score(model.y, model.y_pred)
+                mse_test = None
+                r2_test = None
+
 
             error_scores = error_scores.append({'degree': deg, 
                                                 'lambda': lambda_, 
-                                                'MSE_train': model.mse_train, 
-                                                'MSE_test': model.mse_test,
-                                                'R2_train': model.r2_train, 
-                                                'R2_test': model.r2_test},
+                                                'MSE_train': mse_train, 
+                                                'MSE_test': mse_test,
+                                                'R2_train': r2_train, 
+                                                'R2_test': r2_test},
                                                 ignore_index=True)
 
     
@@ -97,7 +108,7 @@ def franke_regression():
     x1, x2 = generate_mesh(0, 1, 100)
     y = franke_function(x1, x2, eps=1)
 
-    #analyze_regression_cv(x1, x2, y, method='ridge', data_name='franke')
+    analyze_regression_cv(x1, x2, y, n_folds=1, method='ols', data_name='franke')
     analyze_regression(x1, x2, y, method='ols')
     
 
