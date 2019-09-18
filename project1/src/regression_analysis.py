@@ -26,20 +26,19 @@ def franke_regression(method='ols'):
 
     max_degree = 5
 
-    x, y = generate_xy(0, 1, 100)
-    z = franke_function(x, y, 0.00)
+    x, y = generate_mesh(0, 1, 100)
+    z = franke_function(x, y, eps=0.00)
 
     error_scores = pd.DataFrame(columns=['degree', 'MSE', 'R2'])
 
     for deg in range(1, max_degree+1):
 
         X = create_design_matrix(x, y, deg=deg)
-        model = Regression(method)
-        model.set_lambda(0.01)
-#        model.fit(X, z)
-#        model.predict(X)
-        model.skl_fit(X, z)
-        model.skl_predict(X)
+        model = Regression(method, lambda_=0.01)
+        model.fit(X, z)
+        model.predict(X)
+#        model.skl_fit(X, z)
+#        model.skl_predict(X)
 
         beta = model.beta
         y_predict = model.z_predict

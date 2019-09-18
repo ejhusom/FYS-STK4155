@@ -21,11 +21,11 @@ class Regression():
         self.method = method
 
         self.X = None
-        self.z = None
+        self.y = None
         self.lambda_ = lambda_
 
 
-        self.z_predict = None
+        self.y_predict = None
         self.beta = None
         self.mse = None
         self.r2 = None
@@ -37,20 +37,20 @@ class Regression():
     def set_lambda(self, lambda_):
         self.lambda_ = lambda_
 
-    def fit(self, X, z):
+    def fit(self, X, y):
         
-        if len(np.shape(z)) > 1:
-            z = np.ravel(z)
+        if len(np.shape(y)) > 1:
+            y = np.ravel(y)
 
         self.X = X
-        self.z = z
+        self.y = y
 
         if self.method == 'ols':
             self.ols()
         elif self.method == 'ridge':
             self.ridge()
         elif self.method == 'lasso':
-            self.skl_fit(X, z)
+            self.skl_fit(X, y)
 
 
     def predict(self, X):
@@ -59,9 +59,9 @@ class Regression():
         if self.method == 'ridge':
             #X -= np.mean(self.X, axis=0)
             print(np.mean(self.X, axis=0))
-            self.z_predict = X @ self.beta + np.mean(self.z)
+            self.y_predict = X @ self.beta + np.mean(self.y)
         else:
-            self.z_predict = X @ self.beta
+            self.y_predict = X @ self.beta
 
     def ols(self):
         '''Ordinary least squares.'''
@@ -70,15 +70,15 @@ class Regression():
         #XTX = X.T.dot(X)
         #Xinv = np.linalg.pinv(XTX)
         #XinvXT = Xinv @ X.T
-        #self.beta = XinvXT @ self.z
-        self.beta = np.linalg.pinv(X.T.dot(X)).dot(X.T).dot(self.z)
+        #self.beta = XinvXT @ self.y
+        self.beta = np.linalg.pinv(X.T.dot(X)).dot(X.T).dot(self.y)
 
 
     def ridge(self):
 
         # Centering data
         self.X -= np.mean(self.X, axis=0)
-        self.z -= np.mean(self.z)
+        self.y -= np.mean(self.y)
 
 # TODO: Normalize
 #        col_var = np.var(self.X, axis=0)
@@ -87,22 +87,22 @@ class Regression():
 #            self.X[:,i] /= col_var[i]
 #
 #        self.X /= np.var(self.X, axis=0)
-#        self.z /= np.var(self.z)
+#        self.y /= np.var(self.y)
 
 
         X = self.X
         self.beta = np.linalg.pinv(X.T.dot(X) + \
-            self.lambda_*np.identity(np.shape(self.X)[1])).dot(X.T) @ self.z
+            self.lambda_*np.identity(np.shape(self.X)[1])).dot(X.T) @ self.y
 
-    def skl_fit(self, X, z):
+    def skl_fit(self, X, y):
 
 
         self.X = X
         
-        if len(z.shape) > 1:
-            z = np.ravel(z)
+        if len(y.shape) > 1:
+            y = np.ravel(y)
         
-        self.z = z
+        self.y = y
 
         if self.method == 'ols':
             self.skl_model = skl.LinearRegression()
@@ -111,7 +111,7 @@ class Regression():
         elif self.method == 'lasso':
             self.skl_model = skl.Lasso(alpha=self.lambda_, fit_intercept=True)
 
-        self.skl_model.fit(self.X, self.z)
+        self.skl_model.fit(self.X, self.y)
         if len(np.shape(self.skl_model.coef_)) > 1:
             self.beta = self.skl_model.coef_[0]
         else:
@@ -121,7 +121,7 @@ class Regression():
 
     def skl_predict(self, X):
 
-        self.z_predict = np.ravel(self.skl_model.predict(X)) #- self.beta[0])
+        self.y_predict = np.ravel(self.skl_model.predict(X)) #- self.beta[0])
 
 
     
@@ -132,14 +132,14 @@ class Regression():
 
 
     def get_mse(self):
-        self.mse = np.sum((self.z - self.z_predict)**2) / self.z.size
+        self.mse = np.sum((self.y - self.y_predict)**2) / self.y.size
 
         return self.mse
 
     def get_r2(self):
-        return r2_score(self.z, self.z_predict) 
+        return r2_score(self.y, self.y_predict) 
 
 
     def get_var_beta(self):
-        return np.var(self.z)*np.linalg.pinv(self.X.T @ self.X)
+        return np.var(self.y)*np.linalg.pinv(self.X.T @ self.X)
 

@@ -9,37 +9,37 @@
 # ============================================================================
 import numpy as np
 
-def generate_xy(start=0, stop=1, n=100):
+def generate_mesh(start=0, stop=1, n=100):
     '''Generate x and y data and return at as a flat meshgrid.'''
 
-    x = np.linspace(start, stop, n)
-    y = np.linspace(start, stop, n)
-    x, y = np.meshgrid(x, y)
+    x1 = np.linspace(start, stop, n)
+    x2 = np.linspace(start, stop, n)
+    x1, x2 = np.meshgrid(x1, x2)
     
-    return x, y
+    return x1, x2
 
 
-def franke_function(x, y, eps = 0.05):
+def franke_function(x1, x2, eps = 0.05):
 
     np.random.seed(0)
 
-    n = len(x)
+    n = len(x1)
 
-    term1 = 0.75*np.exp(-(0.25*(9*x-2)**2) - 0.25*((9*y-2)**2))
-    term2 = 0.75*np.exp(-((9*x+1)**2)/49.0 - 0.1*(9*y+1))
-    term3 = 0.5*np.exp(-(9*x-7)**2/4.0 - 0.25*((9*y-3)**2))
-    term4 = -0.2*np.exp(-(9*x-4)**2 - (9*y-7)**2)
+    term1 = 0.75*np.exp(-(0.25*(9*x1-2)**2) - 0.25*((9*x2-2)**2))
+    term2 = 0.75*np.exp(-((9*x1+1)**2)/49.0 - 0.1*(9*x2+1))
+    term3 = 0.5*np.exp(-(9*x1-7)**2/4.0 - 0.25*((9*x2-3)**2))
+    term4 = -0.2*np.exp(-(9*x1-4)**2 - (9*x2-7)**2)
     
-    z = term1 + term2 + term3 + term4 + eps*np.random.randn(n)
+    y = term1 + term2 + term3 + term4 + eps*np.random.randn(n)
 
-    return z
+    return y
 
-def plot(x, y, z):
+def plot(x1, x2, y):
 
     fig = plt.figure()
     ax = fig.gca(projection='3d')
 
-    surf = ax.plot_surface(x, y, z,
+    surf = ax.plot_surface(x1, x2, y,
             cmap=cm.coolwarm,linewidth=0, antialiased=False)
     
     # Customize the z axis.
