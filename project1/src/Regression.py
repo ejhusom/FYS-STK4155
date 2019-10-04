@@ -52,7 +52,7 @@ class Regression():
             X = X - np.mean(self.X, axis=0)
             self.y_pred = X @ self.beta + np.mean(self.y)
         elif self.method == 'lasso':
-            skl_predict(X)
+            self.skl_predict(X)
         else:
             self.y_pred = X @ self.beta
 
@@ -81,6 +81,7 @@ class Regression():
 #        self.X /= np.var(self.X, axis=0)
 #        self.y /= np.var(self.y)
 
+        print(f'Lambda: {self.lambda_}')
 
         X = X_center
         self.beta = np.linalg.pinv(X.T.dot(X) + \
