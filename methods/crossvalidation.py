@@ -8,7 +8,8 @@
 #
 # ============================================================================
 from Regression import *
-from sklearn.model_selection import KFold
+from metrics.regression import *
+from sklearn.model_selection import KFold, train_test_split
 
 def cross_validation(X, y, n_folds, method='ols', lambda_=0.01):
 
@@ -23,29 +24,30 @@ def cross_validation(X, y, n_folds, method='ols', lambda_=0.01):
     var = np.zeros((n_folds, 2))
 
     
-
     i = 0
-    for train_index, test_index in kf.split(X):
+    for train_index, val_index in kf.split(X):
         model = Regression(method, lambda_)
         model.fit(X[train_index], y[train_index])
 
         model.predict(X[train_index])
         y_pred_train = model.y_pred
         
-        model.predict(X[test_index])
+        model.predict(X[val_index])
         y_pred_test = model.y_pred
 
 
         mse[i][0] = mean_squared_error(y[train_index], y_pred_train)
-        mse[i][1] = mean_squared_error(y[test_index], y_pred_test)
+        mse[i][1] = mean_squared_error(y[val_index], y_pred_test)
         r2[i][0] = r2_score(y[train_index], y_pred_train)
-        r2[i][1] = r2_score(y[test_index], y_pred_test)
+        r2[i][1] = r2_score(y[val_index], y_pred_test)
         b[i][0] = bias(y[train_index], y_pred_train)
-        b[i][1] = bias(y[test_index], y_pred_test)
+        b[i][1] = bias(y[val_index], y_pred_test)
         var[i][0] = np.var(y_pred_train)
         var[i][1] = np.var(y_pred_test)
 
         i += 1
+
+
 
     mse_train = np.mean(mse[:,0])
     mse_test = np.mean(mse[:,1])

@@ -13,11 +13,17 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 from imageio import imread
 import pandas as pd
+import sys
+
+# Add machine learning methods to path
+sys.path.append('../../methods')
 
 from Regression import *
+from metrics.regression import *
 from crossvalidation import *
 from franke import *
 from designmatrix import *
+
 
 
 def analyze_regression(x1, x2, y, method='ols', n_folds=5, data_name='data'):
@@ -41,7 +47,6 @@ def analyze_regression(x1, x2, y, method='ols', n_folds=5, data_name='data'):
 
     for lambda_ in lambdas:
         for deg in range(1, max_degree+1):
-            #print(deg)
             X = create_design_matrix(x1, x2, deg=deg)
 
             if n_folds > 1:
@@ -85,8 +90,13 @@ def franke_regression():
     x1, x2 = generate_mesh(0, 1, 20)
     y = franke_function(x1, x2, eps=4.0)
 
-    analyze_regression(x1, x2, y, n_folds=5, method='lasso', data_name='franke')
+    analyze_regression(x1, x2, y, n_folds=0, method='ols', data_name='franke')
+    #analyze_regression(x1, x2, y, n_folds=5, method='ridge', data_name='franke')
     
+
+
+
+
 
 def terrain_regression(terrain_file, plot=0):
 
@@ -102,23 +112,28 @@ def plot_regression_analysis(filename):
     df = pd.read_csv(filename)
 
 
-    lambdas = df['lambda'].unique()
+    #lambdas = df['lambda'].unique()
+    lambdas = [1.0]
 
 
     plt.figure()
 
-    for lambda_ in lambdas:
-        dfl = df.loc[df['lambda'] == lambda_]
-        #plt.plot(dfl['degree'], dfl['MSE_train'], label=f'train, \
-        #        lambda={lambda_}')
-        plt.plot(dfl['degree'], dfl['MSE_test'], label=f'test, \
-                lambda={lambda_}')
+#    for lambda_ in lambdas:
+#        dfl = df.loc[df['lambda'] == lambda_]
+#        #plt.plot(dfl['degree'], dfl['MSE_train'], label=f'train, \
+#        #        lambda={lambda_}')
+#        plt.plot(dfl['degree'], dfl['MSE_test'], label=f'MSE, lambda={lambda_}')
+#        plt.plot(dfl['degree'], dfl['bias_test'], label=f'bias, lambda={lambda_}')
+#        plt.plot(dfl['degree'], dfl['var_test'], label=f'variance, lambda={lambda_}')
 
 
     # Plot bias/variance/error
     #plt.plot(df['degree'], df['bias_test'], label='bias')
     #plt.plot(df['degree'], df['var_test'], label='variance')
-    #plt.plot(df['degree'], df['MSE_test'], label='error')
+    #plt.plot(df['degree'], df['MSE_test'], label='MSE')
+    plt.plot(df['degree'], df['bias_train'], label='bias')
+    plt.plot(df['degree'], df['var_train'], label='variance')
+    plt.plot(df['degree'], df['MSE_train'], label='MSE')
 
     # Plot MSE vs model complexity
     #plt.plot(df['degree'], df['MSE_test'], label='test')
@@ -137,4 +152,4 @@ if __name__ == '__main__':
 
     #terrain_regression('dat/n27_e086_1arc_v3.tif', plot=1)
     franke_regression()
-    plot_regression_analysis('error_scores_franke_lasso _cv.csv')
+    plot_regression_analysis('error_scores_franke_ols.csv')

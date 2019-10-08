@@ -15,6 +15,7 @@ from sklearn.metrics import r2_score, mean_squared_error
 
 # Add the source code directory to python path in order to import the code
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.append('../../methods')
 
 from Regression import *
 from franke import *
@@ -24,23 +25,23 @@ from designmatrix import *
 def test_Regression_fit(method='ols'):
     
     # Data generation
-#    N = 100 # data size
-#    p = 5   # polynomial degree
-#
-#    np.random.seed(0)
-#    x = np.random.rand(N, 1)
-#    y = 5*x*x + 0.1*np.random.randn(N, 1)
-#
-#
-#    # Creating design matrix X
-#    X = np.ones((N, p + 1))
-#    for i in range(1, p + 1):
-#        X[:,i] = x[:,0]**i
-#
-    x1, x2 = generate_mesh(0, 1, 100)
-    y = franke_function(x1, x2, eps=0.00)
+    N = 100 # data size
+    p = 5   # polynomial degree
 
-    X = create_design_matrix(x1, x2, deg=5)
+    np.random.seed(0)
+    x = np.random.rand(N, 1)
+    y = 5*x*x + 0.1*np.random.randn(N, 1)
+
+
+    # Creating design matrix X
+    X = np.ones((N, p + 1))
+    for i in range(1, p + 1):
+        X[:,i] = x[:,0]**i
+
+#    x1, x2 = generate_mesh(0, 1, 100)
+#    y = franke_function(x1, x2, eps=0.00)
+#
+#    X = create_design_matrix(x1, x2, deg=5)
     
     test_model = Regression(method=method, lambda_=0.01)
 
@@ -54,30 +55,65 @@ def test_Regression_fit(method='ols'):
 
 
     # Scikit-learn
-    test_model.skl_fit(X, y)
-    beta_skl = test_model.beta
-    test_model.skl_predict(X)
-    y_pred_skl = test_model.y_pred
-    r2_skl = r2_score(test_model.y, test_model.y_pred)
-    mse_skl = mean_squared_error(test_model.y, test_model.y_pred)
+#    test_model.skl_fit(X, y)
+#    beta_skl = test_model.beta
+#    test_model.skl_predict(X)
+#    y_pred_skl = test_model.y_pred
+#    r2_skl = r2_score(test_model.y, test_model.y_pred)
+#    mse_skl = mean_squared_error(test_model.y, test_model.y_pred)
+#    test_model.skl_fit(X, y)
+#    beta_skl = test_model.beta
+#    test_model.skl_predict(X)
+#    y_pred_skl = test_model.y_pred
+#    r2_skl = r2_score(test_model.y, test_model.y_pred)
+#    mse_skl = mean_squared_error(test_model.y, test_model.y_pred)
+#
+#    print('Beta:')
+#    print(beta)
+#    print(beta_skl)
+#    print('y:')
+#    print(y_pred)
+#    print(y_pred_skl)
+#    print('mse:')
+#    print(mse)
+#    print(mse_skl)
+#
+#    tol = 1e-15
+#
+#    
+#    assert mean_squared_error(y_pred, y_pred_skl) < tol
+#    assert mean_squared_error(beta, beta_skl) < tol
+#
+    plot_regression(x, y, x, y_pred)
 
-    print('Beta:')
-    print(beta)
-    print(beta_skl)
-    print('y:')
-    print(y_pred)
-    print(y_pred_skl)
-    print('mse:')
-    print(mse)
-    print(mse_skl)
 
-    tol = 1e-15
+def skl_fit(self, X, y):
 
+
+    self.X = X
     
-    assert mean_squared_error(y_pred, y_pred_skl) < tol
-    assert mean_squared_error(beta, beta_skl) < tol
+    if len(y.shape) > 1:
+        y = np.ravel(y)
+    
+    self.y = y
 
-    #plot_regression(x, y, x, y_pred)
+    if self.method == 'ols':
+        self.skl_model = skl.LinearRegression()
+    elif self.method == 'ridge':
+        self.skl_model = skl.Ridge(alpha=self.lambda_, fit_intercept=True)
+    elif self.method == 'lasso':
+        self.skl_model = skl.Lasso(alpha=self.lambda_, fit_intercept=True)
+
+    self.skl_model.fit(self.X, self.y)
+    if len(np.shape(self.skl_model.coef_)) > 1:
+        self.beta = self.skl_model.coef_[0]
+    else:
+        self.beta = self.skl_model.coef_
+
+
+def skl_predict(self, X):
+
+    self.y_pred = np.ravel(self.skl_model.predict(X) - self.beta[0])
 
 
 
@@ -85,13 +121,13 @@ def plot_regression(x, y, x_fit, y_fit, y_label='model fit'):
     '''Plot data and model fit in one figure.'''
     plt.figure()
     plt.plot(x, y, '.', label='random data')
-    plt.plot(x_fit, y_fit, '-', label=y_label)
+    plt.scatter(x_fit, y_fit label=y_label)
     plt.legend()
     plt.show()
 
 
 if __name__ == '__main__':
 
-    #test_Regression_fit('ols')
-    test_Regression_fit('ridge')
+    test_Regression_fit('ols')
+    #test_Regression_fit('ridge')
     #test_Regression_fit('lasso')

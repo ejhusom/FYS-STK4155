@@ -46,31 +46,18 @@ class Regression():
 
 
     def predict(self, X):
-
-        
-        if self.method == 'ridge':
-            X = X - np.mean(self.X, axis=0)
-            self.y_pred = X @ self.beta + np.mean(self.y)
-        elif self.method == 'lasso':
-            self.skl_predict(X)
-        else:
-            self.y_pred = X @ self.beta
+        self.y_pred = X @ self.beta
 
     def ols(self):
         '''Ordinary least squares.'''
-        #X += 0.1
         X = self.X
-        #XTX = X.T.dot(X)
-        #Xinv = np.linalg.pinv(XTX)
-        #XinvXT = Xinv @ X.T
-        #self.beta = XinvXT @ self.y
         self.beta = np.linalg.pinv(X.T.dot(X)).dot(X.T).dot(self.y)
 
 
     def ridge(self):
 
-        X_center = self.X - np.mean(self.X, axis=0)
-        y_center = self.y - np.mean(self.y)
+        #X_center = self.X - np.mean(self.X, axis=0)
+        #y_center = self.y - np.mean(self.y)
 
 # TODO: Normalize
 #        col_var = np.var(self.X, axis=0)
@@ -81,45 +68,16 @@ class Regression():
 #        self.X /= np.var(self.X, axis=0)
 #        self.y /= np.var(self.y)
 
-        print(f'Lambda: {self.lambda_}')
-
-        X = X_center
+        #X = X_center
         self.beta = np.linalg.pinv(X.T.dot(X) + \
             self.lambda_*np.identity(np.shape(self.X)[1])) @ X.T @ y_center
 
-    def skl_fit(self, X, y):
+    def lasso(self):
+
+        model = skl.Lasso(alpha=self.lambda_, fit_intercept=False,
+                normalize=False, max_iter=10000).fit(self.X, self.y)
+        self.beta = clf.coef_
 
 
-        self.X = X
-        
-        if len(y.shape) > 1:
-            y = np.ravel(y)
-        
-        self.y = y
 
-        if self.method == 'ols':
-            self.skl_model = skl.LinearRegression()
-        elif self.method == 'ridge':
-            self.skl_model = skl.Ridge(alpha=self.lambda_, fit_intercept=True)
-        elif self.method == 'lasso':
-            self.skl_model = skl.Lasso(alpha=self.lambda_, fit_intercept=True)
-
-        self.skl_model.fit(self.X, self.y)
-        if len(np.shape(self.skl_model.coef_)) > 1:
-            self.beta = self.skl_model.coef_[0]
-        else:
-            self.beta = self.skl_model.coef_
-
-
-    def skl_predict(self, X):
-
-        self.y_pred = np.ravel(self.skl_model.predict(X) - self.beta[0])
-
-
-def bias(y_true, y_pred):
-    return np.mean((y_true - np.mean(y_pred))**2)
-
-
-#def var_beta():
-#    return np.var(self.y)*np.linalg.pinv(self.X.T @ self.X)
 

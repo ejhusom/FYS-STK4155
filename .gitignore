@@ -1,6 +1,3 @@
-# included libraries
-include*
-
 # executables
 *.exe
 *.x
