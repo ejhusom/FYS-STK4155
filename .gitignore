@@ -6,6 +6,8 @@
 *.dat
 *.txt
 *.csv
+*.xls
+*.xlsx
 
 # images
 #*.png
