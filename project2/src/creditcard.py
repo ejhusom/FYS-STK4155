@@ -1,13 +1,3 @@
-#!/usr/bin/env python3
-# ============================================================================
-# File:     Skeleton for Python files
-# Author:   Erik Johannes Husom
-# Created:  2019-06-19
-# ----------------------------------------------------------------------------
-# Description:
-#
-# ============================================================================
-
 import pandas as pd
 import os
 import numpy as np
@@ -25,8 +15,7 @@ import random
 random.seed(0)
 
 # Reading file into data frame
-cwd = os.getcwd()
-filename = cwd + '/default of credit card clients.xls'
+filename = './../data/default of credit card clients.xls'
 nanDict = {}
 df = pd.read_excel(filename, header=1, skiprows=0, index_col=0, na_values=nanDict)
 
