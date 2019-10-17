@@ -41,6 +41,7 @@ class GradientDescent():
         n = y.size
         n_batches = int(n/batch_size)
         beta = np.random.randn(X.shape[1],1)
+        beta = np.random.rand(X.shape[1])
 
         for epoch in range(n_epochs):
             indeces = np.arange(n)
@@ -50,13 +51,12 @@ class GradientDescent():
                 rand_indeces = indeces[j*batch_size:(j+1)*batch_size]
                 X_i = X[rand_indeces, :]
                 y_i = y[rand_indeces]
+                
 
                 if self.mode=='regression':
                     gradients = self.squared_loss(X_i, y_i, beta)
                 else:
                     gradients = X_i.T @ (self.sigmoid(X_i, beta) - y_i)
-                print(gradients)
-                print(beta)
                 beta -= self.eta0*gradients
                 j += 1
 
@@ -82,6 +82,11 @@ class GradientDescent():
 
 
     def sigmoid(self, X, beta):
+
+        if len(np.shape(beta)) > 1:
+            beta = np.ravel(beta)
+
+        print(beta)
 
         expXbeta = np.exp(X @ beta)
         return expXbeta / (1 + expXbeta)
