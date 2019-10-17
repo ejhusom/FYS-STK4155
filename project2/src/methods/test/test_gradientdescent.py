@@ -104,5 +104,5 @@ def test_SGD_classification(plot=False):
 if __name__ == '__main__':
     np.random.seed(2019)
     #test_GD_regression()
-    #test_SGD_regression(tol=0.2)
+    #test_SGD_regression(tol=0.5)
     test_SGD_classification(plot=False)

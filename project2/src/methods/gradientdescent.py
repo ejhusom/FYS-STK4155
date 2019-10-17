@@ -55,6 +55,8 @@ class GradientDescent():
                     gradients = self.squared_loss(X_i, y_i, beta)
                 else:
                     gradients = X_i.T @ (self.sigmoid(X_i, beta) - y_i)
+                print(gradients)
+                print(beta)
                 beta -= self.eta0*gradients
                 j += 1
 
