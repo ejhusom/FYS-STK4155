@@ -12,3 +12,7 @@ import numpy as np
 
 def bias(y_true, y_pred):
     return np.mean((y_true - np.mean(y_pred))**2)
+
+def accuracy_score(y_true, y_pred):
+
+    pass

@@ -11,7 +11,8 @@ import numpy as np
 
 class GradientDescent():
 
-    def __init__(self, mode='classification', eta0=0.1, learning_rate='constant'):
+    def __init__(self, mode='classification', stochastic=True, eta0=0.1,
+            learning_rate='constant'):
 
         self.X = None
         self.y = None
@@ -19,6 +20,7 @@ class GradientDescent():
         self.beta = None
 
         self.mode = mode
+        self.stochastic = stochastic
         self.eta0 = eta0
         self.learning_rate = learning_rate
         self.batch_size = None
@@ -34,6 +36,16 @@ class GradientDescent():
         self.y_pred = X @ beta
 
         return self.y_pred
+
+    def fit(self, X, y, batch_size=10, n_epochs=10, n_iterations=1000):
+
+        self.X = X
+        self.y = y
+
+        if self.stochastic:
+            self.SGD(X, y, batch_size, n_epochs)
+        else:
+            self.GD(X, y, n_iterations)
 
 
     def SGD(self, X, y, batch_size=5, n_epochs=100):
@@ -90,8 +102,12 @@ class GradientDescent():
         if len(np.shape(beta)) > 1:
             beta = np.ravel(beta)
 
-        expXbeta = np.exp(X @ beta)
-        return expXbeta / (1 + expXbeta)
+        term = np.exp(X @ beta)
+
+        print('...........')
+        print(term)
+
+        return term / (1 + term)
 
 
     def squared_loss(self, X, y, beta):

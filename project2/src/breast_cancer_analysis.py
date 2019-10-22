@@ -10,58 +10,48 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.datasets import load_breast_cancer
-#from sklearn.metrics import accuracy
+from sklearn.metrics import accuracy_score
 import sys
 
 # Add machine learning methods to path
 sys.path.append('./methods')
 
 from Classification import *
+from gradientdescent import GradientDescent
 
 
 def breast_cancer_analysis():
 
     # Reading data
-    cancer = load_breast_cancer()
-    df = pd.DataFrame(cancer.data, columns=[cancer.feature_names])
-    df['diagnosis'] = pd.Series(data=cancer.target, index=df.index)
+    data = load_breast_cancer()
+    y_names = data['target_names']
+    y = data['target']
+    X_names = data['feature_names']
+    X = data['data']
 
 
-    # Initial analysis of data
-    print('Breast cancer data - info:')
-    df.info()
-    print(df.head(3))
-
-    features_mean = list(df.columns[1:11])
-
-    # Heat map
-    plt.figure(figsize=(10,10))
-    sns.heatmap(df[features_mean].corr(), annot=True, square=True,
-                cmap='coolwarm')
-    plt.show()
-
-    # Scatter matrix
-    color_dic = {'M':'red', 'B':'blue'}
-    colors = df['diagnosis'].map(lambda x: color_dic.get(x))
-
-    sm = pd.scatter_matrix(df[features_mean], c=colors, alpha=0.4,
-            figsize=((15,15)))
-    plt.show()
-
-    #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
-    #        random_state = 0)
-    #sc = StandardScaler()
-
+    # Prediction with Scikit-learn
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
+            random_state = 0)
+    clf_skl = SGDClassifier()
+    clf_skl.fit(X_train, y_train)
+    y_pred = clf_skl.predict(X_test)
+    score = accuracy_score(y_test, y_pred)
+    print(score)
 
 
     # Creating logistic regression model
-    #model = GradientDescent(mode='classification')
-    #beta_SGD = model.SGD(X, y, batch_size=10)
-    #Z = model.predict(np.c_[xx.ravel(), yy.ravel()], beta_SGD)
+    clf = GradientDescent(mode='classification', stochastic=True)
+    clf.fit(X_train, y_train, batch_size=10)
+    y_pred = clf.predict(X_test)
+    score = accuracy_score(y_test, y_pred)
+    print(score)
 
 
 if __name__ == '__main__':
+    np.random.seed(2019)
     breast_cancer_analysis()
