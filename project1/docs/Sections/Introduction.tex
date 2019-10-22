@@ -1,0 +1,11 @@
+\section{Introduction}\label{sec:Introduction}
+
+Regression methods are a set of commonly used tools in machine learning, and the overarching goal is to study the dependence of a target or response variable on a number of independent variables, often called predictors. In order to perform regression we need a data set that contains information about the phenomenon we want to study, and this is used to estimate a function $f$, which is assumed to represent the relationship between the predictors and the response. The result is a model which can be used to understand how the response variable is related to the input variables, or just simply to predict the outcome based on new input data.
+
+The aim of this project is to analyze different regression methods, specifically the Ordinary Least Squares (OLS) method, Ridge regression and Lasso regression. The OLS is one the most common approaches when performing linear regression, and produces a set of polynomial coefficients that describe the model as a function. Ridge and Lasso regression are two types of shrinkage methods that, in contrast to OLS, may reduce or "shrink" some of the coefficients in the model, which may be desirable if some predictors are more important than others, or if some of the predictors in a data set are correlated.
+
+Another important aspect of this project is to explore resampling of data. We have specifically looked at the resampling technique called \textit{bootstrap}, where we draw random samples from a training data set multiple times, and refit a model with each of the samples. By doing this we can extract additional information about the data set.
+
+In the first part of this project, we used a generated data set based on a function called the Franke function, and analyzed the performance of our chosen regression methods, including resampling of the data. In the second and last part, we applied the same techniques on topographical terrain data from an area of Norway.
+
+This report includes the theory used in the project, along with a short review of the methods we implemented in our source code. Then we present our results, followed by a discussion, and lastly a conclusion where we sum up the most important findings.

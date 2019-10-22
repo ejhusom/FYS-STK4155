@@ -1,0 +1,11 @@
+\section{Conclusion}\label{sec:Conclusion}
+
+The aim of this project was to investigate various regression methods and resampling techniques, by testing them on two different data sets, namely generated data from the Franke function and real topographical terrain data. We tested the Ordinary Least Squares method, Ridge regression and Lasso regression, all in combination with Bootstrap resampling. Among these we obtained the lowest test error with the OLS method, on both the Franke data set and the terrain data set. When performing regression on the Franke function, the minimum MSE occured with an OLS model of polynomial degree 5, which gave $\text{MSE} = 0.0136$. Our best terrain model had $\text{MSE} = 0.0091$, when using the OLS method with polynomial degree 10. This was also the most complex model we tested for the terrain data set, and our error analysis indicated that an even higher polynomial degree might have further reduced the mean squared error.
+
+While we could expect that the Ridge and Lasso method would reduce the error compared to the OLS method, since they in theory should lower or remove the impact of less important predictors, our analysis show that in this project the OLS model gives the best performance on test data. One reason for this might be that we failed to do an optimal normalization of our data, which may have affected both the Ridge and the Lasso regression. Also, a more fine-tuned optimalization of the hyperparameter $\lambda$ may have led to even better results. The minimum MSE-values of the Ridge regression were very close to those of OLS, and it is difficult to deem one method better than the other.
+
+This project has shown how different types of regression methods perform on various problems, and how resampling techniques can be used to extract as much information as possible out of a data set. The error analysis we used, by observing both the mean squared error, the bias and the variance, has proven to be a very useful tool when selecting the optimal prediction model of a certain phenomenon.
+
+
+
+%whereas Ridge regression resulted in $MSE=0.0139$ (polynomial degree 6, $\lambda=10^{-4}$ and Lasso gave $MSE=0.0183$ (polynomial degree 5, $\lambda=10^{-8}$.

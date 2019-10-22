@@ -1,0 +1,196 @@
+\section{Theory}\label{sec:Theory}
+
+\subsection{Ordinary Least Squares}
+Suppose we have a collection of data consisting of a set of observations $\textbf{y} = [y_0, y_1, .., y_{n-1}]$, which are assumed to be the response of a set of variables $\textbf{x} = [x_0, x_1, .., x_{n-1}]$, described by some unknown function $f$. With no underlying knowledge of $f$, and a motivation to predict values of $y$ which are not in the original data set, it is usual to assume that there is a linear relationship between $\textbf{x}$ and $\textbf{y}$. A parameterization of $f$ can be chosen based upon some insight of the behaviour of $\textbf{y}$ wrt. $\textbf{x}$, and in the simplest case a polynomial of degree $p$, that is 
+\begin{align}
+    \label{eq:linearModel}
+    y = y(x) \rightarrow y(x_i) = \Tilde{y}_i + \epsilon_i = \sum_{j=0}^{p}\beta_jx_i^j + \epsilon_i
+\end{align}
+where $\beta_j$ is an unknown parameter and $\epsilon_i$ is the error in our prediction $y_i$, which accounts for influences on our prediction values from other sources than our predictors $x_i$. This gives rise to the set of equations
+\begin{align*}
+    y_0&=\beta_0+\beta_1x_0^1+\beta_2x_0^2+\dots+\beta_{n-1}x_0^{p}+\epsilon_0\\
+    y_1&=\beta_0+\beta_1x_1^1+\beta_2x_1^2+\dots+\beta_{n-1}x_1^{p}+\epsilon_1\\
+    y_2&=\beta_0+\beta_1x_2^1+\beta_2x_2^2+\dots+\beta_{n-1}x_2^{p}+\epsilon_2\\
+    &\vdots \\
+    y_{n-1}&=\beta_0+\beta_1x_{n-1}^1+\beta_2x_{n-1}^2+\dots+\beta_{n-1}x_{p}^{n-1}+\epsilon_{n-1}
+\end{align*}
+We can rewrite this as a linear algebra problem by defining the vectors
+\begin{align*}
+    &\textbf{y} = [y_0,y_1, y_2,..., y_{n-1}]^T\\
+    &\boldsymbol{\beta} = [\beta_0,\beta_1, \beta_2,\dots, \beta_{p}]^T\\
+    &\boldsymbol{\epsilon} = [\epsilon_0,\epsilon_1, \epsilon_2,\dots, \epsilon_{n-1}]^T
+\end{align*}
+and the matrix 
+\begin{align}
+    \boldsymbol{X}=
+    \begin{bmatrix} 
+    1& x_{0}^1 &x_{0}^2& \dots &x_{0}^{p}\\
+    1& x_{1}^1 &x_{1}^2& \dots &x_{1}^{p}\\
+    1& x_{2}^1 &x_{2}^2& \dots &x_{2}^{p}\\                      
+    \vdots& \vdots &\vdots& \cdots &\vdots\\
+    1& x_{n-1}^1 &x_{n-1}^2& \dots &x_{n-1}^{p}\\
+    \end{bmatrix}
+    \label{eq:designmatrix}
+\end{align}
+where $\textbf{X} \in \mathbb{R}^{n \times p}$ is known as the \textit{design matrix}\footnote{In general, we are not restricted to a polynomial of only one variable. For a polynomial of degree $p$ with two variables, the design matrix would consist of every permutation of $x^i y^{p-i}$ along each row.}. Equation \ref{eq:linearModel} can then be written as
+\begin{align}
+    \boldsymbol{y} = \boldsymbol{\Tilde{y}} + \boldsymbol{\epsilon} = \boldsymbol{X\beta} + \boldsymbol{\epsilon}
+    \label{eq:OLSmodel}
+\end{align}
+Ordinary Least Squares is a method of estimating the parameters $\boldsymbol{\beta}$, which minimizes the distance between our target $y_i$ and the prediction $\Tilde{y}_i$. A measure of this fit is the mean squared error \cite[p. 29]{james}
+\begin{align}
+    \label{eq:MSE}
+    \text{MSE}(y_i, \Tilde{y}_i) =  \frac{1}{n} \sum_{i=0}^{n-1} (y_i - \Tilde{y}_i)^2
+\end{align}
+which we define as our \textit{cost function} 
+\begin{align}
+    C(\boldsymbol{\beta}) = \frac{1}{n}(\boldsymbol{y} - \boldsymbol{X\beta})^T(\boldsymbol{y} - \boldsymbol{X\beta})
+\end{align}
+Since this is a convex function of $\boldsymbol{\beta}$, it has a unique minimum which occurs when its gradient is equal to zero. By differentiating wrt. $\boldsymbol{\beta}$ and setting it equal to zero, we obtain
+\begin{align}
+    \pdv{C(\boldsymbol{\beta})}{\beta} &= -\frac{2}{n}\boldsymbol{X}^T(\boldsymbol{y} - \boldsymbol{X\beta}) = 0\\
+    \boldsymbol{X}^T\boldsymbol{y} &= \boldsymbol{X}^T\boldsymbol{X\beta},
+\end{align}
+assuming that $\boldsymbol{X}^T\boldsymbol{X}$ is positive definite. This gives us the optimal values for the parameters $\boldsymbol{\beta}$:
+\begin{align}
+    \label{eq:betaoptols}
+    \boldsymbol{\beta} = ( \boldsymbol{X}^T\boldsymbol{X})^{-1} \boldsymbol{X}^T \boldsymbol{y}
+\end{align}
+The predicted outputs $\boldsymbol{\Tilde{y}}$ for a given input $\boldsymbol{X}$ is then given by
+\begin{align}
+    \boldsymbol{\Tilde{y}} = \boldsymbol{X\beta} = \boldsymbol{X}(\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T
+\end{align}
+The predicted values $\boldsymbol{\tilde{y}}$ can be viewed as and orthogonal projection of $\boldsymbol{y}$ onto the vector space spanned by the columns of $\boldsymbol{X}$. The variance of the coefficients $\beta$ is
+
+\begin{align}
+    \text{Var} (\beta) &= \text{Var} \big((\boldsymbol{X}^T\boldsymbol{X})^{-1} \boldsymbol{X}^T \boldsymbol{y} \big) \\
+    &= (\boldsymbol{X}^T\boldsymbol{X})^{-1} \bs{X}^T \text{Var} (\bs{y}) \big((\boldsymbol{X}^T\boldsymbol{X})^{-1} \bs{X}^T\big)^T\\
+    &= \text{Var}(\bs{y})(\boldsymbol{X}^T\boldsymbol{X})^{-1}
+\end{align}
+
+
+\subsection{Ridge and Lasso Regression}
+
+There are several ways we can try to improve the Ordinary Least Squares method. The coefficients produced by the OLS method may often have a low bias and a large variance (to be discussed in the following subsection), and it treats all parameters in the same way without taking into account that some predictors may be more important than others. We can improve the prediction accuracy by removing or reducing some of the coefficients, and Ridge regression is a method that shrinks the coefficients according to a penalty on their size. We introduce a \textit{tuning parameter} $\lambda \geq 0$, which quantifies the amount of shrinkage. For Ridge regression, our cost function is\cite[p. 64]{hastie}:
+\begin{align}
+    C(\boldsymbol{\beta}) = (\boldsymbol{y} - \boldsymbol{X\beta})^T(\boldsymbol{y} - \boldsymbol{X\beta}) + \lambda \boldsymbol{\beta}^T\boldsymbol{\beta}
+\end{align}
+
+By taking the derivatives wrt. $\boldsymbol{\beta}$, as we did with the Ordniary Least Squares method, we obtain that the optimal values for the parameters $\boldsymbol{\beta}$ are:
+\begin{align}
+    \label{eq:betaoptridge}
+    \boldsymbol{\beta} = ( \boldsymbol{X}^T\boldsymbol{X} + \lambda \boldsymbol{I} )^{-1} \boldsymbol{X}^T \boldsymbol{y},
+\end{align}
+and the predicted outputs $\boldsymbol{\Tilde{y}}$ for a given  $\boldsymbol{X}$ is
+\begin{align}
+    \boldsymbol{\Tilde{y}} = \boldsymbol{X\beta} = \boldsymbol{X}(\boldsymbol{X}^T\boldsymbol{X}  + \lambda \boldsymbol{I})^{-1}\boldsymbol{X}^T
+\end{align}
+
+We can see that setting $\lambda=0$ results in the Ordinary Least Squares method.
+
+Another shrinkage method is the Lasso (Least Absolute Shrinkage and Selection Operator) method, which uses the cost function\cite[p. 219]{james}
+\begin{align}
+    C(\boldsymbol{\beta}) = (\boldsymbol{y} - \boldsymbol{X\beta})^T(\boldsymbol{y} - \boldsymbol{X\beta}) + \lambda \sqrt{\boldsymbol{\beta}^T\boldsymbol{\beta}}
+\end{align}
+
+The difference between Ridge and Lasso regression is that we replace the $L_2$ ridge penalty $||\boldsymbol{\beta}||_2^2 = \boldsymbol{\beta}^T\boldsymbol{\beta}$ with the $L_1$ Lasso penalty $||\boldsymbol{\beta}||_1 = \sqrt{\boldsymbol{\beta}^T\boldsymbol{\beta}}$. This altered penalty means that the solutions in the $y_i$ becomes nonlinear, and we cannot find a closed form expression for the parameters. Instead, the Lasso method uses gradient descent to find the minimum of the function\footnote{The specific details of the theory behind the Lasso method and gradient descent algorithms is outside the scope of this project, which is also why we use the Python library Scikit Learn to perform this type of regression.}. When using the $L_1$ norm instead of the $L_2$ norm we may end up with some coefficients being set to zero.
+
+The tuning parameter $\lambda$ needs to be selected carefully, and can be tuned by using for example cross-validation or Bootstrapping.
+
+\subsection{Error analysis}
+
+In order to evaluate the fit of the different models in this project, we use several indicators. One of the most common error measures is the \textit{mean squared error} (MSE), which is already defined in equation \ref{eq:MSE}. The MSE will be small if the predicted values are close to the true values, which is the ideal scenario.
+
+Another measure is the $R^2$ score\cite[p. 70]{james}:
+
+\begin{align}
+    R^2 (y, \Tilde{y}) = 1 - \frac{\sum_{i=0}^{n-1}(y_i - \Tilde{y}_i)^2}{\sum_{i=0}^{n-1}(y_i - \Bar{y})^2},
+\end{align}
+where $\Bar{y}$ is
+
+\begin{align}
+    \Bar{y} = \frac{1}{n} \sum_{i=0}^{n-1} y_i.
+\end{align}
+
+The $R^2$ score tells us how much of the variance in the response variable that is explained by the model. The value is ideally between 0 and 1, and a number close to 1 generally indicates that there is a strong relationship between the input variables and the response.
+
+\subsection{Bias-Variance Tradeoff}
+
+Bias and variance are two important quantities when it comes to predictive models. The bias is a measure of the difference between our prediction and the true value that we want to predict. Models with high bias tends to underfit the data, i. e. the model is oversimplified. Variance is an indicator of how sensitive the machine learning method is to the specific training data set. A high variance means that the model tends to be very affected by small fluctuations and noise in the predictors, and this leads in an overfitted model. As mentioned above, the quality of fit of a model is often measured using the MSE, which should be minimized, and we will now show how the MSE can be decomposed into three parts: Bias, variance and irreducible error.
+
+Variance is in general defined as
+\begin{align}    
+    \label{eq:var1}
+    \text{Var}(x) &= \mathbb{E}\left[(x - \mathbb{E}[x])^2\right]\\
+    &= \mathbb{E}[x^2] - \mathbb{E}[x]^2
+    \label{eq:var2}
+\end{align}
+
+
+
+The bias of our prediction $\bs{\tilde{y}}$ can be mathematically written in the following way\cite[p. 24]{hastie}:
+
+\begin{align}
+    \text{Bias}(\boldsymbol{\tilde{y}}) &= \mathbb{E}[\boldsymbol{\tilde{y}} - f]\\
+    &= \mathbb{E}[\boldsymbol{\tilde{y}}] - f
+\end{align}
+    
+
+The MSE, which is also the basis of the cost function for the OLS method, is given as:
+\begin{align}
+    \text{MSE} = C(\boldsymbol{X},\boldsymbol{\beta}) =\frac{1}{n}\sum_{i=0}^{n-1}(y_i-\tilde{y}_i)^2=\mathbb{E}\left[(\boldsymbol{y}-\boldsymbol{\tilde{y}})^2\right].
+    \label{eq:MSEbiasvar}
+\end{align}
+
+% By decomposing this expression we get:
+% \begin{align}
+%     \mathbb{E}\left[(\boldsymbol{y}-\boldsymbol{\tilde{y}})^2\right] &= \mathbb{E}\left[ \boldsymbol{\tilde{y}}^2 - 2\boldsymbol{\tilde{y}}\boldsymbol{y} + \boldsymbol{y}^2 \right]\\
+%     &= \mathbb{E}\left[ \boldsymbol{\tilde{y}}^2 \right] - 2\mathbb{E}\left[ \boldsymbol{\tilde{y}} \right]\boldsymbol{y} + \boldsymbol{y}^2\\
+%     &= \mathbb{E}\left[ \boldsymbol{\tilde{y}}^2 \right] - \mathbb{E}\left[ \boldsymbol{\tilde{y}} \right]^2 + \mathbb{E}\left[ \boldsymbol{\tilde{y}} \right]^2 - 2\mathbb{E}\left[ \boldsymbol{\tilde{y}} \right]\boldsymbol{y} + \boldsymbol{y}^2\\
+%     &=  \mathbb{E}\left[(\boldsymbol{\tilde{y}} - \mathbb{E}[\boldsymbol{\tilde{y}}])^2\right] + \left(\mathbb{E}\left[ \boldsymbol{\tilde{y}} \right] - \boldsymbol{y} \right)^2\\
+%     &=\frac{1}{n}\sum_i(\tilde{y}_i-\mathbb{E}\left[\boldsymbol{\tilde{y}}\right])^2 + \frac{1}{n}\sum_i(\mathbb{E}\left[\boldsymbol{\tilde{y}}\right] - y_i )^2 + \sigma^2 ,\\
+%     &= \text{Var}(\boldsymbol{\tilde{y}}) + \text{Bias}(\boldsymbol{\tilde{y}})^2 + \text{Var}(\epsilon).
+% \end{align}
+
+We will assume that $\bs{y} = f(x) + \varepsilon$, where $\varepsilon$ is the noise with zero mean and a variance of $\sigma^2$. This means that $\mathbb{E}[\varepsilon] = 0$ and $\text{Var}(\varepsilon) = \sigma^2$. We also have that $\mathbb{E}[f] = f$ since $f$ is deterministic. Furthermore, the variance of $\bs{y}$ can be written as:
+
+\begin{align}
+    \text{Var}(\bs{y}) &= \mathbb{E}\left[(\boldsymbol{\tilde{y}} - \mathbb{E}[\boldsymbol{\tilde{y}}])^2\right]\\
+    &= \mathbb{E}\big[(\bs{y} - f)^2\big] = \mathbb{E}\big[f + \varepsilon - f)^2\big]\\ 
+    &= \mathbb{E}\big[\varepsilon^2\big]\\
+    &= \text{Var}[\varepsilon] + \mathbb{E}[\varepsilon]^2 \\
+    &= \sigma^2
+\end{align}
+In the last equality we use the rearranged version of equation \ref{eq:var2}: $\mathbb{E}[x^2] = \text{Var}(x) + \mathbb{E}[x]^2$. The information above can then be used to decompose the MSE from equation \ref{eq:MSEbiasvar}:
+
+\begin{align}
+    \mathbb {E} {\big [}(\bs{y} - {\bs{\tilde{y}}})^{2}{\big ]}&=\mathbb {E} {\big [}(f+\varepsilon -{\bs{\tilde{y}}})^{2}{\big ]}\\
+    &=\mathbb {E} {\big [}(f+\varepsilon -{\bs{\tilde{y}}}+\mathbb {E} [{\bs{\tilde{y}}}]-\mathbb {E} [{\bs{\tilde{y}}}])^{2}{\big ]}\\
+    &=\mathbb {E} {\big [}(f-\mathbb {E} [{\bs{\tilde{y}}}])^{2}{\big ]}+\mathbb {E} [\varepsilon ^{2}]+\mathbb {E} {\big [}(\mathbb {E} [{\bs{\tilde{y}}}]-{\bs{\tilde{y}}})^{2}{\big ]} \\ 
+    &\hspace{0.5cm}+2\mathbb {E} {\big [}(f-\mathbb {E} [{\bs{\tilde{y}}}])\varepsilon {\big ]}+2\mathbb {E} {\big [}\varepsilon (\mathbb {E} [{\bs{\tilde{y}}}]-{\bs{\tilde{y}}}){\big ]}+2\mathbb {E} {\big [}(\mathbb {E} [{\bs{\tilde{y}}}]-{\bs{\tilde{y}}})(f-\mathbb {E} [{\bs{\tilde{y}}}]){\big ]}\\
+    &=(f-\mathbb {E} [{\bs{\tilde{y}}}])^{2}+\mathbb {E} [\varepsilon ^{2}]+\mathbb {E} {\big [}(\mathbb {E} [{\bs{\tilde{y}}}]-{\bs{\tilde{y}}})^{2}{\big ]}+2(f-\mathbb {E} [{\bs{\tilde{y}}}])\mathbb {E} [\varepsilon ]\\
+    &\hspace{0.5cm}+2\mathbb {E} [\varepsilon ]\mathbb {E} {\big [}\mathbb {E} [{\bs{\tilde{y}}}]-{\bs{\tilde{y}}}{\big ]}+2\mathbb {E} {\big [}\mathbb {E} [{\bs{\tilde{y}}}]-{\bs{\tilde{y}}}{\big ]}(f-\mathbb {E} [{\bs{\tilde{y}}}])\\
+    &=(f-\mathbb {E} [{\bs{\tilde{y}}}])^{2}+\mathbb {E} [\varepsilon ^{2}]+\mathbb {E} {\big [}(\mathbb {E} [{\bs{\tilde{y}}}]-{\bs{\tilde{y}}})^{2}{\big ]}\\
+    &=(f-\mathbb {E} [{\bs{\tilde{y}}}])^{2}+\operatorname \sigma^2 +\operatorname {Var} {\big (}{\bs{\tilde{y}}}{\big )}\\
+    &=\operatorname {Bias} ({\bs{\tilde{y}}})^{2}+\sigma ^{2}+\operatorname {Var} {\big (}{\bs{\tilde{y}}}{\big )}
+\end{align}
+
+
+The decomposition above shows us that to minimize the total error, we need to have both low bias and low variance ($\sigma^2$ is the irreducible error), i. e. we want to have a model that captures the trends in the training data while also performing well on test data that have not been included in training. The problem is that when using methods that give low bias we usually end up with a high variance, and similarly, low-variance methods results in high bias. This is why we need to find the optimal balance between bias and variance when choosing what learning method to use.
+
+
+\subsection{Resampling Methods}
+
+In order to extract as much information from the data set as possible, we use resampling methods. The idea is to select subsets of the training data set repeatedly, and refitting a model each time. In this project we use a resampling method called the Bootstrap method. If we have a training data set $\boldsymbol{Z} = (z_1, z_2, \dots, z_N)$ with $z_i = (x_i, y_i)$, we start by drawing a random dataset of size $N$ (i.e. the same size as the original training set), but allow datapoints to be drawn several times (draw with replacement). Then we fit a model to this dataset with our chosen method, which in this project is different regression methods, and analyze the performance of the fit. We repeat this process $B$ times, each time drawing a new data set from the original datset.
+
+
+\subsection{Franke Function}
+
+In order to analyze the different regression algorithms we used a sum of exponentials that is commonly used when testing fitting methods, called the Franke Function\cite{franke}:
+
+\begin{multline}
+\label{eq:franke}
+f(x,y) = \frac{3}{4}\exp{\left(-\frac{(9x-2)^2}{4} - \frac{(9y-2)^2}{4}\right)}+\frac{3}{4}\exp{\left(-\frac{(9x+1)^2}{49}- \frac{(9y+1)}{10}\right)} \\
++\frac{1}{2}\exp{\left(-\frac{(9x-7)^2}{4} - \frac{(9y-3)^2}{4}\right)} -\frac{1}{5}\exp{\left(-(9x-4)^2 - (9y-7)^2\right) }.
+\end{multline}
+
