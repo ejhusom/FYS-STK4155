@@ -40,8 +40,12 @@ class GradientDescent():
 
         n = y.size
         n_batches = int(n/batch_size)
-        beta = np.random.randn(X.shape[1],1)
-        beta = np.random.rand(X.shape[1])
+
+
+        if self.mode=='regression':
+            beta = np.random.randn(X.shape[1],1)
+        else:
+            beta = np.random.rand(X.shape[1])
 
         for epoch in range(n_epochs):
             indeces = np.arange(n)
@@ -85,8 +89,6 @@ class GradientDescent():
 
         if len(np.shape(beta)) > 1:
             beta = np.ravel(beta)
-
-        print(beta)
 
         expXbeta = np.exp(X @ beta)
         return expXbeta / (1 + expXbeta)
