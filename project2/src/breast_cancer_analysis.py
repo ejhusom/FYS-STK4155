@@ -21,7 +21,16 @@ import sys
 sys.path.append('./methods')
 
 from Classification import *
-from gradientdescent import GradientDescent
+from logisticregression import SGDClassification
+
+
+
+def scale(X_train, X_test):
+    sc = StandardScaler()
+    X_train = sc.fit_transform(X_train)
+    X_test = sc.transform(X_test)
+
+    return X_train, X_test
 
 
 def breast_cancer_analysis():
@@ -34,22 +43,30 @@ def breast_cancer_analysis():
     X = data['data']
 
 
-    # Prediction with Scikit-learn
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
             random_state = 0)
+
+
+    # Normalizing data
+    X_train, X_test = scale(X_train, X_test)
+
+
+    # Prediction with Scikit-learn
     clf_skl = SGDClassifier()
     clf_skl.fit(X_train, y_train)
-    y_pred = clf_skl.predict(X_test)
-    score = accuracy_score(y_test, y_pred)
-    print(score)
+    y_pred_skl = clf_skl.predict(X_test)
+    score_skl = accuracy_score(y_test, y_pred_skl)
+    print(score_skl)
+    print(clf_skl.coef_)
 
 
     # Creating logistic regression model
-    clf = GradientDescent(mode='classification', stochastic=True)
-    clf.fit(X_train, y_train, batch_size=10)
+    clf = SGDClassification()
+    beta = clf.fit(X_train, y_train, batch_size=10, n_epochs=100)
     y_pred = clf.predict(X_test)
     score = accuracy_score(y_test, y_pred)
     print(score)
+    print(beta)
 
 
 if __name__ == '__main__':
