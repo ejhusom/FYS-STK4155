@@ -1,12 +1,19 @@
 # ===================================================================
-# File:     Makefile for Latex
+# File:     Makefile for Markdown
 # Author:   Erik Johannes Husom
 # Created:  2019-06-19
 # -------------------------------------------------------------------
 # PREREQUISITES:
 # - latex
+# - (sudo apt-get install) pandoc
+# - (sudo apt-get install) pandoc-citeproc
+# - (pip3 install) pandoc-fignos
+# - (pip3 install) pandoc-eqnos
+# - (pip3 install) pandoc-tablenos
 # USAGE:
-# Run `make latex` to produce PDF from latex-files.
+# - Run `make pdf` to produce PDF from markdown-file.
+# MARKDOWN USAGE: See https://pandoc.org/MANUAL.html
+# 
 #=================================================================
 TEX			= pdflatex
 DOC_NAME	= report
@@ -16,19 +23,18 @@ PDF			= $(DOC_NAME).pdf
 #=================================================================
 # TODO: Add support for making of figures as prerequisites
 
-latex: $(PDF)
-$(PDF): $(DOC_NAME).tex #$(FIG_DIR)/%.pdf $(FIG_DIR)%.png
-	$(TEX) $(DOC_NAME)
-	# Using .bib-file if it exists:
-	if test -e $(BIB); then bibtex $(DOC_NAME); fi
-	# Multiple compiles necessary for correct handling of references:
-	$(TEX) $(DOC_NAME)
-	$(TEX) $(DOC_NAME)
-	@rm -rf *.aux *.bbl *.blg *.log *.out *.toc
-	@echo "PDF-file created, and temporary files removed."
+pdf: $(PDF)
+$(PDF): *.md *.tex
+	pandoc *.md *.tex -o $(PDF) \
+		--filter=pandoc-fignos \
+		--filter=pandoc-eqnos \
+		--filter=pandoc-tablenos \
+		--filter=pandoc-citeproc \
+		--number-sections \
+		--table-of-contents \
+		--pdf-engine=$(TEX)
 
 clean:
-	@rm -rf *.aux *.bbl *.blg *.log *.out *.toc
 	@rm -rf $(DOC_NAME).pdf
 	@echo "Cleanup complete!"
 

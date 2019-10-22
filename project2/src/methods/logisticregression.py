@@ -31,9 +31,7 @@ class SGDClassification():
             beta = self.beta
 
         y_pred = X @ beta
-        y_pred[y_pred >= 0] = int(1)
-        y_pred[y_pred < 0] = int(0)
-        self.y_pred = y_pred
+        self.y_pred = (y_pred > 0).astype(np.int)
 
         return self.y_pred
 
@@ -73,9 +71,6 @@ class SGDClassification():
     def sigmoid(self, X, beta):
 
         term = np.exp(X @ beta)
-
-        #print('...........')
-        #print(term)
 
         return term / (1 + term)
 

@@ -1,5 +1,5 @@
 ---
-title: "Project 1"
+title: "FYS-STK4155 Project 2: Classification and Regression"
 author:
     - Erik Johannes Husom
 date: 20/10/2019
@@ -13,6 +13,3 @@ bibliography: references.bib
 # Citation: [@citetag].
 ---
 
-# Introduction
-
-Test of intrudtionc.

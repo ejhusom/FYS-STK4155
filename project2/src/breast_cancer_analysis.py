@@ -33,6 +33,30 @@ def scale(X_train, X_test):
     return X_train, X_test
 
 
+def visualize(df):
+
+    plt.figure(figsize=(10,10))
+
+    features = list(df.columns[1:10])
+
+    ax = sns.heatmap(df[features].corr(), square=True, annot=True)
+    bottom, top = ax.get_ylim()
+    ax.set_ylim(bottom + 0.5, top - 0.5)
+    plt.show()
+
+ 
+
+
+
+def bunch2dataframe(bunch):
+
+    data = np.c_[bunch.data, bunch.target]
+    columns = np.append(bunch.feature_names, ['target'])
+
+    return pd.DataFrame(data, columns=columns)
+
+
+
 def breast_cancer_analysis():
 
     # Reading data
@@ -42,7 +66,11 @@ def breast_cancer_analysis():
     X_names = data['feature_names']
     X = data['data']
 
+    # Visualization of data
+#    visualize(bunch2dataframe(data))
 
+
+    # Splitting data set
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
             random_state = 0)
 
