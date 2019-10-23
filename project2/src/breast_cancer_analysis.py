@@ -85,7 +85,6 @@ def neural_network_analysis(X, y):
 
     neural.train()
     test_predict = neural.predict(X_test)
-
     print(accuracy_score(y_test, test_predict))
 
 
@@ -93,5 +92,5 @@ def neural_network_analysis(X, y):
 if __name__ == '__main__':
     np.random.seed(2019)
     X, y = preprocessing_breast_cancer()
-    logistic_analysis(X, y)
-#    neural_network_analysis(X, y)
+#    logistic_analysis(X, y)
+    neural_network_analysis(X, y)

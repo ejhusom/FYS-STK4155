@@ -10,6 +10,43 @@
 import numpy as np
 
 class NeuralNetwork:
+    """
+    Artifical neural network for machine learning purposes, with multilayer
+    perceptrons.
+
+    The number of layers and neurons in each layer is flexible.
+
+    Attributes
+    ----------
+        X_full :
+        y_full :
+        n_inputs :
+        n_features :
+        hidden_layers : array-like
+        n_hidden_neurons : 
+        n_categories : 
+        n_epochs :
+        batch_size :
+        n_iterations : 
+        eta :
+        lmbd :
+        bias :
+
+    Methods
+    -------
+        create_biases_and_weights
+        feed_forward
+        feed_forward_out
+        backpropagation
+        predict
+        predict_probabilities
+        train
+        sigmoid
+        tanh
+
+
+    """
+
     def __init__(
             self,
             X,
@@ -19,7 +56,8 @@ class NeuralNetwork:
             n_epochs=100,
             batch_size=100,
             eta=0.1,
-            lmbd=0.0):
+            lmbd=0.0,
+            bias=0.01):
 
         self.X_full = X
         self.y_full = y
@@ -35,29 +73,35 @@ class NeuralNetwork:
         self.n_iterations = self.n_inputs // self.batch_size
         self.eta = eta
         self.lmbd = lmbd
+        self.bias = bias
 
         self.create_biases_and_weights()
 
     def create_biases_and_weights(self):
 
-
+        # Creating lists containing weights and biases for all layers
         self.hidden_weights = []
+        self.hidden_bias = []
 
         for layer in range(len(self.hidden_layers)):
-            self.hidden_weights[layer] = np.random.randn(self.n_features, self.n_hidden_neurons)
+            self.hidden_weights.append(
+                    np.random.randn(self.n_features,
+                                    self.hidden_layers[layer])
+                    )
+
+            self.hidden_bias.append(
+                    np.zeros(self.hidden_layers[layer]) + self.bias
+                    )
+
+
+        self.output_weights = np.random.randn(self.hidden_layers[-1], self.n_categories)
+        self.output_bias = np.zeros(self.n_categories) + self.bias
 
         self.hidden_weights = np.random.randn(self.n_features, self.n_hidden_neurons)
-        print(self.hidden_weights)
-        self.hidden_bias = np.zeros(self.n_hidden_neurons) + 0.01
-
+        self.hidden_bias = np.zeros(self.n_hidden_neurons) + self.bias
         self.output_weights = np.random.randn(self.n_hidden_neurons, self.n_categories)
         self.output_bias = np.zeros(self.n_categories) + 0.01
 
-    def sigmoid(self, x):
-        return 1/(1 + np.exp(-x))
-
-    def tanh(x):
-        return np.tanh(x)
 
 
     def feed_forward(self):
@@ -126,6 +170,11 @@ class NeuralNetwork:
                 self.feed_forward()
                 self.backpropagation()
 
+    def sigmoid(self, x):
+        return 1/(1 + np.exp(-x))
+
+    def tanh(x):
+        return np.tanh(x)
 
 
 if __name__ == '__main__':
