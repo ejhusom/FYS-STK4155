@@ -18,7 +18,7 @@ from sklearn.datasets import load_breast_cancer
 from sklearn.metrics import accuracy_score
 import sys
 
-from pylearn.crossvalidation import CV
+from pylearn.resampling import CV
 from pylearn.logisticregression import SGDClassification
 from pylearn.neuralnetwork import NeuralNetwork
 
@@ -56,7 +56,7 @@ def preprocessing_breast_cancer():
     return X, y
 
 
-def logistic_breast_cancer(X, y):
+def logistic_analysis(X, y):
 
     # Cross-validation
     print(CV(X, y, SGDClassifier(), n_splits=10))
@@ -93,5 +93,5 @@ def neural_network_analysis(X, y):
 if __name__ == '__main__':
     np.random.seed(2019)
     X, y = preprocessing_breast_cancer()
-    #logistic_breast_cancer(X, y)
-    neural_network_analysis(X, y)
+    logistic_analysis(X, y)
+#    neural_network_analysis(X, y)
