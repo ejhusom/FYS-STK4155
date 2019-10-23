@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # ============================================================================
-# File:     Regression.py
+# File:     linearmodel.py
 # Author:   Erik Johannes Husom
 # Created:  2019-09-11
 # ----------------------------------------------------------------------------
 # Description:
-# Class for linear regression and resampling methods
+# Class for regression methods.
 # ============================================================================
 import numpy as np
 import sklearn.linear_model as skl
@@ -67,7 +67,7 @@ class Regression():
         elif self.method == 'ridge':
             self.ridge()
         elif self.method == 'lasso':
-            self.skl_fit(X, y)
+            self.lasso(X, y)
 
 
     def predict(self, X=None, beta=None):

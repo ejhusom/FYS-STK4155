@@ -6,11 +6,10 @@
 # Version:  2.0
 # ----------------------------------------------------------------------------
 # Description:
-#
+# Resampling methods for machine learning.
 # ============================================================================
 import numpy as np
 from sklearn.model_selection import KFold
-from sklearn.metrics import r2_score
 from sklearn.preprocessing import StandardScaler
 
 from pylearn.logisticregression import SGDClassification
