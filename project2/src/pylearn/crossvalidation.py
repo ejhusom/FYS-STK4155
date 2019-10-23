@@ -12,14 +12,15 @@ import numpy as np
 from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error, r2_score, accuracy_score
 from sklearn.preprocessing import StandardScaler
-from logisticregression import SGDClassification
-from neuralnetwork import NeuralNetwork
-from linearmodel import Regression
+
+from pylearn.logisticregression import SGDClassification
+from pylearn.neuralnetwork import NeuralNetwork
+from pylearn.linearmodel import Regression
 
 
-def CV(X, y, model, n_splits=5):
+def CV(X, y, model, n_splits=5, random_state=0):
 
-    kf = KFold(n_splits=n_splits, random_state=0, shuffle=True)
+    kf = KFold(n_splits=n_splits, random_state=random_state, shuffle=True)
 
     mse = np.zeros(n_splits)
     r2 = np.zeros(n_splits)
@@ -28,11 +29,6 @@ def CV(X, y, model, n_splits=5):
     i = 0
     for train_idx, val_idx in kf.split(X):
         X_train, X_val= standardize_train_val(X[train_idx], X[val_idx])
-#        model.fit(X[train_idx], y[train_idx])
-#        y_pred = model.predict(X[val_idx])
-#        mse[i] = mean_squared_error(y[val_idx], y_pred)
-#        r2[i] = r2_score(y[val_idx], y_pred)
-#        accuracy[i] = accuracy_score(y[val_idx], y_pred)
         model.fit(X_train, y[train_idx])
         y_pred = model.predict(X_val)
         mse[i] = mean_squared_error(y[val_idx], y_pred)

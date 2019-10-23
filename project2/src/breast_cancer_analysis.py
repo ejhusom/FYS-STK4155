@@ -18,12 +18,11 @@ from sklearn.datasets import load_breast_cancer
 from sklearn.metrics import accuracy_score
 import sys
 
-# Add machine learning methods to path
-sys.path.append('./methods')
+from pylearn.crossvalidation import CV
+from pylearn.logisticregression import SGDClassification
+from pylearn.neuralnetwork import NeuralNetwork
 
-from crossvalidation import CV
-from logisticregression import SGDClassification
-from neuralnetwork import NeuralNetwork
+
 
 def visualize(df):
 
@@ -65,9 +64,8 @@ def logistic_breast_cancer(X, y):
 
 
 
-def neural_network_analysis(X_train, X_test, y_train, y_test):
+def neural_network_analysis(X, y):
 
-    # Creating neural network
     # Splitting data set
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
             random_state = 0)

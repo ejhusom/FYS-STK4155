@@ -12,26 +12,27 @@ import numpy as np
 class NeuralNetwork:
     def __init__(
             self,
-            X_data,
-            Y_data,
+            X,
+            y,
             n_hidden_neurons=50,
+            hidden_layers=(1,2),
             n_categories=10,
-            epochs=100,
+            n_epochs=100,
             batch_size=100,
             eta=0.1,
             lmbd=0.0):
 
-        self.X_data_full = X_data
-        self.Y_data_full = Y_data
+        self.X_full = X
+        self.y_full = y
 
-        self.n_inputs = X_data.shape[0]
-        self.n_features = X_data.shape[1]
+        self.n_inputs = X.shape[0]
+        self.n_features = X.shape[1]
         self.n_hidden_neurons = n_hidden_neurons
         self.n_categories = n_categories
 
-        self.epochs = epochs
+        self.n_epochs = n_epochs
         self.batch_size = batch_size
-        self.iterations = self.n_inputs // self.batch_size
+        self.n_iterations = self.n_inputs // self.batch_size
         self.eta = eta
         self.lmbd = lmbd
 
@@ -53,7 +54,7 @@ class NeuralNetwork:
 
     def feed_forward(self):
         # feed-forward for training
-        self.z_h = np.matmul(self.X_data, self.hidden_weights) + self.hidden_bias
+        self.z_h = np.matmul(self.X, self.hidden_weights) + self.hidden_bias
         self.a_h = self.sigmoid(self.z_h)
 
         self.z_o = np.matmul(self.a_h, self.output_weights) + self.output_bias
@@ -73,13 +74,13 @@ class NeuralNetwork:
         return probabilities
 
     def backpropagation(self):
-        error_output = self.probabilities - self.Y_data
+        error_output = self.probabilities - self.y
         error_hidden = np.matmul(error_output, self.output_weights.T) * self.a_h * (1 - self.a_h)
 
         self.output_weights_gradient = np.matmul(self.a_h.T, error_output)
         self.output_bias_gradient = np.sum(error_output, axis=0)
 
-        self.hidden_weights_gradient = np.matmul(self.X_data.T, error_hidden)
+        self.hidden_weights_gradient = np.matmul(self.X.T, error_hidden)
         self.hidden_bias_gradient = np.sum(error_hidden, axis=0)
 
         if self.lmbd > 0.0:
@@ -103,16 +104,16 @@ class NeuralNetwork:
     def train(self):
         data_indices = np.arange(self.n_inputs)
 
-        for i in range(self.epochs):
-            for j in range(self.iterations):
+        for i in range(self.n_epochs):
+            for j in range(self.n_iterations):
                 # pick datapoints with replacement
                 chosen_datapoints = np.random.choice(
                     data_indices, size=self.batch_size, replace=False
                 )
 
                 # minibatch training data
-                self.X_data = self.X_data_full[chosen_datapoints]
-                self.Y_data = self.Y_data_full[chosen_datapoints]
+                self.X = self.X_full[chosen_datapoints]
+                self.y = self.y_full[chosen_datapoints]
 
                 self.feed_forward()
                 self.backpropagation()
