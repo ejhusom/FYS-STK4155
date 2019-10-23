@@ -23,8 +23,6 @@ class SGDClassification():
         self.n_epochs = n_epochs
         self.eta0 = eta0
         self.learning_rate = learning_rate
-        self.batch_size = None
-        print(self.batch_size)
 
 
 

@@ -25,25 +25,6 @@ from crossvalidation import CV
 from logisticregression import SGDClassification
 from neuralnetwork import NeuralNetwork
 
-
-
-def scale(X_train, X_test):
-    sc = StandardScaler()
-    X_train = sc.fit_transform(X_train)
-    X_test = sc.transform(X_test)
-
-#    X_train = X_train - np.mean(X_train, axis=0)
-#    X_test = X_test - np.mean(X_train, axis=0)
-#    col_std = np.std(X_train, axis=0)
-#
-#    for i in range(0, np.shape(X_train)[1]):
-#        X_train[:,i] /= col_std[i]
-#        X_test[:,i] /= col_std[i]
-
-
-    return X_train, X_test
-
-
 def visualize(df):
 
     plt.figure(figsize=(10,10))
@@ -55,18 +36,13 @@ def visualize(df):
     ax.set_ylim(bottom + 0.5, top - 0.5)
     plt.show()
 
- 
 
-
-
-def bunch2dataframe(bunch):
+def sklearn_bunch_to_pandas_df(bunch):
 
     data = np.c_[bunch.data, bunch.target]
     columns = np.append(bunch.feature_names, ['target'])
 
     return pd.DataFrame(data, columns=columns)
-
-
 
 
 
@@ -78,32 +54,14 @@ def preprocessing_breast_cancer():
     X_names = data['feature_names']
     X = data['data']
 
-    # Splitting data set
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
-            random_state = 0)
-
-    # Normalizing data
-    X_train, X_test = scale(X_train, X_test)
-
-    sc = StandardScaler()
-    X = sc.fit_transform(X)
-
-    return X, y, X_train, X_test, y_train, y_test
+    return X, y
 
 
-def logistic_breast_cancer(X, y, X_train, X_test, y_train, y_test):
-
-    # Prediction with Scikit-learn
-    clf_skl = SGDClassifier()
-    clf_skl.fit(X_train, y_train)
-    y_pred_skl = clf_skl.predict(X_test)
-    score_skl = accuracy_score(y_test, y_pred_skl)
-    print(score_skl)
-
+def logistic_breast_cancer(X, y):
 
     # Cross-validation
     print(CV(X, y, SGDClassifier(), n_splits=10))
-    print(CV(X, y, SGDClassification(eta0=0.01), n_splits=10))
+    print(CV(X, y, SGDClassification(), n_splits=10))
 
 
 
@@ -131,5 +89,5 @@ def neural_network_analysis(X_train, X_test, y_train, y_test):
 
 if __name__ == '__main__':
     np.random.seed(2019)
-    X, y, X_train, X_test, y_train, y_test = preprocessing_breast_cancer()
-    logistic_breast_cancer(X, y, X_train, X_test, y_train, y_test)
+    X, y = preprocessing_breast_cancer()
+    logistic_breast_cancer(X, y)
