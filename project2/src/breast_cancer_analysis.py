@@ -64,7 +64,7 @@ def logistic_analysis(X, y):
 
 
 
-def neural_network_analysis(X, y):
+def neural_network_analysis(X, y, single):
 
     # Splitting data set
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
@@ -81,11 +81,13 @@ def neural_network_analysis(X, y):
     y_train_1hot = encoder.fit_transform(y_train).toarray()
 
     neural = NeuralNetwork(X_train, y_train_1hot, hidden_layers=[10],
-            n_categories=2)
+            n_categories=2, single=single)
 
-#    neural.train()
-#    test_predict = neural.predict(X_test)
-#    print(accuracy_score(y_test, test_predict))
+    neural.train()
+    y_pred = neural.predict(X_test)
+    print(np.shape(y_pred))
+    print(np.shape(y_test))
+    print(accuracy_score(y_test, y_pred))
 
 
 
@@ -93,4 +95,11 @@ if __name__ == '__main__':
     np.random.seed(2019)
     X, y = preprocessing_breast_cancer()
 #    logistic_analysis(X, y)
-    neural_network_analysis(X, y)
+
+    if len(sys.argv) > 1:
+        single = True
+        print('single=True')
+    else:
+        single = False
+
+    neural_network_analysis(X, y, single=single)

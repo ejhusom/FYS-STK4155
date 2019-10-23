@@ -57,7 +57,8 @@ class NeuralNetwork:
             batch_size=100,
             eta=0.1,
             lmbd=0.0,
-            bias=0.01):
+            bias=0.01,
+            single=True):
 
         self.X_full = X
         self.y_full = y
@@ -75,6 +76,8 @@ class NeuralNetwork:
         self.lmbd = lmbd
         self.bias = bias
 
+        self.single = single
+
         self.create_biases_and_weights()
 
     def create_biases_and_weights(self):
@@ -83,55 +86,76 @@ class NeuralNetwork:
         self.hidden_weights = []
         self.hidden_bias = []
 
-        for layer in range(len(self.hidden_layers)):
-            self.hidden_weights.append(
-                    np.random.randn(self.n_features,
-                                    self.hidden_layers[layer])
-                    )
-
-            self.hidden_bias.append(
-                    np.zeros(self.hidden_layers[layer]) + self.bias
-                    )
 
 
-        self.output_weights = np.random.randn(self.hidden_layers[-1], self.n_categories)
-        self.output_bias = np.zeros(self.n_categories) + self.bias
+        if self.single:
+            self.hidden_weights = np.random.randn(self.n_features, self.n_hidden_neurons)
+            self.hidden_bias = np.zeros(self.n_hidden_neurons) + self.bias
+            self.output_weights = np.random.randn(self.n_hidden_neurons, self.n_categories)
+            self.output_bias = np.zeros(self.n_categories) + 0.01
+        else:
 
-        self.hidden_weights = np.random.randn(self.n_features, self.n_hidden_neurons)
-        self.hidden_bias = np.zeros(self.n_hidden_neurons) + self.bias
-        self.output_weights = np.random.randn(self.n_hidden_neurons, self.n_categories)
-        self.output_bias = np.zeros(self.n_categories) + 0.01
+            for layer in range(len(self.hidden_layers)):
+                self.hidden_weights.append(
+                        np.random.randn(self.n_features,
+                                        self.hidden_layers[layer])
+                        )
+
+                self.hidden_bias.append(
+                        np.zeros(self.hidden_layers[layer]) + self.bias
+                        )
+
+
+            self.output_weights = np.random.randn(self.hidden_layers[-1], self.n_categories)
+            self.output_bias = np.zeros(self.n_categories) + self.bias
 
 
         print(np.shape(self.hidden_weights))
         print(np.shape(self.hidden_bias))
         print(np.shape(self.output_weights))
-        print(np.shape(output_bias))
+        print(np.shape(self.output_bias))
 
 
     def feed_forward(self):
 
-        for layer in range(len(self.hidden_layers)):
-            pass
 
-        self.z_h = np.matmul(self.X, self.hidden_weights) + self.hidden_bias
-        self.a_h = self.sigmoid(self.z_h)
+        if self.single:
+            self.z_h = np.matmul(self.X, self.hidden_weights) + self.hidden_bias
+            self.a_h = self.sigmoid(self.z_h)
+            self.z_o = np.matmul(self.a_h, self.output_weights) + self.output_bias
+            exp_term = np.exp(self.z_o)
+            self.probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
+        else:
 
-        self.z_o = np.matmul(self.a_h, self.output_weights) + self.output_bias
+            for layer in range(len(self.hidden_layers)):
+                self.z_h = (self.X @ self.hidden_weights[layer] 
+                            + self.hidden_bias[layer])
+                self.a_h = self.sigmoid(self.z_h)
+                self.z_o = self.a_h @ self.output_weights + self.output_bias
+                exp_term = np.exp(self.z_o)
+                self.probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
 
-        exp_term = np.exp(self.z_o)
-        self.probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
 
     def feed_forward_out(self, X):
-        # feed-forward for output
-        z_h = np.matmul(X, self.hidden_weights) + self.hidden_bias
-        a_h = self.sigmoid(z_h)
 
-        z_o = np.matmul(a_h, self.output_weights) + self.output_bias
-        
-        exp_term = np.exp(z_o)
-        probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
-        return probabilities
+        if self.single:
+            z_h = np.matmul(X, self.hidden_weights) + self.hidden_bias
+            a_h = self.sigmoid(z_h)
+
+            z_o = np.matmul(a_h, self.output_weights) + self.output_bias
+            
+            exp_term = np.exp(z_o)
+            probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
+            return probabilities
+        else:
+            z_h = np.matmul(X, self.hidden_weights[-1]) + self.hidden_bias[-1]
+            a_h = self.sigmoid(z_h)
+
+            z_o = np.matmul(a_h, self.output_weights) + self.output_bias
+            
+            exp_term = np.exp(z_o)
+            probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
+            return probabilities
 
     def backpropagation(self):
         error_output = self.probabilities - self.y
