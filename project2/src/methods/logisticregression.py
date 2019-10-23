@@ -8,6 +8,7 @@
 #
 # ============================================================================
 import numpy as np
+from sklearn.model_selection import KFold
 
 class SGDClassification():
 
@@ -24,19 +25,20 @@ class SGDClassification():
 
 
 
-    def predict(self, X=None, beta=None):
+    def predict(self, X=None, beta=None, probability=False):
         if X is None:
             X = self.X
         if beta is None:
             beta = self.beta
 
-        #y_pred = X @ beta
-        #self.y_pred = (y_pred > 0).astype(np.int)
         self.y_pred = self.sigmoid(X, beta)
+
+        if probability==False:
+            self.y_pred = (self.y_pred > 0.5).astype(np.int)
 
         return self.y_pred
 
-    def fit(self, X, y, batch_size=10, n_epochs=100):
+    def fit(self, X, y, batch_size=100, n_epochs=1000):
 
         self.X = X
         self.y = y
@@ -45,7 +47,7 @@ class SGDClassification():
         n_batches = int(n/batch_size)
 
 
-        beta = np.random.rand(X.shape[1])
+        beta = np.random.randn(X.shape[1])
 
         for epoch in range(n_epochs):
             indeces = np.arange(n)
@@ -72,8 +74,36 @@ class SGDClassification():
     def sigmoid(self, X, beta):
 
         term = np.exp(X @ beta)
-
         return term / (1 + term)
+
+
+#    def CV(self, X, y, n_splits=5):
+#
+#        self.X = X
+#        self.y = y
+#
+#        kf = KFold(n_splits=n_splits, random_state=0, shuffle=True)
+#
+#        mse = np.zeros(n_splits)
+#        r2 = np.zeros(n_folds)
+#
+#        i = 0
+#        for train_idx, val_idx in kf-split(self.X):
+#            self.fit(self.X[train_idx], self.y[train_idx])
+#            self.predict(self.X[val_idx])
+#            mse[i] = mean_squared_error(self.y[val_idx], self.y_pred)
+#            r2[i] = r2_score(self.y[val_idx], self.y_pred)
+#
+#            i += 1
+#
+#        self.mse_cv = np.mean(mse)
+#        self.r2_cv = np.mean(r2)
+#
+#        return self.mse_cv, self.r2_cv
+
+
+
+
 
 
 if __name__ == '__main__':

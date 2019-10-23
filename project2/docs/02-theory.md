@@ -1,6 +1,16 @@
 # Theory
 
+## Logistic regression
 
-Test of theory:
 
-$$f(x) = 1$$
+
+
+### Gradient descent
+
+
+
+
+## Neural networks
+
+
+

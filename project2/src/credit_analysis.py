@@ -21,7 +21,8 @@ from Classification import *
 
 def read_data(filename):
     """
-    Read data from file into dataframe. Filename must be given with path.
+    Read data from file into dataframe. Filename must be given with relative
+    path.
     """
     
     if filename.endswith(('.xls', '.xlsx')):
@@ -54,5 +55,5 @@ def preprocess_credit_data(dataframe):
 
 
 if __name__ == '__main__':
-    df = read_data('./../data/default of credit card clients.xls')
+    df = read_data('./../data/credit_card.xls')
     #preprocess_credit_data(df)
