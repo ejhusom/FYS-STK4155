@@ -9,9 +9,11 @@
 # ============================================================================
 import numpy as np
 
+def accuracy_score(y_true, y_pred):
+    return np.sum(y_true == y_pred) / len(y_true)
 
 def bias(y_true, y_pred):
     return np.mean((y_true - np.mean(y_pred))**2)
 
-def accuracy_score(y_true, y_pred):
-    return np.sum(y_true == y_pred) / len(y_test)
+def mean_squared_error(y_true, y_pred):
+    return np.mean((y_true - y_pred)**2, axis=0)
