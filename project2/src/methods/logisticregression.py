@@ -83,33 +83,6 @@ class SGDClassification():
         return term / (1 + term)
 
 
-#    def CV(self, X, y, n_splits=5):
-#
-#        self.X = X
-#        self.y = y
-#
-#        kf = KFold(n_splits=n_splits, random_state=0, shuffle=True)
-#
-#        mse = np.zeros(n_splits)
-#        r2 = np.zeros(n_folds)
-#
-#        i = 0
-#        for train_idx, val_idx in kf-split(self.X):
-#            self.fit(self.X[train_idx], self.y[train_idx])
-#            self.predict(self.X[val_idx])
-#            mse[i] = mean_squared_error(self.y[val_idx], self.y_pred)
-#            r2[i] = r2_score(self.y[val_idx], self.y_pred)
-#
-#            i += 1
-#
-#        self.mse_cv = np.mean(mse)
-#        self.r2_cv = np.mean(r2)
-#
-#        return self.mse_cv, self.r2_cv
-
-
-
-
 
 
 if __name__ == '__main__':
