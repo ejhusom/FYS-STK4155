@@ -103,6 +103,11 @@ class NeuralNetwork:
         self.output_bias = np.zeros(self.n_categories) + 0.01
 
 
+        print(np.shape(self.hidden_weights))
+        print(np.shape(self.hidden_bias))
+        print(np.shape(self.output_weights))
+        print(np.shape(output_bias))
+
 
     def feed_forward(self):
 
