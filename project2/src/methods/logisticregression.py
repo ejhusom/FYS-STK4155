@@ -30,8 +30,9 @@ class SGDClassification():
         if beta is None:
             beta = self.beta
 
-        y_pred = X @ beta
-        self.y_pred = (y_pred > 0).astype(np.int)
+        #y_pred = X @ beta
+        #self.y_pred = (y_pred > 0).astype(np.int)
+        self.y_pred = self.sigmoid(X, beta)
 
         return self.y_pred
 
