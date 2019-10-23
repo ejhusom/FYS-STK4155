@@ -69,13 +69,18 @@ def neural_network_analysis(X, y):
     # Splitting data set
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
             random_state = 0)
-    X_train, X_test = scale(X_train, X_test)
 
+    # Standardizing
+    sc = StandardScaler()
+    X_train = sc.fit_transform(X_train)
+    X_test = sc.transform(X_test)
+
+    # One hot encoding targets
     y_train= y_train.reshape(-1,1)
     encoder = OneHotEncoder(categories='auto')
     y_train_1hot = encoder.fit_transform(y_train).toarray()
 
-    neural = NeuralNetwork(X_train, y_train_1hot, n_hidden_neurons=10,
+    neural = NeuralNetwork(X_train, y_train_1hot, hidden_layers=[10],
             n_categories=2)
 
     neural.train()
@@ -88,4 +93,5 @@ def neural_network_analysis(X, y):
 if __name__ == '__main__':
     np.random.seed(2019)
     X, y = preprocessing_breast_cancer()
-    logistic_breast_cancer(X, y)
+    #logistic_breast_cancer(X, y)
+    neural_network_analysis(X, y)

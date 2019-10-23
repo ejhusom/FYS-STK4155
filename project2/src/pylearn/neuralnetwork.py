@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # ============================================================================
 # File:     neuralnetwork.py
-# Author:   Erik Johannes Husom
+# Author:   Erik Johannes Husom, based on code example by Morten Hjorth-Jensen.
 # Created:  2019-10-22
 # ----------------------------------------------------------------------------
 # Description:
@@ -14,8 +14,7 @@ class NeuralNetwork:
             self,
             X,
             y,
-            n_hidden_neurons=50,
-            hidden_layers=(1,2),
+            hidden_layers=[50],
             n_categories=10,
             n_epochs=100,
             batch_size=100,
@@ -27,7 +26,8 @@ class NeuralNetwork:
 
         self.n_inputs = X.shape[0]
         self.n_features = X.shape[1]
-        self.n_hidden_neurons = n_hidden_neurons
+        self.hidden_layers = hidden_layers
+        self.n_hidden_neurons = hidden_layers[0]
         self.n_categories = n_categories
 
         self.n_epochs = n_epochs
@@ -39,7 +39,15 @@ class NeuralNetwork:
         self.create_biases_and_weights()
 
     def create_biases_and_weights(self):
+
+
+        self.hidden_weights = []
+
+        for layer in range(len(self.hidden_layers)):
+            self.hidden_weights[layer] = np.random.randn(self.n_features, self.n_hidden_neurons)
+
         self.hidden_weights = np.random.randn(self.n_features, self.n_hidden_neurons)
+        print(self.hidden_weights)
         self.hidden_bias = np.zeros(self.n_hidden_neurons) + 0.01
 
         self.output_weights = np.random.randn(self.n_hidden_neurons, self.n_categories)
@@ -53,7 +61,10 @@ class NeuralNetwork:
 
 
     def feed_forward(self):
-        # feed-forward for training
+
+        for layer in range(len(self.hidden_layers)):
+            pass
+
         self.z_h = np.matmul(self.X, self.hidden_weights) + self.hidden_bias
         self.a_h = self.sigmoid(self.z_h)
 
@@ -94,7 +105,6 @@ class NeuralNetwork:
 
     def predict(self, X):
         probabilities = self.feed_forward_out(X)
-        print(np.argmax(probabilities, axis=1))
         return np.argmax(probabilities, axis=1)
 
     def predict_probabilities(self, X):
@@ -106,12 +116,10 @@ class NeuralNetwork:
 
         for i in range(self.n_epochs):
             for j in range(self.n_iterations):
-                # pick datapoints with replacement
                 chosen_datapoints = np.random.choice(
                     data_indices, size=self.batch_size, replace=False
                 )
 
-                # minibatch training data
                 self.X = self.X_full[chosen_datapoints]
                 self.y = self.y_full[chosen_datapoints]
 
