@@ -12,16 +12,19 @@ from sklearn.model_selection import KFold
 
 class SGDClassification():
 
-    def __init__(self, eta0=0.1, learning_rate='constant'):
+    def __init__(self, batch_size=100, n_epochs=1000, eta0=0.1, learning_rate='constant'):
 
         self.X = None
         self.y = None
         self.y_pred = None
         self.beta = None
 
+        self.batch_size = batch_size
+        self.n_epochs = n_epochs
         self.eta0 = eta0
         self.learning_rate = learning_rate
         self.batch_size = None
+        print(self.batch_size)
 
 
 
@@ -38,7 +41,12 @@ class SGDClassification():
 
         return self.y_pred
 
-    def fit(self, X, y, batch_size=100, n_epochs=1000):
+    def fit(self, X, y, batch_size=None, n_epochs=None):
+
+        if batch_size is None:
+            batch_size = self.batch_size
+        if n_epochs is None:
+            n_epochs = self.n_epochs
 
         self.X = X
         self.y = y

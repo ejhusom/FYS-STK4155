@@ -85,6 +85,9 @@ def preprocessing_breast_cancer():
     # Normalizing data
     X_train, X_test = scale(X_train, X_test)
 
+    sc = StandardScaler()
+    X = sc.fit_transform(X)
+
     return X, y, X_train, X_test, y_train, y_test
 
 
@@ -98,16 +101,9 @@ def logistic_breast_cancer(X, y, X_train, X_test, y_train, y_test):
     print(score_skl)
 
 
-    # Creating logistic regression model
-    clf = SGDClassification()
-    beta = clf.fit(X_train, y_train, batch_size=10, n_epochs=100)
-    y_pred = clf.predict(X_test, probability=False)
-    score = accuracy_score(y_test, y_pred)
-    print(score)
-
-
     # Cross-validation
-    print(CV(X, y, SGDClassification(eta0=0.01)))
+    print(CV(X, y, SGDClassifier(), n_splits=10))
+    print(CV(X, y, SGDClassification(eta0=0.01), n_splits=10))
 
 
 
