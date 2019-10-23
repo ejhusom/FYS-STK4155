@@ -107,7 +107,7 @@ def logistic_breast_cancer(X, y, X_train, X_test, y_train, y_test):
 
 
     # Cross-validation
-    print(CV(X, y, SGDClassifier(eta0=0.01)))
+    print(CV(X, y, SGDClassification(eta0=0.01)))
 
 
 

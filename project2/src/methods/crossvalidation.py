@@ -26,7 +26,7 @@ def CV(X, y, model, n_splits=5):
 
     i = 0
     for train_idx, val_idx in kf.split(X):
-        model = SGDClassification(eta0=0.01)
+        #model = SGDClassification(eta0=0.01)
         model.fit(X[train_idx], y[train_idx])
         y_pred = model.predict(X[val_idx])
         accuracy[i] = accuracy_score(y[val_idx], y_pred)
