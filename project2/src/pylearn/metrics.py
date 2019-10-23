@@ -17,3 +17,10 @@ def bias(y_true, y_pred):
 
 def mean_squared_error(y_true, y_pred):
     return np.mean((y_true - y_pred)**2, axis=0)
+
+def r2_score(y_true, y_pred):
+    
+    TSS = np.sum((y_true - np.mean(y_true))**2) # total sum of squares
+    RSS = np.sum((y_true - y_pred)**2)          # residual sum of squares
+
+    return 1 - RSS/TSS

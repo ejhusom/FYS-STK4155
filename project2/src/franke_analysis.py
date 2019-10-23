@@ -88,7 +88,7 @@ def preprocess_franke():
 
 
 def regression_analysis(X, y):
-    print(CV(X, y, Regression(method='ridge', lambda_=0.00001), n_splits=20, classification=False))
+    print(CV(X, y, Regression(method='ridge', alpha=0.00001), n_splits=20, classification=False))
 
 #    X_train, X_test, y_train, y_test = train_test_split(X, y)
 #

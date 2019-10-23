@@ -64,7 +64,7 @@ def standardize_train_val(train, val):
     train = sc.fit_transform(train)
     val = sc.transform(val)
 
-# TODO: Manual scaling
+# TODO: Manual scaling, in order to remove the need for sklearn.
 #    X_train = X_train - np.mean(X_train, axis=0)
 #    X_test = X_test - np.mean(X_train, axis=0)
 #    col_std = np.std(X_train, axis=0)

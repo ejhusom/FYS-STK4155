@@ -12,20 +12,49 @@ import sklearn.linear_model as skl
 
 
 class Regression():
+    """
+    Fitting regression model on dataset with scalar response/target.
 
-    def __init__(self, method='ols', lambda_=0):
+    Attributes
+    ----------
+        method : str, default='ols'
+            Which regression method to use.
+        alpha : float, default=0
+            Hyperparameter for shrinkage methods.
+        X : array
+        y : array
+        y_pred : array
+        beta : array
 
+
+    Methods
+    -------
+        fit
+            Fitting model using one of the three regression methods OLS, Ridge
+            or Lasso.
+        predict(
+            Using model to predict.
+        ols
+            Ordinary Least Squares regression.
+        ridge
+            Ridge regression.
+        lasso
+            Lasso regression with sklearn as backend.
+
+    """
+
+    def __init__(self, 
+            method='ols', 
+            alpha=0):
 
         self.method = method
+        self.alpha = alpha
 
         self.X = None
         self.y = None
-        self.lambda_ = lambda_
-
         self.y_pred = None
         self.beta = None
 
-        self.skl_model = None
 
 
     def fit(self, X, y):
@@ -61,14 +90,13 @@ class Regression():
     def ridge(self):
 
         X = self.X
-
         self.beta = (np.linalg.pinv(X.T.dot(X) +
-                    self.lambda_*np.identity(np.shape(self.X)[1])) @ X.T @
+                    self.alpha*np.identity(np.shape(self.X)[1])) @ X.T @
                     self.y)
 
     def lasso(self):
 
-        model = skl.Lasso(alpha=self.lambda_, fit_intercept=False,
+        model = skl.Lasso(alpha=self.alpha, fit_intercept=False,
                 normalize=False, max_iter=10000).fit(self.X, self.y)
         self.beta = clf.coef_
 
