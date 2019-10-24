@@ -66,6 +66,7 @@ class NeuralNetwork:
         self.n_hidden_neurons = hidden_layers[0]
         self.n_categories = n_categories
         self.layers = [self.n_features] + self.hidden_layers + [self.n_categories]
+        self.n_layers = len(self.layers)
 
         self.n_epochs = n_epochs
         self.batch_size = batch_size
@@ -93,40 +94,47 @@ class NeuralNetwork:
             self.output_bias = np.zeros(self.n_categories) + self.bias0
         else:
 
-            self.weights = []
-            self.bias = []
-            self.a_h = []
+#            self.weights = []
+#            self.bias = []
+#            self.a_h = []
 
-            # FOUDN THE BUG: Size of matrix in each weights[i] is only
-            # n_features in first instance, otherwise it is the size of the
-            # previous layer
-            
-            self.weights.append(np.random.randn(self.n_features,
-                self.hidden_layers[0]))
-            self.bias.append(np.zeros(self.hidden_layers[0]) + self.bias0)
-#            self.a_h.append(np.zeros(self.hidden_layers[0]))
-            self.a_h.append(None)
-            for layer in range(1, len(self.hidden_layers)):
-                self.weights.append(np.random.randn(self.hidden_layers[layer-1],
-                    self.hidden_layers[layer]))
-                self.bias.append(np.zeros(self.hidden_layers[layer]) +
-                        self.bias0)
-#                self.a_h.append(np.zeros(self.hidden_layers[layer]))
-                self.a_h.append(None)
-            self.weights.append(np.random.randn(self.hidden_layers[-1],
-                self.n_categories))
-            self.bias.append(np.zeros(self.n_categories) + self.bias0)
-
-#            for layer in range(1, len(self.layers)-1):
-#                self.weights.append(np.random.randn(self.layers[layer-1],
-#                    self.layers[layer]))
-#                self.bias.append(np.zeros(self.layers[layer]) +
+#            self.weights.append(np.random.randn(self.n_features,
+#                self.hidden_layers[0]))
+#            self.bias.append(np.zeros(self.hidden_layers[0]) + self.bias0)
+#            self.a_h.append(None)
+#            for layer in range(1, len(self.hidden_layers)):
+#                self.weights.append(np.random.randn(self.hidden_layers[layer-1],
+#                    self.hidden_layers[layer]))
+#                self.bias.append(np.zeros(self.hidden_layers[layer]) +
 #                        self.bias0)
-#                self.a_h.append(np.zeros(self.layers[layer]))
-#            
+#                self.a_h.append(None)
 #            self.weights.append(np.random.randn(self.hidden_layers[-1],
 #                self.n_categories))
+#            self.bias.append(np.zeros(self.n_categories) + self.bias0)
 
+
+# ----------------------------------------------------------------------
+# NEW STRUCTURE
+
+            # The lists weights, bias and a_h have one list item per layer, but
+            # does not contain any information for the first layer (i. e. the
+            # input layer). This list item is included for the sake of making
+            # the indeces correspond to the number of layers.
+            self.weights = [None]
+            self.bias = [None]
+            self.a_h = [None]
+
+            for layer in range(1, self.n_layers):
+                self.weights.append(np.random.randn(self.layers[layer-1],
+                    self.layers[layer]))
+                self.bias.append(np.zeros(self.layers[layer]) +
+                        self.bias0)
+                self.a_h.append(None)
+            
+            for i in range(self.n_layers):
+                print(np.shape(self.weights))
+                print(np.shape(self.bias))
+                print(np.shape(self.a_h))
 
 
     def feed_forward(self):

@@ -83,11 +83,11 @@ def neural_network_analysis(X, y, single):
     neural = NeuralNetwork(X_train, y_train_1hot, hidden_layers=[50,10,50],
             n_categories=2, single=single)
 
-    neural.train()
-    y_pred = neural.predict(X_test)
-    print(np.shape(y_pred))
-    print(np.shape(y_test))
-    print(accuracy_score(y_test, y_pred))
+#    neural.train()
+#    y_pred = neural.predict(X_test)
+#    print(np.shape(y_pred))
+#    print(np.shape(y_test))
+#    print(accuracy_score(y_test, y_pred))
 
 
 
