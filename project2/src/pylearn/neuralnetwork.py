@@ -113,8 +113,8 @@ class NeuralNetwork:
 #            self.bias.append(np.zeros(self.n_categories) + self.bias0)
 
 
-# ----------------------------------------------------------------------
-# NEW STRUCTURE
+        # --------------------------------------------------------------------
+        # NEW STRUCTURE
 
             # The lists weights, bias and a_h have one list item per layer, but
             # does not contain any information for the first layer (i. e. the
@@ -122,19 +122,20 @@ class NeuralNetwork:
             # the indeces correspond to the number of layers.
             self.weights = [None]
             self.bias = [None]
-            self.a_h = [None]
+            self.a = [None]
 
             for layer in range(1, self.n_layers):
                 self.weights.append(np.random.randn(self.layers[layer-1],
                     self.layers[layer]))
                 self.bias.append(np.zeros(self.layers[layer]) +
                         self.bias0)
-                self.a_h.append(None)
-            
-            for i in range(self.n_layers):
-                print(np.shape(self.weights))
-                print(np.shape(self.bias))
-                print(np.shape(self.a_h))
+                self.a.append(None)
+
+            # Printout for checking sizes
+#            for i in range(self.n_layers):
+#                print(np.shape(self.weights[i]))
+#                print(np.shape(self.bias[i]))
+#                print(np.shape(self.a_h[i]))
 
 
     def feed_forward(self):
@@ -147,17 +148,30 @@ class NeuralNetwork:
             exp_term = np.exp(self.z_o)
             self.probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
         else:
-            self.z_h = self.X @ self.weights[0] + self.bias[0]
-            self.a_h[0] = self.sigmoid(self.z_h)
-            for layer in range(1, len(self.hidden_layers)):
-                self.z_h = (self.a_h[layer-1] @ self.weights[layer] 
-                            + self.bias[layer])
-                self.a_h[layer] = self.sigmoid(self.z_h)
-                
-            self.z_o = self.a_h[-1] @ self.weights[-1] + self.bias[-1]
-            exp_term = np.exp(self.z_o)
-            self.probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
+#            self.z_h = self.X @ self.weights[0] + self.bias[0]
+#            self.a_h[0] = self.sigmoid(self.z_h)
+#            for layer in range(1, len(self.hidden_layers)):
+#                self.z_h = (self.a_h[layer-1] @ self.weights[layer] 
+#                            + self.bias[layer])
+#                self.a_h[layer] = self.sigmoid(self.z_h)
+#                
+#            self.z_o = self.a_h[-1] @ self.weights[-1] + self.bias[-1]
+#            exp_term = np.exp(self.z_o)
+#            self.probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
 
+        # --------------------------------------------------------------------
+        # NEW STRUCTURE
+#            self.z_h = self.X @ self.weights[0] + self.bias[0]
+#            self.a_h[0] = self.sigmoid(self.z_h)
+            self.a[0] = self.X
+            for layer in range(1, self.n_layers):
+                self.z = (self.a[layer-1] @ self.weights[layer] 
+                            + self.bias[layer])
+                self.a[layer] = self.sigmoid(self.z)
+                
+#            self.z_o = self.a_h[-1] @ self.weights[-1] + self.bias[-1]
+            exp_term = np.exp(self.z)
+            self.probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
 
 
     def feed_forward_out(self, X):
@@ -174,14 +188,27 @@ class NeuralNetwork:
             print(f'prob shape: {np.shape(probabilities)}')
             return probabilities
         else:
-            z_h = X @ self.weights[0] + self.bias[0]
-            a_h = self.sigmoid(z_h)
-            for layer in range(1, len(self.hidden_layers)):
-                z_h = a_h @ self.weights[layer] + self.bias[layer]
-                a_h = self.sigmoid(z_h)
+#            z_h = X @ self.weights[0] + self.bias[0]
+#            a_h = self.sigmoid(z_h)
+#            for layer in range(1, len(self.hidden_layers)):
+#                z_h = a_h @ self.weights[layer] + self.bias[layer]
+#                a_h = self.sigmoid(z_h)
+#                
+#            z_o = a_h @ self.weights[-1] + self.bias[-1]
+#            exp_term = np.exp(z_o)
+#            probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
+#            return probabilities
+        # --------------------------------------------------------------------
+        # NEW STRUCTURE
+#            self.z_h = self.X @ self.weights[0] + self.bias[0]
+#            self.a_h[0] = self.sigmoid(self.z_h)
+            a = X
+            for layer in range(1, self.n_layers):
+                z = a @ self.weights[layer] + self.bias[layer]
+                a = self.sigmoid(z)
                 
-            z_o = a_h @ self.weights[-1] + self.bias[-1]
-            exp_term = np.exp(z_o)
+#            self.z_o = self.a_h[-1] @ self.weights[-1] + self.bias[-1]
+            exp_term = np.exp(z)
             probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
             return probabilities
 
@@ -208,8 +235,39 @@ class NeuralNetwork:
             self.hidden_bias -= self.eta * self.hidden_bias_gradient
         else:
             # Output layer error and gradients
+#            error = self.probabilities - self.y
+#            self.weights_gradient = self.a_h[-1].T @ error
+#            self.bias_gradient = np.sum(error, axis=0)
+#
+#            if self.alpha > 0.0:
+#                self.weights_gradient += self.alpha * self.weights[-1]
+#
+#            self.weights[-1] -= self.eta * self.weights_gradient
+#            self.bias[-1] -= self.eta * self.bias_gradient
+#
+#            # Hidden layers error and gradients
+#            for layer in range(len(self.hidden_layers)-1, -1, -1):
+#                error = error @ self.weights[layer+1].T * self.a_h[layer] * (1 -
+#                        self.a_h[layer])
+#
+#                if layer == 0:
+#                    self.weights_gradient = self.X.T @ error
+#                else:
+#                    self.weights_gradient = self.a_h[layer-1].T @ error
+#                self.bias_gradient = np.sum(error, axis=0)
+#
+#                if self.alpha > 0.0:
+#                    self.weights_gradient += (self.alpha * self.weights[layer])
+#
+#                self.weights[layer] -= self.eta * self.weights_gradient
+#                self.bias[layer] -= self.eta * self.bias_gradient
+
+        # --------------------------------------------------------------------
+        # NEW STRUCTURE
+            # Output layer error and gradients
             error = self.probabilities - self.y
-            self.weights_gradient = self.a_h[-1].T @ error
+            # Using self.a_h[-2], because it is the last valid activation layer
+            self.weights_gradient = self.a_h[-2].T @ error
             self.bias_gradient = np.sum(error, axis=0)
 
             if self.alpha > 0.0:
@@ -217,11 +275,6 @@ class NeuralNetwork:
 
             self.weights[-1] -= self.eta * self.weights_gradient
             self.bias[-1] -= self.eta * self.bias_gradient
-
-
-            # Something wrong with shape of hidden weights, should of size (i,
-            # o), where i is the number of neurons in the previous layer, and o
-            # is the number of neurons in the current layer
 
             # Hidden layers error and gradients
             for layer in range(len(self.hidden_layers)-1, -1, -1):
