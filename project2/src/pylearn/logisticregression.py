@@ -64,7 +64,7 @@ class SGDClassification():
                 X_i = X[rand_indeces, :]
                 y_i = y[rand_indeces]
                 
-                gradients = X_i.T @ (self.sigmoid(X_i, beta) - y_i)
+                gradients = X_i.T @ (self.sigmoid(X_i @ beta) - y_i)
                 beta -= self.eta0*gradients
                 j += 1
 
