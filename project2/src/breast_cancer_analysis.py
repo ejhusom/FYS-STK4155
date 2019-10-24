@@ -94,7 +94,7 @@ def neural_network_analysis(X, y, single):
 if __name__ == '__main__':
     np.random.seed(2019)
     X, y = preprocessing_breast_cancer()
-#    logistic_analysis(X, y)
+    logistic_analysis(X, y)
 
     if len(sys.argv) > 1:
         single = True
@@ -102,4 +102,4 @@ if __name__ == '__main__':
     else:
         single = False
 
-    neural_network_analysis(X, y, single=single)
+#    neural_network_analysis(X, y, single=single)

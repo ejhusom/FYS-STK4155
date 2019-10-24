@@ -10,11 +10,8 @@
 import numpy as np
 
 class NeuralNetwork:
-    """
-    Artifical neural network for machine learning purposes, with multilayer
-    perceptrons.
-
-    The number of layers and neurons in each layer is flexible.
+    """Artifical neural network for machine learning purposes, with multilayer
+    perceptrons. The number of layers and neurons in each layer is flexible.
 
     Attributes
     ----------
@@ -158,23 +155,49 @@ class NeuralNetwork:
             return probabilities
 
     def backpropagation(self):
-        error_output = self.probabilities - self.y
-        error_hidden = np.matmul(error_output, self.output_weights.T) * self.a_h * (1 - self.a_h)
 
-        self.output_weights_gradient = np.matmul(self.a_h.T, error_output)
-        self.output_bias_gradient = np.sum(error_output, axis=0)
+        if self.single:
+            error_output = self.probabilities - self.y
+            error_hidden = error_output @ self.output_weights.T * self.a_h * (1 - self.a_h)
 
-        self.hidden_weights_gradient = np.matmul(self.X.T, error_hidden)
-        self.hidden_bias_gradient = np.sum(error_hidden, axis=0)
+            self.output_weights_gradient = self.a_h.T @ error_output
+            self.output_bias_gradient = np.sum(error_output, axis=0)
 
-        if self.lmbd > 0.0:
-            self.output_weights_gradient += self.lmbd * self.output_weights
-            self.hidden_weights_gradient += self.lmbd * self.hidden_weights
+            self.hidden_weights_gradient = self.X.T @ error_hidden
+            self.hidden_bias_gradient = np.sum(error_hidden, axis=0)
 
-        self.output_weights -= self.eta * self.output_weights_gradient
-        self.output_bias -= self.eta * self.output_bias_gradient
-        self.hidden_weights -= self.eta * self.hidden_weights_gradient
-        self.hidden_bias -= self.eta * self.hidden_bias_gradient
+            if self.lmbd > 0.0:
+                self.output_weights_gradient += self.lmbd * self.output_weights
+                self.hidden_weights_gradient += self.lmbd * self.hidden_weights
+
+            self.output_weights -= self.eta * self.output_weights_gradient
+            self.output_bias -= self.eta * self.output_bias_gradient
+            self.hidden_weights -= self.eta * self.hidden_weights_gradient
+            self.hidden_bias -= self.eta * self.hidden_bias_gradient
+        else:
+            error_output = self.probabilities - self.y
+
+            error_hidden = []
+            for layer in range(len(self.hidden_layers)):
+                error_hidden.append(
+                        error_output @ self.output_weights.T * self.a_h 
+                        * (1 - self.a_h)
+                        )
+
+            self.output_weights_gradient = self.a_h.T @ error_output
+            self.output_bias_gradient = np.sum(error_output, axis=0)
+
+            self.hidden_weights_gradient = self.X.T @ error_hidden
+            self.hidden_bias_gradient = np.sum(error_hidden, axis=0)
+
+            if self.lmbd > 0.0:
+                self.output_weights_gradient += self.lmbd * self.output_weights
+                self.hidden_weights_gradient += self.lmbd * self.hidden_weights
+
+            self.output_weights -= self.eta * self.output_weights_gradient
+            self.output_bias -= self.eta * self.output_bias_gradient
+            self.hidden_weights -= self.eta * self.hidden_weights_gradient
+            self.hidden_bias -= self.eta * self.hidden_bias_gradient
 
     def predict(self, X):
         probabilities = self.feed_forward_out(X)

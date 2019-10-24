@@ -32,7 +32,7 @@ class SGDClassification():
         if beta is None:
             beta = self.beta
 
-        self.y_pred = self.sigmoid(X, beta)
+        self.y_pred = self.sigmoid(X @ beta)
 
         if probability==False:
             self.y_pred = (self.y_pred > 0.5).astype(np.int)
@@ -77,10 +77,11 @@ class SGDClassification():
         return 1.0/(t + t0)
 
 
-    def sigmoid(self, X, beta):
+    def sigmoid(self, x):
 
-        term = np.exp(X @ beta)
-        return term / (1 + term)
+#        term = np.exp(X @ beta)
+#        return term / (1 + term)
+        return 1/(1 + np.exp(-x))
 
 
 
