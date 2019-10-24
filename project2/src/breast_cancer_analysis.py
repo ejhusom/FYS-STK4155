@@ -80,8 +80,8 @@ def neural_network_analysis(X, y, single):
     encoder = OneHotEncoder(categories='auto')
     y_train_1hot = encoder.fit_transform(y_train).toarray()
 
-    neural = NeuralNetwork(X_train, y_train_1hot, hidden_layers=[50],
-            n_categories=2, single=single)
+    neural = NeuralNetwork(X_train, y_train_1hot, hidden_layers=[10,10,10],
+            n_categories=2, single=single, alpha=0.1)
 
     neural.train()
     y_pred = neural.predict(X_test)
