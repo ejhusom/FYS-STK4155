@@ -3,9 +3,20 @@
 # File:     neuralnetwork.py
 # Author:   Erik Johannes Husom, based on code example by Morten Hjorth-Jensen.
 # Created:  2019-10-22
+# Version:  0.1
 # ----------------------------------------------------------------------------
-# Description:
-# Neural network.
+# DESCRIPTION:
+# Feedforward, fully connected, multilayer perceptron artificial neural
+# network.
+# 
+# NOTES:
+# Current main problem is trouble with implementing multilayer functionality.
+# The forward feed and backpropagation runs, but gives wrong results, and there
+# seems to be something wrong with the signal flow, but uncertain whether it is
+# in feed_forward or in backpropagation (or both).
+#
+# The boolean "single" and the single hidden layer code should be removed once
+# the MLP is working.
 # ============================================================================
 import numpy as np
 
@@ -66,6 +77,8 @@ class NeuralNetwork:
         self.n_inputs = X.shape[0]
         self.n_features = X.shape[1]
         self.hidden_layers = hidden_layers
+        # n_hidden_neurons will be deprecated when single layer structure is
+        # removed
         self.n_hidden_neurons = hidden_layers[0]
         # TODO: Give error if there are zero hidden layers, or if there are
         # zero neurons in any hidden layers
@@ -112,7 +125,6 @@ class NeuralNetwork:
 
     def feed_forward(self):
 
-
         if self.single:
             self.z_h = np.matmul(self.X, self.hidden_weights) + self.hidden_bias
             self.a_h = self.sigmoid(self.z_h)
@@ -120,6 +132,7 @@ class NeuralNetwork:
             exp_term = np.exp(self.z_o)
             self.probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
         else:
+            # FIXME: Algorithm gives wrong results.
             self.a[0] = self.X
             for layer in range(1, self.n_layers):
                 self.z = (self.a[layer-1] @ self.weights[layer] 
@@ -144,6 +157,7 @@ class NeuralNetwork:
             print(f'prob shape: {np.shape(probabilities)}')
             return probabilities
         else:
+            # FIXME: Algorithm gives wrong results.
             a = X
             for layer in range(1, self.n_layers):
                 z = a @ self.weights[layer] + self.bias[layer]
@@ -175,6 +189,8 @@ class NeuralNetwork:
             self.hidden_weights -= self.eta * self.hidden_weights_gradient
             self.hidden_bias -= self.eta * self.hidden_bias_gradient
         else:
+            # FIXME: Algorithm gives wrong results.
+
             # Output layer error and gradients
             error = self.probabilities - self.y
             # Using self.a_h[-2], because it is the last valid activation layer
@@ -203,6 +219,8 @@ class NeuralNetwork:
 
 
     def predict(self, X):
+        # TODO: Implement other functions than softmax?
+
         probabilities = self.feed_forward_out(X)
         # Using softmax for prediction
         return np.argmax(probabilities, axis=1)
