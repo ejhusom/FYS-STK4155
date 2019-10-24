@@ -12,8 +12,7 @@ import sklearn.linear_model as skl
 
 
 class Regression():
-    """
-    Fitting regression model on dataset with scalar response/target.
+    """Fitting regression model on dataset with scalar response/target.
 
     Attributes
     ----------

@@ -1,16 +1,37 @@
 #!/usr/bin/env python3
 # ============================================================================
-# File:     gradientdescent.py
+# File:     logisticregression.py
 # Author:   Erik Johannes Husom
 # Created:  2019-10-15
 # ----------------------------------------------------------------------------
 # Description:
+# Logistic regression methods in order to make classification models.
 #
+# TODO: Implement variable learning rate.
+# TODO: Implement KFold function, in order to remove sklearn dependency.
 # ============================================================================
 import numpy as np
 from sklearn.model_selection import KFold
 
 class SGDClassification():
+    """Stochastic gradient descent for logistic regression.
+
+    Attributes
+    ----------
+        X :
+        y :
+        y_pred :
+        beta :
+        batch_size :
+        n_epochs :
+        eta0 :
+        learning_rate :
+
+    Methods
+    -------
+
+
+    """
 
     def __init__(self, batch_size=100, n_epochs=1000, eta0=0.1, learning_rate='constant'):
 
@@ -78,9 +99,6 @@ class SGDClassification():
 
 
     def sigmoid(self, x):
-
-#        term = np.exp(X @ beta)
-#        return term / (1 + term)
         return 1/(1 + np.exp(-x))
 
 

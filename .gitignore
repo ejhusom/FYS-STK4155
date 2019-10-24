@@ -14,6 +14,7 @@
 #*.jpg
 #*.jpeg
 #*.pdf
+*.tif
 
 # compiled files:
 build*
