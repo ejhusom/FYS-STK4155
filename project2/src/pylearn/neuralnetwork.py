@@ -17,6 +17,9 @@
 #
 # The boolean "single" and the single hidden layer code should be removed once
 # the MLP is working.
+#
+# TODO:
+# Implement flexible choice of activation function?
 # ============================================================================
 import numpy as np
 
@@ -27,7 +30,9 @@ class NeuralNetwork:
     Attributes
     ----------
         X_full :
+        X :
         y_full :
+        y :
         n_inputs :
         n_features :
         hidden_layers : array-like
@@ -38,7 +43,10 @@ class NeuralNetwork:
         n_iterations : 
         eta :
         alpha :
-        bias :
+        bias0 : float, default=0.01
+            Initial bias value for all layers.
+        bias : list, containing arrays
+        weights : list, containing arrays
         a : list, containing arrays
             Each array in this list contains the values corresponding to each
             neuron in a layer, after the signal has been run through the
@@ -258,5 +266,3 @@ class NeuralNetwork:
         return np.tanh(x)
 
 
-if __name__ == '__main__':
-    pass
