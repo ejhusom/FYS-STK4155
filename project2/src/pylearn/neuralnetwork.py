@@ -64,6 +64,8 @@ class NeuralNetwork:
         self.n_features = X.shape[1]
         self.hidden_layers = hidden_layers
         self.n_hidden_neurons = hidden_layers[0]
+        # TODO: Give error if there are zero hidden layers, or if there are
+        # zero neurons in any hidden layers
         self.n_categories = n_categories
         self.layers = [self.n_features] + self.hidden_layers + [self.n_categories]
         self.n_layers = len(self.layers)
@@ -267,7 +269,7 @@ class NeuralNetwork:
             # Output layer error and gradients
             error = self.probabilities - self.y
             # Using self.a_h[-2], because it is the last valid activation layer
-            self.weights_gradient = self.a_h[-2].T @ error
+            self.weights_gradient = self.a[-2].T @ error
             self.bias_gradient = np.sum(error, axis=0)
 
             if self.alpha > 0.0:
@@ -277,14 +279,13 @@ class NeuralNetwork:
             self.bias[-1] -= self.eta * self.bias_gradient
 
             # Hidden layers error and gradients
-            for layer in range(len(self.hidden_layers)-1, -1, -1):
-                error = error @ self.weights[layer+1].T * self.a_h[layer] * (1 -
-                        self.a_h[layer])
+#            for layer in range(len(self.hidden_layers)-1, -1, -1):
+            # layer_idx = 3 = fourth layer = last hidden layer
+            for layer in range(self.n_layers-2, 0, -1):
+                error = error @ self.weights[layer+1].T * self.a[layer] * (1 -
+                        self.a[layer])
 
-                if layer == 0:
-                    self.weights_gradient = self.X.T @ error
-                else:
-                    self.weights_gradient = self.a_h[layer-1].T @ error
+                self.weights_gradient = self.a[layer-1].T @ error
                 self.bias_gradient = np.sum(error, axis=0)
 
                 if self.alpha > 0.0:
