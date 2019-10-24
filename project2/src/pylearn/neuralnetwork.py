@@ -127,10 +127,6 @@ class NeuralNetwork:
 #            self.weights.append(np.random.randn(self.hidden_layers[-1],
 #                self.n_categories))
 
-#        print(np.shape(self.hidden_weights))
-#        print(np.shape(self.hidden_bias))
-#        print(np.shape(self.output_weights))
-#        print(np.shape(self.output_bias))
 
 
     def feed_forward(self):
@@ -171,18 +167,14 @@ class NeuralNetwork:
             return probabilities
         else:
             z_h = X @ self.weights[0] + self.bias[0]
-            print(f'z_h: {np.shape(z_h)}')
             a_h = self.sigmoid(z_h)
             for layer in range(1, len(self.hidden_layers)):
                 z_h = a_h @ self.weights[layer] + self.bias[layer]
                 a_h = self.sigmoid(z_h)
                 
-            print(f'z_h: {np.shape(z_h)}')
             z_o = a_h @ self.weights[-1] + self.bias[-1]
-            print(f'z_o: {np.shape(z_o)}')
-            exp_term = np.exp(self.z_o)
+            exp_term = np.exp(z_o)
             probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
-            print(f'prob shape: {np.shape(probabilities)}')
             return probabilities
 
 
