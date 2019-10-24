@@ -39,7 +39,14 @@ class NeuralNetwork:
         eta :
         alpha :
         bias :
-        a :
+        a : list, containing arrays
+            Each array in this list contains the values corresponding to each
+            neuron in a layer, after the signal has been run through the
+            activation function. The arrays are contained in a list because
+            they usually are of different lengths. The first item in the list
+            contains the input features, because this makes the for-loops
+            smooth. The last item in the list is empty, because there are no
+            values needed for the output layer.
         z :
         probabilities :
 
