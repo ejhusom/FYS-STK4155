@@ -18,6 +18,10 @@
 # The boolean "single" and the single hidden layer code should be removed once
 # the MLP is working.
 #
+# PLAN:
+# - Print weights and/or z for individual layers for single-layer and MLP, and
+#   compare in order to find the erranous calculations.
+#
 # TODO:
 # Implement flexible choice of activation function?
 # ============================================================================
@@ -45,7 +49,7 @@ class NeuralNetwork:
         alpha :
         bias0 : float, default=0.01
             Initial bias value for all layers.
-        bias : list, containing arrays
+        biases : list, containing arrays
         weights : list, containing arrays
         a : list, containing arrays
             Each array in this list contains the values corresponding to each
@@ -57,6 +61,8 @@ class NeuralNetwork:
             values needed for the output layer.
         z :
         probabilities :
+        cost_func :
+        cost_func_der :
 
     Methods
     -------
@@ -67,6 +73,7 @@ class NeuralNetwork:
         predict
         predict_probabilities
         train
+        set_cost_func
         sigmoid
         tanh
 
@@ -78,8 +85,8 @@ class NeuralNetwork:
             X,
             y,
             hidden_layers=[50],
-            n_categories=10,
-            n_epochs=100,
+            n_categories=2,
+            n_epochs=1000,
             batch_size=100,
             eta=0.1,
             alpha=0.0,
@@ -92,7 +99,7 @@ class NeuralNetwork:
         self.n_inputs = X.shape[0]
         self.n_features = X.shape[1]
         self.hidden_layers = hidden_layers
-        # n_hidden_neurons will be deprecated when single layer structure is
+        # NOTE: n_hidden_neurons will be deprecated when single layer structure is
         # removed
         self.n_hidden_neurons = hidden_layers[0]
         # TODO: Give error if there are zero hidden layers, or if there are
@@ -111,6 +118,7 @@ class NeuralNetwork:
         self.single = single
 
         self.create_biases_and_weights()
+        self.set_cost_func()
 
     def create_biases_and_weights(self):
 
@@ -121,21 +129,15 @@ class NeuralNetwork:
             self.output_bias = np.zeros(self.n_categories) + self.bias0
         else:
             self.weights = [None]
-            self.bias = [None]
+            self.biases = [None]
             self.a = [None]
 
             for layer in range(1, self.n_layers):
                 self.weights.append(np.random.randn(self.layers[layer-1],
                     self.layers[layer]))
-                self.bias.append(np.zeros(self.layers[layer]) +
+                self.biases.append(np.zeros(self.layers[layer]) +
                         self.bias0)
                 self.a.append(None)
-
-            # Printout for checking sizes
-#            for i in range(self.n_layers):
-#                print(np.shape(self.weights[i]))
-#                print(np.shape(self.bias[i]))
-#                print(np.shape(self.a_h[i]))
 
 
     def feed_forward(self):
@@ -147,36 +149,34 @@ class NeuralNetwork:
             exp_term = np.exp(self.z_o)
             self.probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
         else:
-            # FIXME: Algorithm gives wrong results.
             self.a[0] = self.X
-            for layer in range(1, self.n_layers):
-                self.z = (self.a[layer-1] @ self.weights[layer] 
-                            + self.bias[layer])
-                self.a[layer] = self.sigmoid(self.z)
+            for l in range(1, self.n_layers):
+                self.z = (self.a[l-1] @ self.weights[l] + self.biases[l])
+                self.a[l] = self.sigmoid(self.z)
                 
-            exp_term = np.exp(self.z)
-            self.probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
+#            exp_term = np.exp(self.z)
+#            self.probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
+            self.probabilities = self.a[l]
 
 
     def feed_forward_out(self, X):
 
         if self.single:
             z_h = np.matmul(X, self.hidden_weights) + self.hidden_bias
-            print(f'z_h: {np.shape(z_h)}')
             a_h = self.sigmoid(z_h)
 
             z_o = np.matmul(a_h, self.output_weights) + self.output_bias
             
+            # Uses softmax for output
             exp_term = np.exp(z_o)
             probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
-            print(f'prob shape: {np.shape(probabilities)}')
             return probabilities
         else:
-            # FIXME: Algorithm gives wrong results.
             a = X
-            for layer in range(1, self.n_layers):
-                z = a @ self.weights[layer] + self.bias[layer]
+            for l in range(1, self.n_layers):
+                z = a @ self.weights[l] + self.biases[l]
                 a = self.sigmoid(z)
+                
                 
             exp_term = np.exp(z)
             probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
@@ -203,11 +203,16 @@ class NeuralNetwork:
             self.output_bias -= self.eta * self.output_bias_gradient
             self.hidden_weights -= self.eta * self.hidden_weights_gradient
             self.hidden_bias -= self.eta * self.hidden_bias_gradient
+#            print(error_hidden)            
+#            print(self.hidden_weights)
+
         else:
-            # FIXME: Algorithm gives wrong results.
+            # FIXME: The calculation of errors is wrong, and causes the
+            # algorithm to give wrong results.
 
             # Output layer error and gradients
             error = self.probabilities - self.y
+            delta = 
             # Using self.a_h[-2], because it is the last valid activation layer
             self.weights_gradient = self.a[-2].T @ error
             self.bias_gradient = np.sum(error, axis=0)
@@ -216,21 +221,26 @@ class NeuralNetwork:
                 self.weights_gradient += self.alpha * self.weights[-1]
 
             self.weights[-1] -= self.eta * self.weights_gradient
-            self.bias[-1] -= self.eta * self.bias_gradient
+            self.biases[-1] -= self.eta * self.bias_gradient
 
             # Hidden layers error and gradients
-            for layer in range(self.n_layers-2, 0, -1):
-                error = error @ self.weights[layer+1].T * self.a[layer] * (1 -
-                        self.a[layer])
+            for l in range(self.n_layers-2, 0, -1):
+                error = [
+#                    error @ self.weights[l+1].T * self.a[l] * (1 - self.a[l])
+                    
+                ]
+#                print(error)
 
-                self.weights_gradient = self.a[layer-1].T @ error
+                self.weights_gradient = self.a[l-1].T @ error
                 self.bias_gradient = np.sum(error, axis=0)
 
                 if self.alpha > 0.0:
-                    self.weights_gradient += (self.alpha * self.weights[layer])
+                    self.weights_gradient += (self.alpha * self.weights[l])
 
-                self.weights[layer] -= self.eta * self.weights_gradient
-                self.bias[layer] -= self.eta * self.bias_gradient
+                self.weights[l] -= self.eta * self.weights_gradient
+                self.biases[l] -= self.eta * self.bias_gradient
+            
+#            print(self.weights[1])
 
 
     def predict(self, X):
@@ -259,8 +269,19 @@ class NeuralNetwork:
                 self.feed_forward()
                 self.backpropagation()
 
+
+    def set_cost_func(self):
+
+        self.cost_func = np.vectorize(lambda y: 0.5*(y - self.y)**2)
+        self.cost_func_der = np.vectorize(lambda y: y - self.y)
+
+
     def sigmoid(self, x):
         return 1/(1 + np.exp(-x))
+
+    def sigmoid_der(self, x):
+        return np.exp(-x)/(np.exp(-x) + 1)**2
+
 
     def tanh(x):
         return np.tanh(x)

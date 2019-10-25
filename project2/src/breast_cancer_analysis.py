@@ -13,7 +13,8 @@ import pandas as pd
 import seaborn as sns
 from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, MinMaxScaler
 from sklearn.datasets import load_breast_cancer
 from sklearn.metrics import accuracy_score
 import sys
@@ -71,7 +72,8 @@ def neural_network_analysis(X, y, single):
             random_state = 0)
 
     # Standardizing
-    sc = StandardScaler()
+#    sc = StandardScaler()
+    sc = MinMaxScaler()
     X_train = sc.fit_transform(X_train)
     X_test = sc.transform(X_test)
 
@@ -80,13 +82,28 @@ def neural_network_analysis(X, y, single):
     encoder = OneHotEncoder(categories='auto')
     y_train_1hot = encoder.fit_transform(y_train).toarray()
 
-    neural = NeuralNetwork(X_train, y_train_1hot, hidden_layers=[10,10,10],
-            n_categories=2, single=single, alpha=0.1)
+    encoder = OneHotEncoder(categories='auto')
+    y_test_1hot = encoder.fit_transform(y_test.reshape(-1,1)).toarray()
+
+    # Reduce size of train sets if necessary
+#    X_train = X_train[:10,:]
+#    y_train_1hot = y_train_1hot[:10,:]
+#    print(np.shape(y_train_1hot))
+
+    # Scikit-learn NN
+#    dnn = MLPClassifier(hidden_layer_sizes=(50,50), activation='logistic',
+#                            alpha=0.1, learning_rate_init=0.1, max_iter=1000)
+#    dnn.fit(X_train, y_train_1hot)
+#    print(f'Accuracy: {dnn.score(X_test, y_test_1hot)}')
+
+
+
+    neural = NeuralNetwork(X_train, y_train_1hot, hidden_layers=[50,50],
+            n_categories=2, single=single, alpha=0.1, batch_size=100,
+            n_epochs=1000)
 
     neural.train()
     y_pred = neural.predict(X_test)
-    print(np.shape(y_pred))
-    print(np.shape(y_test))
     print(accuracy_score(y_test, y_pred))
 
 
