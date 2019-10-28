@@ -22,6 +22,7 @@ import sys
 from pylearn.resampling import CV
 from pylearn.logisticregression import SGDClassification
 from pylearn.neuralnetwork import NeuralNetwork
+from pylearn.morten_nn import NeuralNetwork_M
 
 
 
@@ -91,25 +92,34 @@ def neural_network_analysis(X, y, single):
 #    print(np.shape(y_train_1hot))
 
     # Scikit-learn NN
-#    dnn = MLPClassifier(hidden_layer_sizes=(50,50), activation='logistic',
-#                            alpha=0.1, learning_rate_init=0.1, max_iter=1000)
-#    dnn.fit(X_train, y_train_1hot)
-#    print(f'Accuracy: {dnn.score(X_test, y_test_1hot)}')
+    dnn = MLPClassifier(hidden_layer_sizes=(50,50), activation='logistic',
+                            alpha=0.1, learning_rate_init=0.1, max_iter=1000)
+    dnn.fit(X_train, y_train_1hot)
+    print(f'Scikit: {dnn.score(X_test, y_test_1hot)}')
 
 
 
-    neural = NeuralNetwork(X_train, y_train_1hot, hidden_layers=[50,50],
-            n_categories=2, single=single, alpha=0.1, batch_size=100,
-            n_epochs=1000)
+#    neural = NeuralNetwork(X_train, y_train_1hot, hidden_layers=[50],
+#            n_categories=2, single=single, alpha=0.1, batch_size=50,
+#            n_epochs=2000)
+
+#    neural.train()
+#    y_pred = neural.predict(X_test)
+#    print(accuracy_score(y_test, y_pred))
+
+
+    # Morten's NN code
+    neural = NeuralNetwork_M(X_train, y_train_1hot, n_hidden_neurons=50,
+            n_categories=2, lmbd=0.1, eta=0.1, batch_size=100,
+            epochs=1000)
 
     neural.train()
     y_pred = neural.predict(X_test)
-    print(accuracy_score(y_test, y_pred))
-
+    print(f'Morten: {accuracy_score(y_test, y_pred)}')
 
 
 if __name__ == '__main__':
-    np.random.seed(2019)
+    np.random.seed(2020)
     X, y = preprocessing_breast_cancer()
 #    logistic_analysis(X, y)
 

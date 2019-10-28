@@ -154,9 +154,9 @@ class NeuralNetwork:
                 self.z = (self.a[l-1] @ self.weights[l] + self.biases[l])
                 self.a[l] = self.sigmoid(self.z)
                 
-#            exp_term = np.exp(self.z)
-#            self.probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
-            self.probabilities = self.a[l]
+            exp_term = np.exp(self.z)
+            self.probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
+#            self.probabilities = self.a[l]
 
 
     def feed_forward_out(self, X):
@@ -212,7 +212,7 @@ class NeuralNetwork:
 
             # Output layer error and gradients
             error = self.probabilities - self.y
-            delta = 
+            delta = self.a[-1] - self.y
             # Using self.a_h[-2], because it is the last valid activation layer
             self.weights_gradient = self.a[-2].T @ error
             self.bias_gradient = np.sum(error, axis=0)
@@ -226,7 +226,7 @@ class NeuralNetwork:
             # Hidden layers error and gradients
             for l in range(self.n_layers-2, 0, -1):
                 error = [
-#                    error @ self.weights[l+1].T * self.a[l] * (1 - self.a[l])
+                    error @ self.weights[l+1].T * self.a[l] * (1 - self.a[l])
                     
                 ]
 #                print(error)
@@ -270,17 +270,31 @@ class NeuralNetwork:
                 self.backpropagation()
 
 
-    def set_cost_func(self):
+    def set_cost_func(self, cost_func_str='mse'):
 
-        self.cost_func = np.vectorize(lambda y: 0.5*(y - self.y)**2)
-        self.cost_func_der = np.vectorize(lambda y: y - self.y)
+        if cost_func_str == 'mse':
+            self.cost_func = np.vectorize(lambda y: 0.5*(y - self.y)**2)
+            self.cost_func_der = np.vectorize(lambda y: y - self.y)
+
+    def set_act_func(self):
+
+        sigmoid = lambda x: 1/(1 + np.exp(-x))
+        self.act_func = np.vectorize(sigmoid)
+        self.act_func_der = np.vectorize(lambda x: sigmoid(x)*(1 - sigmoid(x)))
+
+
+    def set_output_func(self):
+        # TODO: Possible to choose a different activation function for the
+        # output layer.
+        pass
 
 
     def sigmoid(self, x):
         return 1/(1 + np.exp(-x))
 
     def sigmoid_der(self, x):
-        return np.exp(-x)/(np.exp(-x) + 1)**2
+#        return np.exp(-x)/(np.exp(-x) + 1)**2
+        return self.sigmoid(x)*(1 - self.sigmoid(x))
 
 
     def tanh(x):
