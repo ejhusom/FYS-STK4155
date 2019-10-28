@@ -93,19 +93,12 @@ def neural_network_analysis(X, y, single):
 
     # Scikit-learn NN
     dnn = MLPClassifier(hidden_layer_sizes=(50,50), activation='logistic',
-                            alpha=0.1, learning_rate_init=0.1, max_iter=1000)
+                            alpha=0.1, learning_rate_init=0.1, max_iter=1000,
+                            batch_size=100, learning_rate='constant')
     dnn.fit(X_train, y_train_1hot)
     print(f'Scikit: {dnn.score(X_test, y_test_1hot)}')
 
 
-
-#    neural = NeuralNetwork(X_train, y_train_1hot, hidden_layers=[50],
-#            n_categories=2, single=single, alpha=0.1, batch_size=50,
-#            n_epochs=2000)
-
-#    neural.train()
-#    y_pred = neural.predict(X_test)
-#    print(accuracy_score(y_test, y_pred))
 
 
     # Morten's NN code
@@ -116,6 +109,16 @@ def neural_network_analysis(X, y, single):
     neural.train()
     y_pred = neural.predict(X_test)
     print(f'Morten: {accuracy_score(y_test, y_pred)}')
+
+
+    # Our code
+    neural = NeuralNetwork(X_train, y_train_1hot, hidden_layers=[50],
+            n_categories=2, single=single, alpha=0.1, batch_size=100,
+            n_epochs=1000)
+
+    neural.train()
+    y_pred = neural.predict(X_test)
+    print(f'Our code: {accuracy_score(y_test, y_pred)}')
 
 
 if __name__ == '__main__':
