@@ -27,27 +27,19 @@ from pylearn.morten_nn import NeuralNetwork_M
 from franke import *
 
 def visualize(df):
-
     plt.figure(figsize=(10,10))
-
     features = list(df.columns[1:10])
-
     ax = sns.heatmap(df[features].corr(), square=True, annot=True)
     bottom, top = ax.get_ylim()
     ax.set_ylim(bottom + 0.5, top - 0.5)
     plt.show()
 
-
 def sklearn_bunch_to_pandas_df(bunch):
-
     data = np.c_[bunch.data, bunch.target]
     columns = np.append(bunch.feature_names, ['target'])
-
     return pd.DataFrame(data, columns=columns)
 
-
-
-def preprocessing_breast_cancer():
+def create_breast_cancer_dataset():
     # Reading data
     data = load_breast_cancer()
     y_names = data['target_names']
@@ -58,11 +50,8 @@ def preprocessing_breast_cancer():
     return X, y
 
 
+def regression_analysis(X, y):
 
-
-def franke_analysis():
-
-    X, y = create_franke_dataset()
     print(CV(X, y, Regression(method='ridge', alpha=0.00001), n_splits=20, classification=False))
 
     # Old code without cross-validation
@@ -81,9 +70,8 @@ def franke_analysis():
 
 def logistic_analysis(X, y):
 
-    # Cross-validation
-    print(CV(X, y, SGDClassifier(), n_splits=10))
-    print(CV(X, y, SGDClassification(), n_splits=10))
+    print(CV(X, y, SGDClassifier(), n_splits=10))       # sklearn
+    print(CV(X, y, SGDClassification(), n_splits=10))   # pylearn
 
 
 
@@ -105,8 +93,6 @@ def neural_network_analysis(X, y):
     y_train= y_train.reshape(-1,1)
     encoder = OneHotEncoder(categories='auto')
     y_train_1hot = encoder.fit_transform(y_train).toarray()
-
-    encoder = OneHotEncoder(categories='auto')
     y_test_1hot = encoder.fit_transform(y_test.reshape(-1,1)).toarray()
 
     # Reduce size of train sets if necessary
@@ -123,27 +109,14 @@ def neural_network_analysis(X, y):
 #                            batch_size=100, learning_rate='constant')
 #    dnn.fit(X_train, y_train_1hot)
 #    print(f'Scikit: {dnn.score(X_test, y_test_1hot)}')
-#
-#
-#
-#
-#    # Morten's NN code
+
     etas = np.linspace(0.01, 0.1, 10)
     etas = [0.001]
 
     for eta in etas:
         print('----------------')
         print('Eta: {0:.3f}'.format(eta))
-#        neural = NeuralNetwork_M(X_train, y_train_1hot, n_hidden_neurons=hl[0],
-#                n_categories=2, lmbd=0.0, eta=eta, batch_size=100,
-#                epochs=100)
-#
-#        neural.train()
-#        y_pred = neural.predict(X_test)
-#        print(f'Morten: {accuracy_score(y_test, y_pred)}')
 
-
-    # Our code
         neural = NeuralNetwork(X_train, y_train_1hot, hidden_layer_sizes=hl,
                 n_categories=2, eta=eta, alpha=0.1, batch_size=10,
                 n_epochs=100)
@@ -155,7 +128,8 @@ def neural_network_analysis(X, y):
 
 if __name__ == '__main__':
     np.random.seed(2020)
-    X, y = preprocessing_breast_cancer()
-#    logistic_analysis(X, y)
-#    neural_network_analysis(X, y)
-    franke_analysis()
+    X_b, y_b = create_breast_cancer_dataset()
+    X_f, y_f = create_franke_dataset()
+#    regression_analysis(X_f, y_f)
+#    logistic_analysis(X_b, y_b)
+    neural_network_analysis(X_b, y_b)
