@@ -3,7 +3,7 @@
 # File:     neuralnetwork.py
 # Author:   Erik Johannes Husom, based on code example by Morten Hjorth-Jensen.
 # Created:  2019-10-22
-# Version:  0.1
+# Version:  0.2
 # ----------------------------------------------------------------------------
 # DESCRIPTION:
 # Feedforward, fully connected, multilayer perceptron artificial neural
@@ -74,6 +74,7 @@ class NeuralNetwork:
             n_epochs=1000,
             batch_size=100,
             eta=0.1,
+            learning_rate='constant',
             alpha=0.1,
             bias0=0.01):
 
@@ -93,6 +94,8 @@ class NeuralNetwork:
         self.batch_size = batch_size
         self.n_iterations = self.n_inputs // self.batch_size
         self.eta = eta
+        # TODO: Implement adaptive learning rate
+        self.learning_rate = learning_rate
         self.alpha = alpha
         self.bias0 = bias0
 
@@ -125,9 +128,6 @@ class NeuralNetwork:
             self.z[l] = self.a[l-1] @ self.weights[l] + self.biases[l]
             self.a[l] = self.act_func(self.z[l])
             
-#        exp_term = np.exp(self.z[-1])
-#        self.a[-1] = exp_term / np.sum(exp_term, axis=1, keepdims=True)
-
         # Overwriting last output with the chosen output function
         self.a[-1] = self.output_func(self.z[-1])
 

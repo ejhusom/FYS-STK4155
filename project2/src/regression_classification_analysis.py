@@ -1,27 +1,29 @@
 #!/usr/bin/env python3
 # ============================================================================
-# File:     breast_cancer_analysis.py
+# File:     regression_classification_analysis.py
 # Author:   Erik Johannes Husom
 # Created:  2019-10-22
 # ----------------------------------------------------------------------------
 # Description:
-# Analyze breast cancer data.
+# Analyze regression and classification methods.
 # ============================================================================
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import sklearn as skl
-from sklearn.linear_model import SGDClassifier
+from sklearn.linear_model import SGDClassifier, Ridge
 from sklearn.model_selection import train_test_split
-from sklearn.neural_network import MLPClassifier
+from sklearn.neural_network import MLPClassifier, MLPRegressor
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, MinMaxScaler
 from sklearn.datasets import load_breast_cancer
 from sklearn.metrics import accuracy_score
 import sys
 
 from pylearn.resampling import CV
+from pylearn.linearmodel import Regression
 from pylearn.logisticregression import SGDClassification
+from pylearn.metrics import *
 from pylearn.neuralnetwork import NeuralNetwork
 
 from franke import *
@@ -52,7 +54,7 @@ def create_breast_cancer_dataset():
 
 def regression_analysis(X, y):
 
-    print(CV(X, y, skl.Ridge(alpha=0.00001), n_splits=20,
+    print(CV(X, y, Ridge(alpha=0.00001), n_splits=20,
         classification=False))
     print(CV(X, y, Regression(method='ridge', alpha=0.00001), n_splits=20,
         classification=False))
@@ -65,7 +67,7 @@ def logistic_analysis(X, y):
 
 
 
-def neural_network_analysis(X, y):
+def nn_classification(X, y):
 
     # Splitting data set
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
@@ -83,7 +85,7 @@ def neural_network_analysis(X, y):
     y_train= y_train.reshape(-1,1)
     encoder = OneHotEncoder(categories='auto')
     y_train_1hot = encoder.fit_transform(y_train).toarray()
-    y_test_1hot = encoder.fit_transform(y_test.reshape(-1,1)).toarray()
+#    y_test_1hot = encoder.fit_transform(y_test.reshape(-1,1)).toarray()
 
     # Reduce size of train sets if necessary
 #    X_train = X_train[:10,:]
@@ -116,10 +118,42 @@ def neural_network_analysis(X, y):
         print(f'Our code: {accuracy_score(y_test, y_pred)}')
 
 
+
+def nn_regression(X, y):
+    # Splitting data set
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
+            random_state = 0)
+
+    y_train = np.ravel(y_train)
+    y_test = np.ravel(y_test)
+
+    # Scaling
+    sc = StandardScaler()
+#    sc = MinMaxScaler()
+#    X_train = sc.fit_transform(X_train)
+#    X_test = sc.transform(X_test)
+#    y_train = sc.fit_transform(y_train)
+#    y_test = sc.transform(y_test)
+
+    hl = [50]
+
+    # Scikit-learn NN
+    dnn = MLPRegressor(hidden_layer_sizes=hl, activation='logistic',
+                            alpha=0.1, learning_rate_init=0.1, max_iter=1000,
+                            batch_size=100, learning_rate='constant')
+    dnn.fit(X_train, y_train)
+    score = dnn.score(X_train, y_train)
+    print(f'Scikit: {score}')
+#    y_pred = dnn.predict(X_test)
+#    print(f'Scikit: {mean_squared_error(y_test, y_pred)}')
+
+
+
 if __name__ == '__main__':
     np.random.seed(2020)
     X_b, y_b = create_breast_cancer_dataset()
     X_f, y_f = create_franke_dataset()
-    regression_analysis(X_f, y_f)
+#    regression_analysis(X_f, y_f)
 #    logistic_analysis(X_b, y_b)
-#    neural_network_analysis(X_b, y_b)
+#    nn_classification(X_b, y_b)
+    nn_regression(X_f, y_f)
