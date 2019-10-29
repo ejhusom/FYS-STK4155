@@ -10,7 +10,6 @@
 # network.
 # ============================================================================
 import numpy as np
-from sklearn.metrics import accuracy_score
 
 class NeuralNetwork:
     """Artifical neural network for machine learning purposes, with multilayer
@@ -46,8 +45,6 @@ class NeuralNetwork:
             values needed for the output layer.
         z :
         probabilities :
-        cost_func :
-        cost_func_der :
 
     Methods
     -------

@@ -24,7 +24,7 @@ from pylearn.logisticregression import SGDClassification
 from pylearn.neuralnetwork import NeuralNetwork
 from pylearn.morten_nn import NeuralNetwork_M
 
-
+from franke import *
 
 def visualize(df):
 
@@ -56,6 +56,27 @@ def preprocessing_breast_cancer():
     X = data['data']
 
     return X, y
+
+
+
+
+def franke_analysis():
+
+    X, y = create_franke_dataset()
+    print(CV(X, y, Regression(method='ridge', alpha=0.00001), n_splits=20, classification=False))
+
+    # Old code without cross-validation
+#    X_train, X_test, y_train, y_test = train_test_split(X, y)
+#
+#    sc = StandardScaler()
+#    X_train = sc.fit_transform(X_train)
+#    X_test = sc.transform(X_test)
+#
+#    model = Regression()
+#    model.fit(X_train, y_train)
+#    model.predict(X_test)
+#    print(mean_squared_error(model.y_pred, y_test))
+#    print(r2_score(y_test, model.y_pred))
 
 
 def logistic_analysis(X, y):
@@ -136,4 +157,5 @@ if __name__ == '__main__':
     np.random.seed(2020)
     X, y = preprocessing_breast_cancer()
 #    logistic_analysis(X, y)
-    neural_network_analysis(X, y)
+#    neural_network_analysis(X, y)
+    franke_analysis()
