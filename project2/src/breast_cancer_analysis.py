@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import sklearn as skl
 from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
@@ -22,7 +23,6 @@ import sys
 from pylearn.resampling import CV
 from pylearn.logisticregression import SGDClassification
 from pylearn.neuralnetwork import NeuralNetwork
-from pylearn.morten_nn import NeuralNetwork_M
 
 from franke import *
 
@@ -52,20 +52,10 @@ def create_breast_cancer_dataset():
 
 def regression_analysis(X, y):
 
-    print(CV(X, y, Regression(method='ridge', alpha=0.00001), n_splits=20, classification=False))
-
-    # Old code without cross-validation
-#    X_train, X_test, y_train, y_test = train_test_split(X, y)
-#
-#    sc = StandardScaler()
-#    X_train = sc.fit_transform(X_train)
-#    X_test = sc.transform(X_test)
-#
-#    model = Regression()
-#    model.fit(X_train, y_train)
-#    model.predict(X_test)
-#    print(mean_squared_error(model.y_pred, y_test))
-#    print(r2_score(y_test, model.y_pred))
+    print(CV(X, y, skl.Ridge(alpha=0.00001), n_splits=20,
+        classification=False))
+    print(CV(X, y, Regression(method='ridge', alpha=0.00001), n_splits=20,
+        classification=False))
 
 
 def logistic_analysis(X, y):
@@ -130,6 +120,6 @@ if __name__ == '__main__':
     np.random.seed(2020)
     X_b, y_b = create_breast_cancer_dataset()
     X_f, y_f = create_franke_dataset()
-#    regression_analysis(X_f, y_f)
+    regression_analysis(X_f, y_f)
 #    logistic_analysis(X_b, y_b)
-    neural_network_analysis(X_b, y_b)
+#    neural_network_analysis(X_b, y_b)
