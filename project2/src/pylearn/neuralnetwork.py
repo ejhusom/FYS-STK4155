@@ -57,10 +57,13 @@ class NeuralNetwork:
         backpropagation
         predict
         predict_probabilities
-        train
+        fit
         set_cost_func
+        set_act_func
+        set_output_func
         sigmoid
-        tanh
+        sigmoid_der
+        softmax
 
 
     """
@@ -99,6 +102,7 @@ class NeuralNetwork:
         self.setup_arrays()
         self.set_cost_func()
         self.set_act_func()
+        self.set_output_func()
 
     def setup_arrays(self):
 
@@ -123,16 +127,17 @@ class NeuralNetwork:
         for l in range(1, self.n_layers):
             self.z[l] = self.a[l-1] @ self.weights[l] + self.biases[l]
             self.a[l] = self.act_func(self.z[l])
-#            self.a[l] = self.sigmoid(self.z[l])
             
-        exp_term = np.exp(self.z[-1])
-        self.probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
-        self.a[-1] = self.probabilities
+#        exp_term = np.exp(self.z[-1])
+#        self.a[-1] = exp_term / np.sum(exp_term, axis=1, keepdims=True)
+
+        # Overwriting last output with the chosen output function
+        self.a[-1] = self.output_func(self.z[-1])
 
 
     def backpropagation(self):
 
-        self.d[-1] = self.probabilities - self.y
+        self.d[-1] = self.a[-1] - self.y
 
         self.weights_gradient = self.a[-2].T @ self.d[-1]
 #        self.bias_gradient = np.sum(self.d[-1], axis=0)
@@ -145,7 +150,6 @@ class NeuralNetwork:
             self.d[l] = (
                     self.d[l+1] @ self.weights[l+1].T *
                     self.act_func_der(self.z[l])
-#                    self.sigmoid_der(self.z[l])
             )
 
             self.weights[l] -= self.eta * self.a[l-1].T @ self.d[l]
@@ -159,30 +163,24 @@ class NeuralNetwork:
         for l in range(1, self.n_layers):
             z = a @ self.weights[l] + self.biases[l]
             a = self.act_func(z)
-#            a = self.sigmoid(z)
             
-            
-        exp_term = np.exp(z)
-        probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
-        return probabilities
+        # Overwriting output with chosen output function
+        a = self.output_func(z)
+        return a
 
     def predict(self, X):
         # TODO: Implement other functions than softmax?
-
         probabilities = self.feed_forward_out(X)
-        # Using softmax for prediction
         return np.argmax(probabilities, axis=1)
 
     def predict_probabilities(self, X):
         probabilities = self.feed_forward_out(X)
         return probabilities
 
-    def train(self):
+    def fit(self):
         data_indices = np.arange(self.n_inputs)
 
         for i in range(self.n_epochs):
-#            print(accuracy_score(np.argmax(self.y_full, axis=1),
-#                self.predict(self.X_full)))
             for j in range(self.n_iterations):
                 chosen_datapoints = np.random.choice(
                     data_indices, size=self.batch_size, replace=False
@@ -205,13 +203,16 @@ class NeuralNetwork:
         # TODO: Implement alternative activation functions.
 
         if act_func_str == 'sigmoid':
-            sigmoid = lambda x: 1/(1 + np.exp(-x))
-            self.act_func = sigmoid
-            self.act_func_der = lambda x: sigmoid(x)*(1 - sigmoid(x))
+            self.act_func = self.sigmoid
+            self.act_func_der = self.sigmoid_der
 
 
+    def set_output_func(self, output_func_str='softmax'):
 
-    def set_output_func(self):
+        if output_func_str == 'softmax':
+            self.output_func = self.softmax
+        elif output_func_str == 'sigmoid':
+            self.output_func == self.sigmoid
 
 
     def sigmoid(self, x):
@@ -220,8 +221,7 @@ class NeuralNetwork:
     def sigmoid_der(self, x):
         return self.sigmoid(x)*(1 - self.sigmoid(x))
 
-
-    def tanh(x):
-        return np.tanh(x)
-
+    def softmax(self, x):
+        exp_term = np.exp(x)
+        return exp_term / np.sum(exp_term, axis=1, keepdims=True)
 

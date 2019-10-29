@@ -127,7 +127,7 @@ def neural_network_analysis(X, y):
                 n_categories=2, eta=eta, alpha=0.1, batch_size=10,
                 n_epochs=100)
 
-        neural.train()
+        neural.fit()
         y_pred = neural.predict(X_test)
         print(f'Our code: {accuracy_score(y_test, y_pred)}')
 
