@@ -15,12 +15,9 @@
 # seems to be something wrong with the signal flow, but uncertain whether it is
 # in feed_forward or in backpropagation (or both).
 #
-# The boolean "single" and the single hidden layer code should be removed once
-# the MLP is working.
-#
 # PLAN:
-# - Print weights and/or z for individual layers for single-layer and MLP, and
-#   compare in order to find the erranous calculations.
+# - Test regression case, and print resulting coefficients, compare with
+#   scikit-learn.
 #
 # TODO:
 # Implement flexible choice of activation function?
@@ -39,7 +36,7 @@ class NeuralNetwork:
         y :
         n_inputs :
         n_features :
-        hidden_layers : array-like
+        hidden_layer_sizes : array-like
         n_hidden_neurons : 
         n_categories : 
         n_epochs :
@@ -84,12 +81,12 @@ class NeuralNetwork:
             self,
             X,
             y,
-            hidden_layers=[50],
+            hidden_layer_sizes=[50],
             n_categories=2,
             n_epochs=1000,
             batch_size=100,
             eta=0.1,
-            alpha=0.0,
+            alpha=0.1,
             bias0=0.01,
             single=True):
 
@@ -98,14 +95,11 @@ class NeuralNetwork:
 
         self.n_inputs = X.shape[0]
         self.n_features = X.shape[1]
-        self.hidden_layers = hidden_layers
-        # NOTE: n_hidden_neurons will be deprecated when single layer structure is
-        # removed
-        self.n_hidden_neurons = hidden_layers[0]
+        self.hidden_layer_sizes = hidden_layer_sizes
         # TODO: Give error if there are zero hidden layers, or if there are
         # zero neurons in any hidden layers
         self.n_categories = n_categories
-        self.layers = [self.n_features] + self.hidden_layers + [self.n_categories]
+        self.layers = [self.n_features] + self.hidden_layer_sizes + [self.n_categories]
         self.n_layers = len(self.layers)
 
         self.n_epochs = n_epochs
@@ -122,126 +116,133 @@ class NeuralNetwork:
 
     def create_biases_and_weights(self):
 
-        if self.single:
-            self.hidden_weights = np.random.randn(self.n_features, self.n_hidden_neurons)
-            self.hidden_bias = np.zeros(self.n_hidden_neurons) + self.bias0
-            self.output_weights = np.random.randn(self.n_hidden_neurons, self.n_categories)
-            self.output_bias = np.zeros(self.n_categories) + self.bias0
-        else:
-            self.weights = [None]
-            self.biases = [None]
-            self.a = [None]
+        self.weights = [None]   # weights for each layer
+        self.biases = [None]    # biases for each layer
+        self.a = [None]         # output for each layer
+        self.z = [None]         # activation for each layer
+        self.d = [None]         # error for each layer
 
-            for layer in range(1, self.n_layers):
-                self.weights.append(np.random.randn(self.layers[layer-1],
-                    self.layers[layer]))
-                self.biases.append(np.zeros(self.layers[layer]) +
-                        self.bias0)
-                self.a.append(None)
+        for l in range(1, self.n_layers):
+            self.weights.append(np.random.randn(self.layers[l-1],
+                self.layers[l])) 
+            self.biases.append(np.zeros(self.layers[l]) + self.bias0)
+            self.z.append(None)
+            self.a.append(None)
+            self.d.append(None)
 
 
     def feed_forward(self):
 
-        if self.single:
-            self.z_h = np.matmul(self.X, self.hidden_weights) + self.hidden_bias
-            self.a_h = self.sigmoid(self.z_h)
-            self.z_o = np.matmul(self.a_h, self.output_weights) + self.output_bias
-            exp_term = np.exp(self.z_o)
-            self.probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
-        else:
-            self.a[0] = self.X
-            for l in range(1, self.n_layers):
-                self.z = (self.a[l-1] @ self.weights[l] + self.biases[l])
-                self.a[l] = self.sigmoid(self.z)
-                
-            exp_term = np.exp(self.z)
-            self.probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
-#            self.probabilities = self.a[l]
-
-
-    def feed_forward_out(self, X):
-
-        if self.single:
-            z_h = np.matmul(X, self.hidden_weights) + self.hidden_bias
-            a_h = self.sigmoid(z_h)
-
-            z_o = np.matmul(a_h, self.output_weights) + self.output_bias
+        self.a[0] = self.X
+        for l in range(1, self.n_layers):
+            self.z[l] = (self.a[l-1] @ self.weights[l] + self.biases[l])
+            self.a[l] = self.sigmoid(self.z[l])
             
-            # Uses softmax for output
-            exp_term = np.exp(z_o)
-            probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
-            return probabilities
-        else:
-            a = X
-            for l in range(1, self.n_layers):
-                z = a @ self.weights[l] + self.biases[l]
-                a = self.sigmoid(z)
-                
-                
-            exp_term = np.exp(z)
-            probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
-            return probabilities
+#        exp_term = np.exp(self.z)
+#        self.probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
+#        self.probabilities = self.a[l]
 
 
     def backpropagation(self):
 
-        if self.single:
-            error_output = self.probabilities - self.y
-            error_hidden = error_output @ self.output_weights.T * self.a_h * (1 - self.a_h)
+        # FIXME: The calculation of errors is wrong, and causes the
+        # algorithm to give wrong results.
 
-            self.output_weights_gradient = self.a_h.T @ error_output
-            self.output_bias_gradient = np.sum(error_output, axis=0)
+        # Output layer error and gradients
+#        error = self.probabilities - self.y
 
-            self.hidden_weights_gradient = self.X.T @ error_hidden
-            self.hidden_bias_gradient = np.sum(error_hidden, axis=0)
+        
+#        dC_da = self.a[-1] - self.y
+#        self.d[-1] = dC_da * self.sigmoid_der(self.z[-1])
 
-            if self.alpha > 0.0:
-                self.output_weights_gradient += self.alpha * self.output_weights
-                self.hidden_weights_gradient += self.alpha * self.hidden_weights
+        error_out = self.a[-1] - self.y
 
-            self.output_weights -= self.eta * self.output_weights_gradient
-            self.output_bias -= self.eta * self.output_bias_gradient
-            self.hidden_weights -= self.eta * self.hidden_weights_gradient
-            self.hidden_bias -= self.eta * self.hidden_bias_gradient
-#            print(error_hidden)            
-#            print(self.hidden_weights)
+        dC_da = self.a[-1] - self. y # output error
+        self.d[-1] = self.sigmoid_der(self.z[-1]) * dC_da
 
-        else:
-            # FIXME: The calculation of errors is wrong, and causes the
-            # algorithm to give wrong results.
+        self.weights_gradient = self.a[-2].T @ self.d[-1]
 
-            # Output layer error and gradients
-            error = self.probabilities - self.y
-            delta = self.a[-1] - self.y
-            # Using self.a_h[-2], because it is the last valid activation layer
-            self.weights_gradient = self.a[-2].T @ error
-            self.bias_gradient = np.sum(error, axis=0)
+        self.weights[-1] -= self.eta * self.a[-2].T @ self.d[-1]
+        self.biases[-1] -= self.eta * np.sum(self.d[-1], axis=0)
 
-            if self.alpha > 0.0:
-                self.weights_gradient += self.alpha * self.weights[-1]
 
-            self.weights[-1] -= self.eta * self.weights_gradient
-            self.biases[-1] -= self.eta * self.bias_gradient
+        for l in range(self.n_layers-2, 0, -1):
+            self.d[l] = (
+                    self.d[l+1] @ self.weights[l+1].T *
+                    self.sigmoid_der(self.z[l])
+            )
+            self.weights[l] -= self.eta * self.a[l-1].T @ self.d[l]
+            self.biases[l] -= self.eta * np.sum(self.d[l], axis=0)
 
-            # Hidden layers error and gradients
-            for l in range(self.n_layers-2, 0, -1):
-                error = [
-                    error @ self.weights[l+1].T * self.a[l] * (1 - self.a[l])
-                    
-                ]
+        
+
+
+#        output_weight_gradient = (
+#                self.a[-2] @ self.weights[-1].T + self.bias[-1]
+#        )
+#        output_bias_gradient = np.sum(error_out, axis=0)
+
+
+#        gradient_out = self.sigmoid_der(self.a[-1])
+#        d_output = error*gradient_out
+
+#        gradient_h = self.sigmoid_der(self.a[-2])
+
+#        e_h = d_output @ w_out.T
+#        d_hidden = e_h * gradient_h
+#
+#        w_out = w_out + self.a[-2].T @ d_output * self.eta
+#        w_h = w_h + self.eta * self.a[-1].T @ d_hidden
+
+#        bias_output += 
+
+
+
+#        der1 = self.sigmoid_der(self.z[-1])
+#        der2 =
+
+
+        # Using self.a[-2], because it is the last valid activation layer
+#        self.weights_gradient = self.a[-2].T @ error
+#        self.bias_gradient = np.sum(error, axis=0)
+
+#        if self.alpha > 0.0:
+#            self.weights_gradient += self.alpha * self.weights[-1]
+
+#        self.weights[-1] -= self.eta * self.weights_gradient
+#        self.biases[-1] -= self.eta * self.bias_gradient
+
+        # Hidden layers error and gradients
+#        for l in range(self.n_layers-2, 0, -1):
+#            error = [
+#                error @ self.weights[l+1].T * self.a[l] * (1 - self.a[l])
+#                
+#            ]
 #                print(error)
 
-                self.weights_gradient = self.a[l-1].T @ error
-                self.bias_gradient = np.sum(error, axis=0)
-
-                if self.alpha > 0.0:
-                    self.weights_gradient += (self.alpha * self.weights[l])
-
-                self.weights[l] -= self.eta * self.weights_gradient
-                self.biases[l] -= self.eta * self.bias_gradient
+#            self.weights_gradient = self.a[l-1].T @ error
+#            self.bias_gradient = np.sum(error, axis=0)
+#
+#            if self.alpha > 0.0:
+#                self.weights_gradient += (self.alpha * self.weights[l])
+#
+#            self.weights[l] -= self.eta * self.weights_gradient
+#            self.biases[l] -= self.eta * self.bias_gradient
             
 #            print(self.weights[1])
 
+    def feed_forward_out(self, X):
+
+        a = X
+        for l in range(1, self.n_layers):
+            z = a @ self.weights[l] + self.biases[l]
+            a = self.sigmoid(z)
+            
+            
+        exp_term = np.exp(z)
+        probabilities = exp_term / np.sum(exp_term, axis=1, keepdims=True)
+#        return probabilities
+        return a
 
     def predict(self, X):
         # TODO: Implement other functions than softmax?

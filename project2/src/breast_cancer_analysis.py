@@ -66,13 +66,15 @@ def logistic_analysis(X, y):
 
 
 
-def neural_network_analysis(X, y, single):
+def neural_network_analysis(X, y):
 
     # Splitting data set
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
             random_state = 0)
 
-    # Standardizing
+    # Scaling
+    # NOTE: MinMaxScaler seems to give better results than StandardScaler on
+    # breast cancer data.
 #    sc = StandardScaler()
     sc = MinMaxScaler()
     X_train = sc.fit_transform(X_train)
@@ -91,18 +93,21 @@ def neural_network_analysis(X, y, single):
 #    y_train_1hot = y_train_1hot[:10,:]
 #    print(np.shape(y_train_1hot))
 
+
+    hl = [50]
+
     # Scikit-learn NN
-    dnn = MLPClassifier(hidden_layer_sizes=(50,50), activation='logistic',
-                            alpha=0.1, learning_rate_init=0.1, max_iter=1000,
-                            batch_size=100, learning_rate='constant')
-    dnn.fit(X_train, y_train_1hot)
-    print(f'Scikit: {dnn.score(X_test, y_test_1hot)}')
-
-
-
-
-    # Morten's NN code
-    neural = NeuralNetwork_M(X_train, y_train_1hot, n_hidden_neurons=50,
+#    dnn = MLPClassifier(hidden_layer_sizes=hl, activation='logistic',
+#                            alpha=0.1, learning_rate_init=0.1, max_iter=1000,
+#                            batch_size=100, learning_rate='constant')
+#    dnn.fit(X_train, y_train_1hot)
+#    print(f'Scikit: {dnn.score(X_test, y_test_1hot)}')
+#
+#
+#
+#
+#    # Morten's NN code
+    neural = NeuralNetwork_M(X_train, y_train_1hot, n_hidden_neurons=hl[0],
             n_categories=2, lmbd=0.1, eta=0.1, batch_size=100,
             epochs=1000)
 
@@ -112,8 +117,8 @@ def neural_network_analysis(X, y, single):
 
 
     # Our code
-    neural = NeuralNetwork(X_train, y_train_1hot, hidden_layers=[50],
-            n_categories=2, single=single, alpha=0.1, batch_size=100,
+    neural = NeuralNetwork(X_train, y_train_1hot, hidden_layer_sizes=hl,
+            n_categories=2, alpha=0.1, batch_size=100,
             n_epochs=1000)
 
     neural.train()
@@ -125,11 +130,4 @@ if __name__ == '__main__':
     np.random.seed(2020)
     X, y = preprocessing_breast_cancer()
 #    logistic_analysis(X, y)
-
-    if len(sys.argv) > 1:
-        single = True
-        print('single=True')
-    else:
-        single = False
-
-    neural_network_analysis(X, y, single=single)
+    neural_network_analysis(X, y)
