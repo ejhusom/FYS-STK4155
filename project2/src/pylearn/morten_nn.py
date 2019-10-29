@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.metrics import accuracy_score
 
 class NeuralNetwork_M:
     def __init__(
@@ -87,6 +88,8 @@ class NeuralNetwork_M:
         data_indices = np.arange(self.n_inputs)
 
         for i in range(self.epochs):
+#            print(accuracy_score(np.argmax(self.Y_data_full, axis=1),
+#                self.predict(self.X_data_full)))
             for j in range(self.iterations):
                 # pick datapoints with replacement
                 chosen_datapoints = np.random.choice(

@@ -107,23 +107,29 @@ def neural_network_analysis(X, y):
 #
 #
 #    # Morten's NN code
-    neural = NeuralNetwork_M(X_train, y_train_1hot, n_hidden_neurons=hl[0],
-            n_categories=2, lmbd=0.1, eta=0.1, batch_size=100,
-            epochs=1000)
+    etas = np.linspace(0.01, 0.1, 10)
+    etas = [0.001]
 
-    neural.train()
-    y_pred = neural.predict(X_test)
-    print(f'Morten: {accuracy_score(y_test, y_pred)}')
+    for eta in etas:
+        print('----------------')
+        print('Eta: {0:.3f}'.format(eta))
+#        neural = NeuralNetwork_M(X_train, y_train_1hot, n_hidden_neurons=hl[0],
+#                n_categories=2, lmbd=0.0, eta=eta, batch_size=100,
+#                epochs=100)
+#
+#        neural.train()
+#        y_pred = neural.predict(X_test)
+#        print(f'Morten: {accuracy_score(y_test, y_pred)}')
 
 
     # Our code
-    neural = NeuralNetwork(X_train, y_train_1hot, hidden_layer_sizes=hl,
-            n_categories=2, alpha=0.1, batch_size=100,
-            n_epochs=1000)
+        neural = NeuralNetwork(X_train, y_train_1hot, hidden_layer_sizes=hl,
+                n_categories=2, eta=eta, alpha=0.1, batch_size=10,
+                n_epochs=100)
 
-    neural.train()
-    y_pred = neural.predict(X_test)
-    print(f'Our code: {accuracy_score(y_test, y_pred)}')
+        neural.train()
+        y_pred = neural.predict(X_test)
+        print(f'Our code: {accuracy_score(y_test, y_pred)}')
 
 
 if __name__ == '__main__':
