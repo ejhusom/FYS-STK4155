@@ -139,8 +139,6 @@ class NeuralNetwork:
 #        self.dw = self.a[-2].T @ self.d[-1]
 #        self.db = np.sum(self.d[-1], axis=0)
 
-#        print(np.shape(self.weights[-1]))
-
         self.weights[-1] -= self.eta * self.a[-2].T @ self.d[-1]
         self.biases[-1] -= self.eta * np.sum(self.d[-1], axis=0)
 
@@ -246,8 +244,8 @@ class NeuralNetwork:
         return x - self.y
 
     def crossentropy(self, x):
-        return - self.y * np.log(x) + (1 - self.y) * np.log(1 - x)
-#        return -self.y * np.log(x)
+#        return - self.y * np.log(x) + (1 - self.y) * np.log(1 - x)
+        return -self.y * np.log(x)
 
     def crossentropy_der(self, x):
         return -self.y/x + (1 - self.y)/(1 - x)
