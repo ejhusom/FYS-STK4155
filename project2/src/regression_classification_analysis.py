@@ -103,17 +103,20 @@ def nn_classification(X, y):
 #    print(f'Scikit: {dnn.score(X_test, y_test_1hot)}')
 
     etas = np.linspace(0.01, 0.1, 10)
-    etas = [0.001]
+    etas = [0.1]
 
     for eta in etas:
         print('----------------')
         print('Eta: {0:.3f}'.format(eta))
 
-        neural = NeuralNetwork(X_train, y_train_1hot, hidden_layer_sizes=hl,
+        neural = NeuralNetwork(hidden_layer_sizes=hl,
                 n_categories=2, eta=eta, alpha=0.1, batch_size=10,
-                n_epochs=100)
+                n_epochs=100,
+                act_func_str='sigmoid',
+                output_func_str='sigmoid',
+                cost_func_str='crossentropy')
 
-        neural.fit()
+        neural.fit(X_train, y_train_1hot)
         y_pred = neural.predict(X_test)
         print(f'Our code: {accuracy_score(y_test, y_pred)}')
 
@@ -124,26 +127,38 @@ def nn_regression(X, y):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
             random_state = 0)
 
-    y_train = np.ravel(y_train)
-    y_test = np.ravel(y_test)
-
     # Scaling
-    sc = StandardScaler()
-#    sc = MinMaxScaler()
+#    sc = StandardScaler()
+    sc = MinMaxScaler()
 #    X_train = sc.fit_transform(X_train)
 #    X_test = sc.transform(X_test)
 #    y_train = sc.fit_transform(y_train)
 #    y_test = sc.transform(y_test)
 
+
+
     hl = [50]
+    neural = NeuralNetwork(hidden_layer_sizes=hl,
+            n_categories=1, eta=0.01, alpha=0.1, batch_size=10,
+            n_epochs=100, act_func_str='relu')
+
+    neural.fit(X_train, y_train)
+    y_pred = neural.predict(X_test)
+    print(f'Our code: {r2_score(y_test, y_pred)}')
+
 
     # Scikit-learn NN
+    y_train = np.ravel(y_train)
+    y_test = np.ravel(y_test)
     dnn = MLPRegressor(hidden_layer_sizes=hl, activation='logistic',
                             alpha=0.1, learning_rate_init=0.1, max_iter=1000,
                             batch_size=100, learning_rate='constant')
     dnn.fit(X_train, y_train)
-    score = dnn.score(X_train, y_train)
-    print(f'Scikit: {score}')
+    y_pred = dnn.predict(X_test)
+#    score = dnn.score(X_test, y_test)
+    r2 = r2_score(y_test, y_pred)
+#    print(f'Scikit: {score}')
+    print(f'Scikit: {r2}')
 #    y_pred = dnn.predict(X_test)
 #    print(f'Scikit: {mean_squared_error(y_test, y_pred)}')
 
@@ -155,5 +170,5 @@ if __name__ == '__main__':
     X_f, y_f = create_franke_dataset()
 #    regression_analysis(X_f, y_f)
 #    logistic_analysis(X_b, y_b)
-#    nn_classification(X_b, y_b)
-    nn_regression(X_f, y_f)
+    nn_classification(X_b, y_b)
+#    nn_regression(X_f, y_f)

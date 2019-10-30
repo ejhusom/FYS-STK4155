@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # ============================================================================
 # File:     neuralnetwork.py
-# Author:   Erik Johannes Husom, based on code example by Morten Hjorth-Jensen.
+# Author:   Erik Johannes Husom.
 # Created:  2019-10-22
 # Version:  0.2
 # ----------------------------------------------------------------------------
@@ -67,42 +67,35 @@ class NeuralNetwork:
 
     def __init__(
             self,
-            X,
-            y,
             hidden_layer_sizes=[50],
-            n_categories=2,
+            n_categories=1,
             n_epochs=1000,
-            batch_size=100,
-            eta=0.1,
+            batch_size='auto',
+            eta=0.01,
             learning_rate='constant',
             alpha=0.1,
-            bias0=0.01):
+            bias0=0.01,
+            act_func_str='sigmoid',
+            output_func_str='softmax',
+            cost_func_str='mse'):
 
-        self.X_full = X
-        self.y_full = y
-
-        self.n_inputs = X.shape[0]
-        self.n_features = X.shape[1]
         self.hidden_layer_sizes = hidden_layer_sizes
-        # TODO: Give error if there are zero hidden layers, or if there are
-        # zero neurons in any hidden layers
         self.n_categories = n_categories
-        self.layers = [self.n_features] + self.hidden_layer_sizes + [self.n_categories]
-        self.n_layers = len(self.layers)
 
         self.n_epochs = n_epochs
-        self.batch_size = batch_size
-        self.n_iterations = self.n_inputs // self.batch_size
+        if batch_size == 'auto':
+            self.batch_size = min(100, n_inputs)
+        else:
+            self.batch_size = batch_size
         self.eta = eta
         # TODO: Implement adaptive learning rate
         self.learning_rate = learning_rate
         self.alpha = alpha
         self.bias0 = bias0
+        self.act_func_str = act_func_str
+        self.output_func_str = output_func_str
+        self.cost_func_str = cost_func_str
 
-        self.setup_arrays()
-        self.set_cost_func()
-        self.set_act_func()
-        self.set_output_func()
 
     def setup_arrays(self):
 
@@ -134,10 +127,19 @@ class NeuralNetwork:
 
     def backpropagation(self):
 
-        self.d[-1] = self.a[-1] - self.y
+#        self.d[-1] = self.a[-1] - self.y
+        self.d[-1] = (
+                self.cost_func_der(self.a[-1])*self.output_func_der(self.z[-1])
+        )
+#        self.d[-1] = self.cost_func_der(self.a[-1])
 
-        self.weights_gradient = self.a[-2].T @ self.d[-1]
-#        self.bias_gradient = np.sum(self.d[-1], axis=0)
+#        cost = self.cost_func(self.a[-1])
+#        print(f'Cost: {cost}')
+
+#        self.dw = self.a[-2].T @ self.d[-1]
+#        self.db = np.sum(self.d[-1], axis=0)
+
+#        print(np.shape(self.weights[-1]))
 
         self.weights[-1] -= self.eta * self.a[-2].T @ self.d[-1]
         self.biases[-1] -= self.eta * np.sum(self.d[-1], axis=0)
@@ -174,7 +176,20 @@ class NeuralNetwork:
         probabilities = self.feed_forward_out(X)
         return probabilities
 
-    def fit(self):
+    def fit(self, X, y):
+        self.X_full = X
+        self.y_full = y
+
+        self.n_inputs = X.shape[0]
+        self.n_features = X.shape[1]
+        self.layers = [self.n_features] + self.hidden_layer_sizes + [self.n_categories]
+        self.n_layers = len(self.layers)
+        self.setup_arrays()
+        self.set_cost_func(self.cost_func_str)
+        self.set_act_func(self.act_func_str)
+        self.set_output_func(self.output_func_str)
+        self.n_iterations = self.n_inputs // self.batch_size
+
         data_indices = np.arange(self.n_inputs)
 
         for i in range(self.n_epochs):
@@ -190,26 +205,52 @@ class NeuralNetwork:
                 self.backpropagation()
 
 
-    def set_cost_func(self, cost_func_str='mse'):
+    def set_cost_func(self, cost_func_str):
 
         if cost_func_str == 'mse':
-            self.cost_func = np.vectorize(lambda y: 0.5*(y - self.y)**2)
-            self.cost_func_der = np.vectorize(lambda y: y - self.y)
+            self.cost_func = self.mse
+            self.cost_func_der = self.mse_der
+        elif cost_func_str == 'crossentropy':
+            self.cost_func = self.crossentropy
+            self.cost_func_der = self.crossentropy_der
 
-    def set_act_func(self, act_func_str='sigmoid'):
+
+    def set_act_func(self, act_func_str):
         # TODO: Implement alternative activation functions.
 
         if act_func_str == 'sigmoid':
             self.act_func = self.sigmoid
             self.act_func_der = self.sigmoid_der
+        if act_func_str == 'relu':
+            self.act_func = self.relu
+            self.act_func_der = self.relu_der
 
 
     def set_output_func(self, output_func_str='softmax'):
 
         if output_func_str == 'softmax':
             self.output_func = self.softmax
+            self.output_func_der = self.softmax_der
         elif output_func_str == 'sigmoid':
-            self.output_func == self.sigmoid
+            self.output_func = self.sigmoid
+            self.output_func_der = self.sigmoid_der
+        elif output_func_str == 'relu':
+            self.output_func = self.relu
+            self.output_func_der = self.relu_der
+
+
+    def mse(self, x):
+        return 0.5*(x - self.y)**2
+
+    def mse_der(self, x):
+        return x - self.y
+
+    def crossentropy(self, x):
+        return - self.y * np.log(x) + (1 - self.y) * np.log(1 - x)
+#        return -self.y * np.log(x)
+
+    def crossentropy_der(self, x):
+        return -self.y/x + (1 - self.y)/(1 - x)
 
 
     def sigmoid(self, x):
@@ -218,7 +259,24 @@ class NeuralNetwork:
     def sigmoid_der(self, x):
         return self.sigmoid(x)*(1 - self.sigmoid(x))
 
+    def tanh(self, x):
+        return 2/(1 + np.exp(-2*x)) - 1
+
+    def tanh_der(self, x):
+        return 1 - self.tanh(x)**2
+
     def softmax(self, x):
         exp_term = np.exp(x)
-        return exp_term / np.sum(exp_term, axis=1, keepdims=True)
+        return exp_term / exp_term.sum(axis=1, keepdims=True)
 
+    def softmax_der(self, x):
+#        pass
+#        s = self.softmax(x).reshape(-1,1)
+#        return np.diagflat(s) - np.dot(s, s.T)
+        return self.cost_func(x) * (1 - self.cost_func(x))
+
+    def relu(self, x):
+        return x * (x > 0)
+
+    def relu_der(self, x):
+        return 1. * (x > 0)
