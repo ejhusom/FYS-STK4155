@@ -127,11 +127,13 @@ class NeuralNetwork:
 
     def backpropagation(self):
 
-        self.d[-1] = self.a[-1] - self.y
-#        self.d[-1] = (
-#                self.cost_func_der(self.a[-1])*self.output_func_der(self.z[-1])
-#        )
 
+        # The following calculation of output error works with the following
+        # combination of output activation / loss function:
+        # - Sigmoid / binary cross entropy
+        # - Softmax / categorical cross entropy
+        # - Identity / squared loss
+        self.d[-1] = self.a[-1] - self.y
 #        cost = self.cost_func(self.a[-1])
 #        print(f'Cost: {cost}')
 
@@ -278,8 +280,11 @@ class NeuralNetwork:
         return self.sigmoid(x)*(1 - self.sigmoid(x))
 
     def relu(self, x):
-        np.clip(x, 0, np.finfo(x.dtype).max, out=x)
-        return x
+#        np.clip(x, 0, np.finfo(x.dtype).max, out=x)
+        result = 0 if x < 0.0 else x
+        return result
 
     def relu_der(self, x):
-        return 1. * (x > 0)
+#        return 1. * (x > 0)
+        result = 0 if x < 0.0 else 1
+        return result
