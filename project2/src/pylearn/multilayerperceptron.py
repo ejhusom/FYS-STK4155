@@ -314,12 +314,12 @@ class MultilayerPerceptron:
 #        f = np.vectorize(lambda x: 0 if x < 0.0 else x)
 #        return f(x)
 
-    def relu_der(self, x, alpha=0.01):
-      dx = np.ones_like(x)
-      dx[x < 0] = alpha
-      return dx
+#    def relu_der(self, x, alpha=0.01):
+#      dx = np.ones_like(x)
+#      dx[x < 0] = alpha
+#      return dx
 
-#    def relu_der(self, x):
+    def relu_der(self, x):
 #        z = np.zeros_like(x)
 #        return np.clip(1, 0, np.finfo(x.dtype).max, out=None)
 #        return z
@@ -328,9 +328,10 @@ class MultilayerPerceptron:
 #        return result
 #        return (x > 0) * 1
 #        return (x > 0).astype(int)
-#        z = np.zeros_like(x)
-#        z[x>0]=1
-#        z[x<=0]=0
-#        return z
+        z = np.zeros_like(x)
+        z[x>0]=1
+        z[x<=0]=0
+#        print(z)
+        return z
 #        f = np.vectorize(lambda x: 0 if x < 0.0 else 1)
 #        return f(x)

@@ -136,38 +136,39 @@ def nn_regression(X, y):
     # Scaling
 #    sc = StandardScaler()
     sc = MinMaxScaler()
-#    X_train = sc.fit_transform(X_train)
-#    X_test = sc.transform(X_test)
+    X_train = sc.fit_transform(X_train)
+    X_test = sc.transform(X_test)
+#    print(np.min(X_train))
 
 
 
     hl = [100,20]
-    neural = MultilayerPerceptron(hidden_layer_sizes=hl,
-            n_categories=1, eta=0.001, alpha=0.1, batch_size=100,
-            n_epochs=100, 
-            act_func_str='relu',
-            cost_func_str='mse',
-            output_func_str='identity')
-
-    neural.fit(X_train, y_train)
-    y_pred = neural.predict_probabilities(X)
+#    neural = MultilayerPerceptron(hidden_layer_sizes=hl,
+#            n_categories=1, eta=0.001, alpha=0.1, batch_size=100,
+#            n_epochs=100, 
+#            act_func_str='relu',
+#            cost_func_str='mse',
+#            output_func_str='identity')
+#
+#    neural.fit(X_train, y_train)
+#    y_pred = neural.predict_probabilities(X)
 
 #    print(f'Our code R2: {r2_score(y_test, y_pred)}')
 #    print(f'Our code MSE: {mean_squared_error(y_test, y_pred)}')
 
     # Scikit-learn NN
-#    y_train = np.ravel(y_train)
-#    y_test = np.ravel(y_test)
-#    dnn = MLPRegressor(hidden_layer_sizes=hl, 
-#        activation='relu',
-#        alpha=0.1, 
-#        learning_rate_init=0.01, 
-#        max_iter=1000,
-##       batch_size=100, 
-#        tol=1e-7,
-#        learning_rate='adaptive')
-#    dnn.fit(X_train, y_train)
-#    y_pred = dnn.predict(X)
+    y_train = np.ravel(y_train)
+    y_test = np.ravel(y_test)
+    dnn = MLPRegressor(hidden_layer_sizes=hl, 
+        activation='relu',
+        alpha=0.1, 
+        learning_rate_init=0.01, 
+        max_iter=1000,
+       batch_size=100, 
+        tol=1e-7,
+        learning_rate='adaptive')
+    dnn.fit(X_train, y_train)
+    y_pred = dnn.predict(X)
 
 #    print(f'Scikit: {r2_score(y_test, y_pred)}')
 #    print(f'Scikit MSE: {mean_squared_error(y_test, y_pred)}')
