@@ -137,10 +137,10 @@ class MultilayerPerceptron:
             self.z[l] = self.a[l-1] @ self.weights[l] + self.biases[l]
             self.a[l] = self.act_func(self.z[l])
             print(self.z[l])
-            sys.exit(1)
             
         # Overwriting last output with the chosen output function
         self.a[-1] = self.output_func(self.z[-1])
+        sys.exit(1)
 
 
     def backpropagation(self):
