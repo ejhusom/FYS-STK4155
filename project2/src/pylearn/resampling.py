@@ -15,7 +15,7 @@ from sklearn.preprocessing import StandardScaler
 from pylearn.logisticregression import SGDClassification
 from pylearn.linearmodel import Regression
 from pylearn.metrics import *
-from pylearn.neuralnetwork import NeuralNetwork
+from pylearn.multilayerperceptron import MultilayerPerceptron
 
 
 def CV(X, y, model, n_splits=5, random_state=0, classification=True):

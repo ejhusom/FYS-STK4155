@@ -26,7 +26,7 @@ from pylearn.resampling import CV
 from pylearn.linearmodel import Regression
 from pylearn.logisticregression import SGDClassification
 from pylearn.metrics import *
-from pylearn.neuralnetwork import NeuralNetwork
+from pylearn.multilayerperceptron import MultilayerPerceptron
 from pylearn.morten_nn import *
 
 from franke import *
@@ -112,7 +112,7 @@ def nn_classification(X, y):
 #        print('----------------')
 #        print('Eta: {0:.3f}'.format(eta))
 
-    neural = NeuralNetwork(hidden_layer_sizes=hl,
+    neural = MultilayerPerceptron(hidden_layer_sizes=hl,
             n_categories=2, 
             eta=0.001, 
             alpha=0.1,
@@ -142,15 +142,15 @@ def nn_regression(X, y):
 
 
     hl = [100,20]
-    neural = NeuralNetwork(hidden_layer_sizes=hl,
-            n_categories=1, eta=0.001, alpha=0.1, batch_size=50,
+    neural = MultilayerPerceptron(hidden_layer_sizes=hl,
+            n_categories=1, eta=0.001, alpha=0.1, batch_size=100,
             n_epochs=100, 
-            act_func_str='sigmoid',
+            act_func_str='relu',
             cost_func_str='mse',
             output_func_str='identity')
 
     neural.fit(X_train, y_train)
-    y_pred = neural.predict(X)
+    y_pred = neural.predict_probabilities(X)
 
 #    print(f'Our code R2: {r2_score(y_test, y_pred)}')
 #    print(f'Our code MSE: {mean_squared_error(y_test, y_pred)}')
