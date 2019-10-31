@@ -127,11 +127,10 @@ class NeuralNetwork:
 
     def backpropagation(self):
 
-#        self.d[-1] = self.a[-1] - self.y
-        self.d[-1] = (
-                self.cost_func_der(self.a[-1])*self.output_func_der(self.z[-1])
-        )
-#        self.d[-1] = self.cost_func_der(self.a[-1])
+        self.d[-1] = self.a[-1] - self.y
+#        self.d[-1] = (
+#                self.cost_func_der(self.a[-1])*self.output_func_der(self.z[-1])
+#        )
 
 #        cost = self.cost_func(self.a[-1])
 #        print(f'Cost: {cost}')
@@ -219,22 +218,25 @@ class NeuralNetwork:
         if act_func_str == 'sigmoid':
             self.act_func = self.sigmoid
             self.act_func_der = self.sigmoid_der
-        if act_func_str == 'relu':
+        elif act_func_str == 'relu':
             self.act_func = self.relu
             self.act_func_der = self.relu_der
 
 
     def set_output_func(self, output_func_str='softmax'):
 
-        if output_func_str == 'softmax':
-            self.output_func = self.softmax
-            self.output_func_der = self.softmax_der
-        elif output_func_str == 'sigmoid':
+        if output_func_str == 'sigmoid':
             self.output_func = self.sigmoid
             self.output_func_der = self.sigmoid_der
+        elif output_func_str == 'softmax':
+            self.output_func = self.softmax
+            self.output_func_der = self.softmax_der
         elif output_func_str == 'relu':
             self.output_func = self.relu
             self.output_func_der = self.relu_der
+        elif self.output_func_str == 'identity':
+            self.output_func = lambda x: x
+            self.output_func_der = lambda x: 1
 
 
     def mse(self, x):
@@ -244,11 +246,12 @@ class NeuralNetwork:
         return x - self.y
 
     def crossentropy(self, x):
-#        return - self.y * np.log(x) + (1 - self.y) * np.log(1 - x)
-        return -self.y * np.log(x)
+        return - self.y * np.log(x) + (1 - self.y) * np.log(1 - x)
+#        return -self.y * np.log(x)
 
     def crossentropy_der(self, x):
         return -self.y/x + (1 - self.y)/(1 - x)
+#        return -self.y/x
 
 
     def sigmoid(self, x):
@@ -268,13 +271,15 @@ class NeuralNetwork:
         return exp_term / exp_term.sum(axis=1, keepdims=True)
 
     def softmax_der(self, x):
+        # FIXME: This does not work.
 #        pass
 #        s = self.softmax(x).reshape(-1,1)
 #        return np.diagflat(s) - np.dot(s, s.T)
-        return self.cost_func(x) * (1 - self.cost_func(x))
+        return self.sigmoid(x)*(1 - self.sigmoid(x))
 
     def relu(self, x):
-        return x * (x > 0)
+        np.clip(x, 0, np.finfo(x.dtype).max, out=x)
+        return x
 
     def relu_der(self, x):
         return 1. * (x > 0)

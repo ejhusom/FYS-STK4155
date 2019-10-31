@@ -10,8 +10,10 @@
 # ============================================================================
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
 
-def generate_mesh(start=0, stop=1, n=100):
+def generate_mesh(start=0, stop=1, n=101):
     '''Generate x and y data and return at as a flat meshgrid.'''
 
     x1 = np.linspace(start, stop, n)
@@ -21,10 +23,7 @@ def generate_mesh(start=0, stop=1, n=100):
     return x1, x2
 
 
-def franke_function(x1, x2, eps = 0.05):
-
-    np.random.seed(0)
-
+def franke_function(x1, x2, eps = 0.00):
     n = len(x1)
 
     term1 = 0.75*np.exp(-(0.25*(9*x1-2)**2) - 0.25*((9*x2-2)**2))
@@ -34,12 +33,17 @@ def franke_function(x1, x2, eps = 0.05):
     
     y = term1 + term2 + term3 + term4 + eps*np.random.randn(n)
 
-    y = y.reshape(-1, 1)
 
     return y
 
 
-def create_design_matrix(x1, x2, deg=5):
+def create_design_matrix(x1, x2):
+
+    X = np.c_[x1.ravel()[:, np.newaxis], x2.ravel()[:, np.newaxis]]
+
+    return X
+
+def create_polynomial_design_matrix(x1, x2, deg=5):
 
     p = int((deg+1)*(deg+2)/2)
     if len(x1.shape) > 1:
@@ -56,32 +60,38 @@ def create_design_matrix(x1, x2, deg=5):
 
     return X
 
-def plot(x1, x2, y):
+
+def plot_franke(x1, x2, y):
 
     fig = plt.figure()
     ax = fig.gca(projection='3d')
 
-    surf = ax.plot_surface(x1, x2, y,
-            cmap=cm.coolwarm,linewidth=0, antialiased=False)
+#    surf = ax.plot_surface(x1, x2, y, linewidth=0, antialiased=False)
+    ax.plot_surface(x1, x2, y)
     
     # Customize the z axis.
-    ax.set_zlim(-0.10, 1.40)
-    ax.zaxis.set_major_locator(LinearLocator(10))
-    ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+#    ax.set_zlim(-0.10, 1.40)
+#    ax.zaxis.set_major_locator(LinearLocator(10))
+#    ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
     
     # Add a color bar which maps values to colors.
-    fig.colorbar(surf, shrink=0.5, aspect=5)
+#    fig.colorbar(surf, shrink=0.5, aspect=5)
     plt.show()
 
 
-def create_franke_dataset():
+def create_franke_dataset(plot=False):
     x1, x2 = generate_mesh()
     y = franke_function(x1, x2)
-    X = create_design_matrix(x1, x2, deg=5)
+    
+    if plot:
+        plot_franke(x1, x2, y)
 
-    return X, y
+    y = y.ravel()[:, np.newaxis]
+    X = create_design_matrix(x1, x2)
+
+    return X, y 
 
 
 
 if __name__ == '__main__':
-    pass
+    create_franke_dataset(plot=False)

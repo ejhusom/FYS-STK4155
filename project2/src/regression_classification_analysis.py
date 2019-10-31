@@ -8,6 +8,8 @@
 # Analyze regression and classification methods.
 # ============================================================================
 import matplotlib.pyplot as plt
+from matplotlib import cm
+from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -25,6 +27,7 @@ from pylearn.linearmodel import Regression
 from pylearn.logisticregression import SGDClassification
 from pylearn.metrics import *
 from pylearn.neuralnetwork import NeuralNetwork
+from pylearn.morten_nn import *
 
 from franke import *
 
@@ -93,7 +96,7 @@ def nn_classification(X, y):
 #    print(np.shape(y_train_1hot))
 
 
-    hl = [50]
+    hl = [50,50,50]
 
     # Scikit-learn NN
 #    dnn = MLPClassifier(hidden_layer_sizes=hl, activation='logistic',
@@ -102,23 +105,26 @@ def nn_classification(X, y):
 #    dnn.fit(X_train, y_train_1hot)
 #    print(f'Scikit: {dnn.score(X_test, y_test_1hot)}')
 
-    etas = np.linspace(0.01, 0.1, 10)
-    etas = [0.1]
+#    etas = np.linspace(0.01, 0.1, 10)
+#    etas = [0.1]
 
-    for eta in etas:
-        print('----------------')
-        print('Eta: {0:.3f}'.format(eta))
+#    for eta in etas:
+#        print('----------------')
+#        print('Eta: {0:.3f}'.format(eta))
 
-        neural = NeuralNetwork(hidden_layer_sizes=hl,
-                n_categories=2, eta=eta, alpha=0.1, batch_size=10,
-                n_epochs=100,
-                act_func_str='sigmoid',
-                output_func_str='sigmoid',
-                cost_func_str='crossentropy')
+    neural = NeuralNetwork(hidden_layer_sizes=hl,
+            n_categories=2, 
+            eta=0.001, 
+            alpha=0.1,
+            batch_size=100,
+            n_epochs=1000,
+            act_func_str='sigmoid',
+            output_func_str='sigmoid',
+            cost_func_str='crossentropy')
 
-        neural.fit(X_train, y_train_1hot)
-        y_pred = neural.predict(X_test)
-        print(f'Our code: {accuracy_score(y_test, y_pred)}')
+    neural.fit(X_train, y_train_1hot)
+    y_pred = neural.predict(X_test)
+    print(f'Our code: {accuracy_score(y_test, y_pred)}')
 
 
 
@@ -132,35 +138,55 @@ def nn_regression(X, y):
     sc = MinMaxScaler()
 #    X_train = sc.fit_transform(X_train)
 #    X_test = sc.transform(X_test)
-#    y_train = sc.fit_transform(y_train)
-#    y_test = sc.transform(y_test)
 
 
 
-    hl = [50]
+    hl = [100,20]
     neural = NeuralNetwork(hidden_layer_sizes=hl,
-            n_categories=1, eta=0.01, alpha=0.1, batch_size=10,
-            n_epochs=100, act_func_str='relu')
+            n_categories=1, eta=0.001, alpha=0.1, batch_size=50,
+            n_epochs=100, 
+            act_func_str='sigmoid',
+            cost_func_str='mse',
+            output_func_str='identity')
 
     neural.fit(X_train, y_train)
-    y_pred = neural.predict(X_test)
-    print(f'Our code: {r2_score(y_test, y_pred)}')
+    y_pred = neural.predict(X)
 
+#    print(f'Our code R2: {r2_score(y_test, y_pred)}')
+#    print(f'Our code MSE: {mean_squared_error(y_test, y_pred)}')
 
     # Scikit-learn NN
-    y_train = np.ravel(y_train)
-    y_test = np.ravel(y_test)
-    dnn = MLPRegressor(hidden_layer_sizes=hl, activation='logistic',
-                            alpha=0.1, learning_rate_init=0.1, max_iter=1000,
-                            batch_size=100, learning_rate='constant')
-    dnn.fit(X_train, y_train)
-    y_pred = dnn.predict(X_test)
-#    score = dnn.score(X_test, y_test)
-    r2 = r2_score(y_test, y_pred)
-#    print(f'Scikit: {score}')
-    print(f'Scikit: {r2}')
-#    y_pred = dnn.predict(X_test)
-#    print(f'Scikit: {mean_squared_error(y_test, y_pred)}')
+#    y_train = np.ravel(y_train)
+#    y_test = np.ravel(y_test)
+#    dnn = MLPRegressor(hidden_layer_sizes=hl, 
+#        activation='relu',
+#        alpha=0.1, 
+#        learning_rate_init=0.01, 
+#        max_iter=1000,
+##       batch_size=100, 
+#        tol=1e-7,
+#        learning_rate='adaptive')
+#    dnn.fit(X_train, y_train)
+#    y_pred = dnn.predict(X)
+
+#    print(f'Scikit: {r2_score(y_test, y_pred)}')
+#    print(f'Scikit MSE: {mean_squared_error(y_test, y_pred)}')
+
+    n = 101
+    x1 = X[:,0].reshape(n,n)
+    x2 = X[:,1].reshape(n,n)
+
+    yp = y.reshape(n,n)
+    yp_pred = y_pred.reshape(n,n)
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_surface(x1, x2, yp, cmap=cm.coolwarm)
+    ax.plot_wireframe(x1, x2, yp_pred)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_surface(x1, x2, np.abs(yp-yp_pred))
+    plt.show()
 
 
 
@@ -170,5 +196,5 @@ if __name__ == '__main__':
     X_f, y_f = create_franke_dataset()
 #    regression_analysis(X_f, y_f)
 #    logistic_analysis(X_b, y_b)
-    nn_classification(X_b, y_b)
-#    nn_regression(X_f, y_f)
+#    nn_classification(X_b, y_b)
+    nn_regression(X_f, y_f)
