@@ -10,6 +10,7 @@
 # network.
 # ============================================================================
 import numpy as np
+import sys
 
 class MultilayerPerceptron:
     """Artifical neural network for machine learning purposes, with multilayer
@@ -81,12 +82,9 @@ class MultilayerPerceptron:
 
         self.hidden_layer_sizes = hidden_layer_sizes
         self.n_categories = n_categories
+        self.batch_size = batch_size
 
         self.n_epochs = n_epochs
-        if batch_size == 'auto':
-            self.batch_size = min(100, n_inputs)
-        else:
-            self.batch_size = batch_size
         self.eta = eta
         # TODO: Implement adaptive learning rate
         self.learning_rate = learning_rate
@@ -104,6 +102,10 @@ class MultilayerPerceptron:
         self.n_inputs = X.shape[0]
         self.n_features = X.shape[1]
         self.n_outputs = y.shape[1]
+
+        if self.batch_size == 'auto':
+            self.batch_size = min(100, self.n_inputs)
+        self.n_batches = int(self.n_inputs/self.batch_size)
 
         self.layers = [self.n_features] + self.hidden_layer_sizes + [self.n_categories]
         self.n_layers = len(self.layers)
@@ -134,6 +136,8 @@ class MultilayerPerceptron:
         for l in range(1, self.n_layers):
             self.z[l] = self.a[l-1] @ self.weights[l] + self.biases[l]
             self.a[l] = self.act_func(self.z[l])
+            print(self.z[l])
+            sys.exit(1)
             
         # Overwriting last output with the chosen output function
         self.a[-1] = self.output_func(self.z[-1])
@@ -200,18 +204,29 @@ class MultilayerPerceptron:
         tol = 1e-7
         cost_decrease_fails = -1
 
+#        self.n_iterations = 1
         for i in range(self.n_epochs):
-            for j in range(self.n_iterations):
-                chosen_datapoints = np.random.choice(
-                    data_indices, size=self.batch_size, replace=False
-                )
+#            for j in range(self.n_iterations):
+#                chosen_datapoints = np.random.choice(
+#                    data_indices, size=self.batch_size, replace=False
+#                )
+            j = 0
+            indeces = np.arange(self.n_inputs)
+            np.random.shuffle(indeces)
+            for batch in range(self.n_batches):
+                rand_indeces = indeces[j*self.batch_size:(j+1)*self.batch_size]
+                self.X = self.X_full[rand_indeces, :]
+                self.y = self.y_full[rand_indeces]
 
-                self.X = self.X_full[chosen_datapoints]
-                self.y = self.y_full[chosen_datapoints]
+                j += 1
+#                self.X = self.X_full[chosen_datapoints]
+#                self.y = self.y_full[chosen_datapoints]
 
 
                 self.feed_forward()
                 self.backpropagation()
+#                print(f'Cost in iterations: {self.cost}')
+
             
             # Adapative learning rate: If the cost is not reduced by a minimum
             # of tol in two epochs, the learning rate will be divided by 5.
