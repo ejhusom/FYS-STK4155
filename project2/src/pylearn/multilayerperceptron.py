@@ -136,15 +136,12 @@ class MultilayerPerceptron:
         for l in range(1, self.n_layers):
             self.z[l] = self.a[l-1] @ self.weights[l] + self.biases[l]
             self.a[l] = self.act_func(self.z[l])
-            print(self.z[l])
             
         # Overwriting last output with the chosen output function
         self.a[-1] = self.output_func(self.z[-1])
-        sys.exit(1)
 
 
     def backpropagation(self):
-
 
         self.cost = self.cost_func(self.a[-1])
 
@@ -225,7 +222,7 @@ class MultilayerPerceptron:
 
                 self.feed_forward()
                 self.backpropagation()
-#                print(f'Cost in iterations: {self.cost}')
+                print(f'Cost in iterations: {self.cost}')
 
             
             # Adapative learning rate: If the cost is not reduced by a minimum
