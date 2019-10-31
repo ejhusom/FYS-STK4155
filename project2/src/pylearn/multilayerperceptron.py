@@ -302,11 +302,11 @@ class MultilayerPerceptron:
 
     def relu(self, x):
 #        z = np.zeros_like(x)
-         return np.clip(x, 0, np.finfo(x.dtype).max, out=None)
+#         return np.clip(x, 0, np.finfo(x.dtype).max, out=None)
 #        return z
 #        result = 0 if x < 0.0 else x
 #        return result
-#        return np.maximum(0, x)
+        return np.maximum(0, x)
 #        return (x > 0) * x
 #        z[x>0]=x
 #        z[x<=0]=0
@@ -314,9 +314,14 @@ class MultilayerPerceptron:
 #        f = np.vectorize(lambda x: 0 if x < 0.0 else x)
 #        return f(x)
 
-    def relu_der(self, x):
+    def relu_der(self, x, alpha=0.01):
+      dx = np.ones_like(x)
+      dx[x < 0] = alpha
+      return dx
+
+#    def relu_der(self, x):
 #        z = np.zeros_like(x)
-        return np.clip(1, 0, np.finfo(x.dtype).max, out=None)
+#        return np.clip(1, 0, np.finfo(x.dtype).max, out=None)
 #        return z
 #        return 1. * (x > 0)
 #        result = 0 if x < 0.0 else 1
