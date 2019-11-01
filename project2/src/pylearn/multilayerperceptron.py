@@ -16,72 +16,22 @@ class MultilayerPerceptron:
     """Artifical neural network for machine learning purposes, with multilayer
     perceptrons. The number of layers and neurons in each layer is flexible.
 
-    Attributes
-    ----------
-        X_full :
-        X :
-        y_full :
-        y :
-        n_inputs :
-        n_features :
-        hidden_layer_sizes : array-like
-        n_hidden_neurons : 
-        n_categories : 
-        n_epochs :
-        batch_size :
-        n_iterations : 
-        eta :
-        alpha :
-        bias0 : float, default=0.01
-            Initial bias value for all layers.
-        biases : list, containing arrays
-        weights : list, containing arrays
-        a : list, containing arrays
-            Each array in this list contains the values corresponding to each
-            neuron in a layer, after the signal has been run through the
-            activation function. The arrays are contained in a list because
-            they usually are of different lengths. The first item in the list
-            contains the input features, because this makes the for-loops
-            smooth. The last item in the list is empty, because there are no
-            values needed for the output layer.
-        z :
-        probabilities :
-
-    Methods
-    -------
-        setup_arrays
-        feed_forward
-        feed_forward_out
-        backpropagation
-        predict
-        predict_probabilities
-        fit
-        set_cost_func
-        set_act_func
-        set_output_func
-        sigmoid
-        sigmoid_der
-        softmax
-
-
     """
 
     def __init__(
             self,
             hidden_layer_sizes=[50],
-            n_categories=1,
             n_epochs=1000,
             batch_size='auto',
-            eta=0.01,
+            eta=0.001,
             learning_rate='constant',
             alpha=0.1,
             bias0=0.01,
             act_func_str='sigmoid',
             output_func_str='softmax',
-            cost_func_str='mse'):
+            cost_func_str='crossentropy'):
 
         self.hidden_layer_sizes = hidden_layer_sizes
-        self.n_categories = n_categories
         self.batch_size = batch_size
 
         self.n_epochs = n_epochs
@@ -101,13 +51,16 @@ class MultilayerPerceptron:
 
         self.n_inputs = X.shape[0]
         self.n_features = X.shape[1]
-        self.n_outputs = y.shape[1]
+        self.n_categories = y.shape[1]
 
         if self.batch_size == 'auto':
             self.batch_size = min(100, self.n_inputs)
         self.n_batches = int(self.n_inputs/self.batch_size)
 
-        self.layers = [self.n_features] + self.hidden_layer_sizes + [self.n_categories]
+        print(self.n_batches)
+        self.layers = ([self.n_features] + 
+                        self.hidden_layer_sizes +
+                        [self.n_categories])
         self.n_layers = len(self.layers)
         self.set_cost_func(self.cost_func_str)
         self.set_act_func(self.act_func_str)
@@ -122,6 +75,8 @@ class MultilayerPerceptron:
         self.d = [None]         # error for each layer
 
         for l in range(1, self.n_layers):
+#            self.weights.append(np.random.normal(0.0, pow(self.layers[l],
+#                -0.5), (self.layers[l-1], self.layers[l])))
             self.weights.append(np.random.randn(self.layers[l-1],
                 self.layers[l])) 
             self.biases.append(np.zeros(self.layers[l]) + self.bias0)
@@ -153,11 +108,14 @@ class MultilayerPerceptron:
         # - Identity / squared loss
         self.d[-1] = self.a[-1] - self.y
 
-#        self.dw = self.a[-2].T @ self.d[-1]
-#        self.db = np.sum(self.d[-1], axis=0)
+        self.dw = self.a[-2].T @ self.d[-1]
+        self.db = np.sum(self.d[-1], axis=0)
 
-        self.weights[-1] -= self.eta * self.a[-2].T @ self.d[-1]
-        self.biases[-1] -= self.eta * np.sum(self.d[-1], axis=0)
+        if self.alpha > 0.0:
+            self.dw += self.alpha * self.weights[-1]
+
+        self.weights[-1] -= self.eta * self.dw
+        self.biases[-1] -= self.eta * self.db
 
 
         for l in range(self.n_layers-2, 0, -1):
@@ -165,8 +123,13 @@ class MultilayerPerceptron:
                     self.d[l+1] @ self.weights[l+1].T *
                     self.act_func_der(self.z[l])
             )
+            
+            self.dw = self.a[l-1].T @ self.d[l]
 
-            self.weights[l] -= self.eta * self.a[l-1].T @ self.d[l]
+            if self.alpha > 0.0:
+                self.dw += self.alpha * self.weights[l]
+
+            self.weights[l] -= self.eta * self.dw
             self.biases[l] -= self.eta * np.sum(self.d[l], axis=0)
         
 
@@ -201,6 +164,13 @@ class MultilayerPerceptron:
         tol = 1e-7
         cost_decrease_fails = -1
 
+        if self.learning_rate == 'adaptive':
+            t0 = 5
+            t1 = 50
+            eta = lambda t: 0.01*t0/(t + t1)
+        else:
+            eta = lambda t: self.eta
+
 #        self.n_iterations = 1
         for i in range(self.n_epochs):
 #            for j in range(self.n_iterations):
@@ -211,6 +181,9 @@ class MultilayerPerceptron:
             indeces = np.arange(self.n_inputs)
             np.random.shuffle(indeces)
             for batch in range(self.n_batches):
+
+                self.eta = eta(i*self.n_batches + batch)
+
                 rand_indeces = indeces[j*self.batch_size:(j+1)*self.batch_size]
                 self.X = self.X_full[rand_indeces, :]
                 self.y = self.y_full[rand_indeces]
@@ -222,12 +195,13 @@ class MultilayerPerceptron:
 
                 self.feed_forward()
                 self.backpropagation()
-                print(f'Cost in iterations: {self.cost}')
+#                print(f'Cost in iterations: {self.cost}')
 
             
             # Adapative learning rate: If the cost is not reduced by a minimum
             # of tol in two epochs, the learning rate will be divided by 5.
-            print(f'Cost: {self.cost}')
+            print(f'\rCost: {self.cost}', end='')
+#            print(f'Cost: {self.cost}')
 #            if (cost_limit - self.cost) < tol:
 #                cost_decrease_fails += 1
 #            if cost_decrease_fails > 5:
@@ -253,6 +227,9 @@ class MultilayerPerceptron:
         if act_func_str == 'sigmoid':
             self.act_func = self.sigmoid
             self.act_func_der = self.sigmoid_der
+        elif act_func_str == 'tanh':
+            self.act_func = self.tanh
+            self.act_func_der = self.tanh_der
         elif act_func_str == 'relu':
             self.act_func = self.relu
             self.act_func_der = self.relu_der
@@ -296,7 +273,8 @@ class MultilayerPerceptron:
         return self.sigmoid(x)*(1 - self.sigmoid(x))
 
     def tanh(self, x):
-        return 2/(1 + np.exp(-2*x)) - 1
+#        return 2/(1 + np.exp(-2*x)) - 1
+        return np.tanh(x)
 
     def tanh_der(self, x):
         return 1 - self.tanh(x)**2
@@ -313,37 +291,10 @@ class MultilayerPerceptron:
         return self.sigmoid(x)*(1 - self.sigmoid(x))
 
     def relu(self, x):
-#        z = np.zeros_like(x)
-#         return np.clip(x, 0, np.finfo(x.dtype).max, out=None)
-#        return z
-#        result = 0 if x < 0.0 else x
-#        return result
-        return np.maximum(0, x)
-#        return (x > 0) * x
-#        z[x>0]=x
-#        z[x<=0]=0
-#        return z
-#        f = np.vectorize(lambda x: 0 if x < 0.0 else x)
-#        return f(x)
+        return (x >= 0) * x
 
-#    def relu_der(self, x, alpha=0.01):
-#      dx = np.ones_like(x)
-#      dx[x < 0] = alpha
-#      return dx
 
     def relu_der(self, x):
-#        z = np.zeros_like(x)
-#        return np.clip(1, 0, np.finfo(x.dtype).max, out=None)
-#        return z
-#        return 1. * (x > 0)
-#        result = 0 if x < 0.0 else 1
-#        return result
-#        return (x > 0) * 1
-#        return (x > 0).astype(int)
-        z = np.zeros_like(x)
-        z[x>0]=1
-        z[x<=0]=0
-#        print(z)
-        return z
-#        f = np.vectorize(lambda x: 0 if x < 0.0 else 1)
-#        return f(x)
+        return 1. * (x >= 0)
+
+

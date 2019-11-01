@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 
-def generate_mesh(start=0, stop=1, n=101):
+def generate_mesh(start=0, stop=1, n=201):
     '''Generate x and y data and return at as a flat meshgrid.'''
 
     x1 = np.linspace(start, stop, n)
