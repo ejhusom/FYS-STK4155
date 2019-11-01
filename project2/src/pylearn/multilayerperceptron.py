@@ -10,7 +10,6 @@
 # network.
 # ============================================================================
 import numpy as np
-import sys
 
 class MultilayerPerceptron:
     """Artifical neural network for machine learning purposes, with multilayer
@@ -33,10 +32,8 @@ class MultilayerPerceptron:
 
         self.hidden_layer_sizes = hidden_layer_sizes
         self.batch_size = batch_size
-
         self.n_epochs = n_epochs
         self.eta = eta
-        # TODO: Implement adaptive learning rate
         self.learning_rate = learning_rate
         self.alpha = alpha
         self.bias0 = bias0
@@ -100,8 +97,7 @@ class MultilayerPerceptron:
 
         self.cost = self.cost_func(self.a[-1])
 
-
-        # The following calculation of output error works with the following
+        # NOTE: The following calculation of output error works with the following
         # combination of output activation / loss function:
         # - Sigmoid / binary cross entropy
         # - Softmax / categorical cross entropy
@@ -158,12 +154,6 @@ class MultilayerPerceptron:
 
         self.initialize(X, y)
 
-        data_indices = np.arange(self.n_inputs)
-        
-        cost_limit = 1000
-        tol = 1e-7
-        cost_decrease_fails = -1
-
         if self.learning_rate == 'adaptive':
             t0 = 5
             t1 = 50
@@ -171,45 +161,23 @@ class MultilayerPerceptron:
         else:
             eta = lambda t: self.eta
 
-#        self.n_iterations = 1
         for i in range(self.n_epochs):
-#            for j in range(self.n_iterations):
-#                chosen_datapoints = np.random.choice(
-#                    data_indices, size=self.batch_size, replace=False
-#                )
             j = 0
             indeces = np.arange(self.n_inputs)
             np.random.shuffle(indeces)
             for batch in range(self.n_batches):
-
                 self.eta = eta(i*self.n_batches + batch)
 
                 rand_indeces = indeces[j*self.batch_size:(j+1)*self.batch_size]
                 self.X = self.X_full[rand_indeces, :]
                 self.y = self.y_full[rand_indeces]
 
-                j += 1
-#                self.X = self.X_full[chosen_datapoints]
-#                self.y = self.y_full[chosen_datapoints]
-
-
                 self.feed_forward()
                 self.backpropagation()
-#                print(f'Cost in iterations: {self.cost}')
 
+                j += 1
             
-            # Adapative learning rate: If the cost is not reduced by a minimum
-            # of tol in two epochs, the learning rate will be divided by 5.
             print(f'\rCost: {self.cost}', end='')
-#            print(f'Cost: {self.cost}')
-#            if (cost_limit - self.cost) < tol:
-#                cost_decrease_fails += 1
-#            if cost_decrease_fails > 5:
-#                self.eta /= 2.0
-#                cost_decrease_fails = 0
-#                print(f'Learning rate apapted: {self.eta}')
-#
-#            cost_limit = self.cost
 
 
 

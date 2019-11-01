@@ -4,8 +4,13 @@
 # Author:   Erik Johannes Husom
 # Created:  2019-10-22
 # ----------------------------------------------------------------------------
-# Description:
+# DESCRIPTION:
 # Analyze regression and classification methods.
+#
+# NOTES:
+# 
+# Breast cancer data:
+# - MinMaxScaler seems to give better results than StandardScaler.
 # ============================================================================
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -33,7 +38,7 @@ from pylearn.multilayerperceptron import MultilayerPerceptron
 
 from breastcancer import *
 from creditcard import *
-from franke import FrankeDataset
+from franke import *
 
 
 def scale_data(train_data, test_data, scaler='standard'):
@@ -72,24 +77,18 @@ def nn_classification(X, y, scale_columns=None, pl=True, skl=False):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
             random_state = 0)
 
-    # Scaling
-    # NOTE: MinMaxScaler seems to give better results than StandardScaler on
-    # breast cancer data.
-#    sc = StandardScaler()
-#    sc = MinMaxScaler()
-#    X_train = sc.fit_transform(X_train)
-#    X_test = sc.transform(X_test)
-    # CC
-    minmaxscaler = MinMaxScaler()
-    scaler = ColumnTransformer(
-                        remainder='passthrough',
-                        transformers=[('minmaxscaler', minmaxscaler, scale_columns)])
-    scaler.fit(X_train)
-    X_train = scaler.transform(X_train)
-    X_test = scaler.transform(X_test)
+    if scale_columns is not None:
+        minmaxscaler = MinMaxScaler()
+        scaler = ColumnTransformer(
+                            remainder='passthrough',
+                            transformers=[('minmaxscaler', minmaxscaler, scale_columns)])
+        scaler.fit(X_train)
+        X_train = scaler.transform(X_train)
+        X_test = scaler.transform(X_test)
+
 
     # One hot encoding targets
-    y_train= y_train.reshape(-1,1)
+    y_train = y_train.reshape(-1,1)
     encoder = OneHotEncoder(categories='auto')
     y_train_1hot = encoder.fit_transform(y_train).toarray()
     y_test_1hot = encoder.fit_transform(y_test.reshape(-1,1)).toarray()
@@ -132,10 +131,8 @@ def nn_classification(X, y, scale_columns=None, pl=True, skl=False):
 def nn_classification_plot(y_test, y_pred):
 
     ax = plot_confusion_matrix(y_test, y_pred, normalize=True, cmap='Blues')
-
     bottom, top = ax.get_ylim()
     ax.set_ylim(bottom + 0.5, top - 0.5)
-
     plt.show()
 
 
@@ -195,9 +192,9 @@ def nn_regression_plot(X, y, y_pred):
     n = int(np.sqrt(size(y)))
     x1 = X[:,0].reshape(n,n)
     x2 = X[:,1].reshape(n,n)
-
     y_mesh = y.reshape(n,n)
     y__pred_mesh = y_pred.reshape(n,n)
+
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.plot_surface(x1, x2, y_mesh, cmap=cm.coolwarm)
