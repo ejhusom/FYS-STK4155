@@ -10,11 +10,11 @@
 # ============================================================================
 import numpy as np
 from sklearn.model_selection import KFold
+from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
 
 from pylearn.logisticregression import SGDClassification
 from pylearn.linearmodel import Regression
-from pylearn.metrics import *
 from pylearn.multilayerperceptron import MultilayerPerceptron
 
 

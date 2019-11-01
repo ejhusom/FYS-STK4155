@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ============================================================================
-# File:     regression_classification_analysis.py
+# File:     main.py
 # Author:   Erik Johannes Husom
 # Created:  2019-10-22
 # ----------------------------------------------------------------------------
@@ -8,7 +8,11 @@
 # Analyze regression and classification methods.
 #
 # NOTES:
-# 
+#
+# Pylearn:
+# - For regression with relu: eta must be 0.000001
+# - For classification: eta must be 0.001
+#
 # Breast cancer data:
 # - MinMaxScaler seems to give better results than StandardScaler.
 # ============================================================================
@@ -23,6 +27,7 @@ import time
 
 import sklearn as skl
 from sklearn.linear_model import SGDClassifier, Ridge
+from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier, MLPRegressor
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, MinMaxScaler
@@ -33,7 +38,6 @@ import scikitplot.metrics as skplt
 from pylearn.resampling import CV
 from pylearn.linearmodel import Regression
 from pylearn.logisticregression import SGDClassification
-from pylearn.metrics import *
 from pylearn.multilayerperceptron import MultilayerPerceptron
 
 from breastcancer import *
@@ -113,8 +117,9 @@ def nn_classification(X, y, scale_columns=None, pl=True, skl=False):
                 cost_func_str='crossentropy')
 
         model.fit(X_train, y_train_1hot)
-        y_pred = model.predict(X_test)
+        y_pred = model.predict_class(X_test)
         print(f'pylearn accuracy: {accuracy_score(y_test, y_pred)}')
+        nn_classification_plot(y_test, y_pred)
 
     if skl:
         dnn = MLPClassifier(hidden_layer_sizes=hl, activation='logistic',
@@ -124,6 +129,7 @@ def nn_classification(X, y, scale_columns=None, pl=True, skl=False):
         y_pred = dnn.predict(X_test)
         y_pred = np.argmax(y_pred, axis=1)
         print(f'Scikit accuracy: {accuracy_score(y_test, y_pred)}')
+        nn_classification_plot(y_test, y_pred)
 
 
 
@@ -143,6 +149,7 @@ def nn_regression(X, y, pl=True, skl=False):
             random_state = 0)
 
     hl = [100,30,20]
+    n_epochs = 100
 
 
     if pl:
@@ -152,14 +159,14 @@ def nn_regression(X, y, pl=True, skl=False):
                     alpha=0.000, 
                     batch_size=100,
                     learning_rate='constant',
-                    n_epochs=100, 
+                    n_epochs=n_epochs, 
                     act_func_str='sigmoid',
                     cost_func_str='mse',
                     output_func_str='identity')
 
         model.fit(X_train, y_train)
-        y_pred = model.predict_probabilities(X)
-        y_pred_test = model.predict_probabilities(X_test)
+        y_pred = model.predict(X)
+        y_pred_test = model.predict(X_test)
         print(f'pylearn R2: {r2_score(y_test, y_pred_test)}')
         print(f'pylearn MSE: {mean_squared_error(y_test, y_pred_test)}')
         nn_regression_plot(X, y, y_pred)
@@ -170,10 +177,10 @@ def nn_regression(X, y, pl=True, skl=False):
         y_test = np.ravel(y_test)
         dnn = MLPRegressor(
                 hidden_layer_sizes=hl, 
-                activation='relu',
+                activation='logistic',
                 alpha=0.1, 
                 learning_rate_init=0.01, 
-                max_iter=1000,
+                max_iter=n_epochs,
                 batch_size=200, 
                 tol=1e-7,
                 learning_rate='constant')
@@ -189,11 +196,11 @@ def nn_regression(X, y, pl=True, skl=False):
 
 def nn_regression_plot(X, y, y_pred):
 
-    n = int(np.sqrt(size(y)))
+    n = int(np.sqrt(np.size(y)))
     x1 = X[:,0].reshape(n,n)
     x2 = X[:,1].reshape(n,n)
     y_mesh = y.reshape(n,n)
-    y__pred_mesh = y_pred.reshape(n,n)
+    y_pred_mesh = y_pred.reshape(n,n)
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -212,7 +219,7 @@ if __name__ == '__main__':
 
     # Create data sets
     X_b, y_b = breast_cancer_dataset()
-    franke = FrankeDataset()
+    franke = FrankeDataset(n=101, eps=0.001)
     X_f, y_f = franke.generate_data_set()
     X_c, y_c, scale_columns = preprocess_creditcard_data('../data/credit_card.xls')
 
@@ -220,5 +227,5 @@ if __name__ == '__main__':
 #    regression_analysis(X_f, y_f)
 #    logistic_analysis(X_b, y_b)
 #    nn_classification(X_b, y_b)
-    nn_classification(X_c, y_c, scale_columns, pl=True, skl=True)
-#    nn_regression(X_f, y_f, pl=True, skl=False)
+#    nn_classification(X_c, y_c, scale_columns, pl=True, skl=True)
+    nn_regression(X_f, y_f, pl=True, skl=False)

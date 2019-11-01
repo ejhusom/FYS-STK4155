@@ -8,6 +8,10 @@
 # DESCRIPTION:
 # Feedforward, fully connected, multilayer perceptron artificial neural
 # network.
+#
+# Used for:
+# - Regression
+# - Binary classification
 # ============================================================================
 import numpy as np
 
@@ -24,7 +28,7 @@ class MultilayerPerceptron:
             batch_size='auto',
             eta=0.001,
             learning_rate='constant',
-            alpha=0.1,
+            alpha=0.0,
             bias0=0.01,
             act_func_str='sigmoid',
             output_func_str='softmax',
@@ -42,7 +46,7 @@ class MultilayerPerceptron:
         self.cost_func_str = cost_func_str
 
 
-    def initialize(self, X, y):
+    def _initialize(self, X, y):
         self.X_full = X
         self.y_full = y
 
@@ -54,7 +58,6 @@ class MultilayerPerceptron:
             self.batch_size = min(100, self.n_inputs)
         self.n_batches = int(self.n_inputs/self.batch_size)
 
-        print(self.n_batches)
         self.layers = ([self.n_features] + 
                         self.hidden_layer_sizes +
                         [self.n_categories])
@@ -74,16 +77,14 @@ class MultilayerPerceptron:
         for l in range(1, self.n_layers):
 #            self.weights.append(np.random.normal(0.0, pow(self.layers[l],
 #                -0.5), (self.layers[l-1], self.layers[l])))
-            self.weights.append(np.random.randn(self.layers[l-1],
-                self.layers[l])) 
+            self.weights.append(np.random.randn(self.layers[l-1], self.layers[l])) 
             self.biases.append(np.zeros(self.layers[l]) + self.bias0)
             self.z.append(None)
             self.a.append(None)
             self.d.append(None)
 
 
-    def feed_forward(self):
-
+    def _feed_forward(self):
         self.a[0] = self.X
         for l in range(1, self.n_layers):
             self.z[l] = self.a[l-1] @ self.weights[l] + self.biases[l]
@@ -93,7 +94,18 @@ class MultilayerPerceptron:
         self.a[-1] = self.output_func(self.z[-1])
 
 
-    def backpropagation(self):
+    def _feed_forward_out(self, X):
+        a = X
+        for l in range(1, self.n_layers):
+            z = a @ self.weights[l] + self.biases[l]
+            a = self.act_func(z)
+            
+        # Overwriting output with chosen output function
+        a = self.output_func(z)
+        return a
+
+
+    def _backpropagation(self):
 
         self.cost = self.cost_func(self.a[-1])
 
@@ -127,32 +139,14 @@ class MultilayerPerceptron:
 
             self.weights[l] -= self.eta * self.dw
             self.biases[l] -= self.eta * np.sum(self.d[l], axis=0)
-        
 
 
-    def feed_forward_out(self, X):
 
-        a = X
-        for l in range(1, self.n_layers):
-            z = a @ self.weights[l] + self.biases[l]
-            a = self.act_func(z)
-            
-        # Overwriting output with chosen output function
-        a = self.output_func(z)
-        return a
 
-    def predict(self, X):
-        # TODO: Implement other functions than softmax?
-        probabilities = self.feed_forward_out(X)
-        return np.argmax(probabilities, axis=1)
-
-    def predict_probabilities(self, X):
-        probabilities = self.feed_forward_out(X)
-        return probabilities
 
     def fit(self, X, y):
 
-        self.initialize(X, y)
+        self._initialize(X, y)
 
         if self.learning_rate == 'adaptive':
             t0 = 5
@@ -172,13 +166,23 @@ class MultilayerPerceptron:
                 self.X = self.X_full[rand_indeces, :]
                 self.y = self.y_full[rand_indeces]
 
-                self.feed_forward()
-                self.backpropagation()
+                self._feed_forward()
+                self._backpropagation()
 
                 j += 1
             
-            print(f'\rCost: {self.cost}', end='')
+            print(f'Epoch {i+1}/{self.n_epochs}. Cost: {self.cost}', end='\r')
 
+        print('\nTraining done.')
+
+
+    def predict_class(self, X):
+        output = self._feed_forward_out(X)
+        return np.argmax(output, axis=1)
+
+
+    def predict(self, X):
+        return self._feed_forward_out(X)
 
 
     def set_cost_func(self, cost_func_str):
@@ -233,7 +237,6 @@ class MultilayerPerceptron:
         return -self.y/x + (1 - self.y)/(1 - x)
 #        return -self.y/x
 
-
     def sigmoid(self, x):
         return 1/(1 + np.exp(-x))
 
@@ -260,7 +263,6 @@ class MultilayerPerceptron:
 
     def relu(self, x):
         return (x >= 0) * x
-
 
     def relu_der(self, x):
         return 1. * (x >= 0)
