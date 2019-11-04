@@ -67,3 +67,5 @@ Trash
 *.dlog
 *.user
 
+# vim
+Session.vim
