@@ -107,7 +107,7 @@ def nn_classification(X, y, scale_columns=None, pl=True, skl=False):
 
     if pl:
         model = MultilayerPerceptron(hidden_layer_sizes=hl,
-                eta=0.001, 
+                eta=0.1, 
                 learning_rate='constant',
                 alpha=0.0,
                 batch_size=100,
@@ -148,19 +148,19 @@ def nn_regression(X, y, pl=True, skl=False):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
             random_state = 0)
 
-    hl = [100,30,20]
-    n_epochs = 100
+    hl = [100,100,100,100]
+    n_epochs = 1000
 
 
     if pl:
         model = MultilayerPerceptron(
                     hidden_layer_sizes=hl,
-                    eta=0.001, 
+                    eta=0.01, 
                     alpha=0.000, 
                     batch_size=100,
                     learning_rate='constant',
                     n_epochs=n_epochs, 
-                    act_func_str='sigmoid',
+                    act_func_str='relu',
                     cost_func_str='mse',
                     output_func_str='identity')
 
@@ -215,17 +215,17 @@ def nn_regression_plot(X, y, y_pred):
 
 
 if __name__ == '__main__':
-    np.random.seed(2020)
+    np.random.seed(2010)
 
     # Create data sets
     X_b, y_b = breast_cancer_dataset()
-    franke = FrankeDataset(n=101, eps=0.001)
+    franke = FrankeDataset(n=100, eps=0.01)
     X_f, y_f = franke.generate_data_set()
-    X_c, y_c, scale_columns = preprocess_creditcard_data('../data/credit_card.xls')
+    # X_c, y_c, scale_columns = preprocess_creditcard_data('../data/credit_card.xls')
 
     # Analyze data
 #    regression_analysis(X_f, y_f)
 #    logistic_analysis(X_b, y_b)
 #    nn_classification(X_b, y_b)
-#    nn_classification(X_c, y_c, scale_columns, pl=True, skl=True)
+    # nn_classification(X_c, y_c, scale_columns, pl=True, skl=True)
     nn_regression(X_f, y_f, pl=True, skl=False)
