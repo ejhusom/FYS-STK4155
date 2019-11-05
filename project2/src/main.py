@@ -19,6 +19,7 @@
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.patches import Rectangle
 plt.style.use('ggplot')
 import numpy as np
 import pandas as pd
@@ -147,7 +148,7 @@ def nn_classification_plot(y_test, y_pred):
 def nn_regression_analysis(train=False):
 
     franke = FrankeDataset(n=20, eps=0.2)
-    X_f, y_f = franke.generate_data_set()
+    X, y = franke.generate_data_set()
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
             random_state = 0)
@@ -268,7 +269,7 @@ def nn_regression_analysis(train=False):
 def nn_regression_heatmap(train=False):
 
     franke = FrankeDataset(n=20, eps=0.2)
-    X_f, y_f = franke.generate_data_set()
+    X, y = franke.generate_data_set()
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
             random_state = 0)
@@ -276,8 +277,8 @@ def nn_regression_heatmap(train=False):
     
 
     # Test cases
-    n_layers = np.arange(1, 5, 1)                  # 1, 2, 3, ...
-    n_nodes = np.arange(10, 51, 10)                # 10, 20, 30, ...
+    n_layers = np.arange(1, 10, 1)                  # 1, 2, 3, ...
+    n_nodes = np.arange(10, 101, 10)                # 10, 20, 30, ...
 
     mse = np.zeros((len(n_layers), len(n_nodes)))
     r2 = np.zeros((len(n_layers), len(n_nodes)))
@@ -302,10 +303,17 @@ def nn_regression_heatmap(train=False):
 
                 model.fit(X_train, y_train)
                 y_pred_test = model.predict(X_test)
-                mse[i,j] = mean_squared_error(y_test, y_pred_test)
-                r2[i,j] = r2_score(y_test, y_pred_test)
+                if np.isnan(y_pred_test).any():
+                    mse[i,j] = np.nan
+                    r2[i,j] = np.nan
+                    print('Nan detected')
+                else:
+                    mse[i,j] = mean_squared_error(y_test, y_pred_test)
+                    r2[i,j] = r2_score(y_test, y_pred_test)
                 j += 1
+                print(f'Nodes: {n}')
             i += 1
+            print(f'Layers: {l}')
 
         np.save('mse_heat', mse)
         np.save('r2_heat', r2)
@@ -313,20 +321,67 @@ def nn_regression_heatmap(train=False):
     mse = np.load('mse_heat.npy')
     r2 = np.load('r2_heat.npy')
 
-    plt.figure()
+    min_idcs = np.where(mse == np.nanmin(mse))
+    print(min_idcs)
 
-    ax = sns.heatmap(mse, annot=True)
-    ax.set_xlabel('Number of layers')
-    ax.set_ylabel('Number of nodes per layer')
+    plt.figure(figsize=(9.5,4.5))
+
+    print(n_layers)
+    print(n_nodes)
+    ax = sns.heatmap(mse, annot=True, xticklabels=n_nodes, yticklabels=n_layers)
+    ax.add_patch(Rectangle((min_idcs[1], min_idcs[0]), 1, 1, fill=False, edgecolor='red', lw=3))
+    # ax.set_xticks(n_layers)
+    ax.set_xlabel('Number of nodes per layer')
+    ax.set_ylabel('Number of layers')
+    # ax.set_yticks(n_nodes)
     bottom, top = ax.get_ylim()
     ax.set_ylim(bottom + 0.5, top - 0.5)
     plt.savefig('heatmap.pdf')
     plt.show()
 
 
+def nn_regression_optimal(train=False):
+    franke = FrankeDataset(n=200, eps=0.2)
+    X, y = franke.generate_data_set()
+    franke_clean = FrankeDataset(n=200, eps=0.0)
+    X_clean, y_clean = franke_clean.generate_data_set()
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
+            random_state = 0)
+
+    
+
+
+    if train:
+        model = MultilayerPerceptron(
+                    hidden_layer_sizes=[70,70,70],
+                    eta=1e-2, 
+                    alpha=0.0, 
+                    batch_size=100,
+                    learning_rate='constant',
+                    n_epochs=2000, 
+                    act_func_str='relu',
+                    cost_func_str='mse',
+                    output_func_str='identity')
+
+        model.fit(X_train, y_train)
+        y_pred_test = model.predict(X_test)
+        y_pred = model.predict(X)
+        mse = mean_squared_error(y_test, y_pred_test)
+        r2 = r2_score(y_test, y_pred_test)
+        print(f'MSE: {mse}')
+        print(f'R2: {r2}')
+        
+        np.save('y_pred_optimal', y_pred)
+
+    y_pred = np.load('y_pred_optimal.npy')
+    nn_regression_plot(X, y, y_pred)
+    
+
+
 def nn_regression_skl(X, y):
     franke = FrankeDataset(n=20, eps=0.2)
-    X_f, y_f = franke.generate_data_set()
+    X, y = franke.generate_data_set()
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
             random_state = 0)
@@ -336,7 +391,7 @@ def nn_regression_skl(X, y):
             hidden_layer_sizes=hl, 
             activation='logistic',
             alpha=0.1, 
-            learning_rate_init=0.01, 
+            learning_rate_init=0.01,
             max_iter=n_epochs,
             batch_size=200, 
             tol=1e-7,
@@ -359,10 +414,11 @@ def nn_regression_plot(X, y, y_pred):
     y_mesh = y.reshape(n,n)
     y_pred_mesh = y_pred.reshape(n,n)
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(6,4.5))
     ax = fig.add_subplot(111, projection='3d')
     ax.plot_surface(x1, x2, y_mesh, cmap=cm.coolwarm)
     ax.plot_wireframe(x1, x2, y_pred_mesh)
+    plt.savefig('nn_franke.pdf')
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -382,4 +438,5 @@ if __name__ == '__main__':
 #    nn_classification(X_b, y_b)
     # nn_classification(X_c, y_c, scale_columns, pl=True, skl=True)
     # nn_regression_analysis(train=False)
-    nn_regression_heatmap(train=True)
+    # nn_regression_heatmap(train=True)
+    nn_regression_optimal(train=False)
