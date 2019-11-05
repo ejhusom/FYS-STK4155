@@ -149,6 +149,7 @@ class MultilayerPerceptron:
     def fit(self, X, y):
 
         self._initialize(X, y)
+        self.costs = np.zeros(self.n_epochs)
 
         if self.learning_rate == 'adaptive':
             t0 = 5
@@ -173,6 +174,7 @@ class MultilayerPerceptron:
 
                 j += 1
 
+            self.costs[i] = self.cost
             print(f'Epoch {i+1}/{self.n_epochs}. Cost: {self.cost}', end='\r')
 
         print('\nTraining done.')
