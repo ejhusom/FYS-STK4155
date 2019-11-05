@@ -148,14 +148,28 @@ def nn_regression(X, y, pl=True, skl=False):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
             random_state = 0)
 
+    
+
+    # Test cases
+    n_layers = np.linspace(1, 20, 20, dtype='int')  # 1, 2, 3, ...
+    n_nodes = np.arange(10, 1001, 10, dtype='int')  # 10, 20, 30, ..., 1000
+    etas = np.logspace(-1, -10, 10)                 # 0.1, 0.01, ..., 1e-10
+    n_epochs = np.arange(0, 10001, 100)             
+    n_epochs[0] = 1                                 # 1, 100, 200, ..., 10 000
+
+    n_epoch0 = 1000
+    eta0 = 0.001
+
+
+
     hl = [100,100]
-    n_epochs = 1000
+    n_epochs = 10
 
 
     if pl:
         model = MultilayerPerceptron(
                     hidden_layer_sizes=hl,
-                    eta=0.01, 
+                    eta=1e-3, 
                     alpha=0.000, 
                     batch_size=100,
                     learning_rate='constant',
@@ -224,8 +238,6 @@ if __name__ == '__main__':
     # X_c, y_c, scale_columns = preprocess_creditcard_data('../data/credit_card.xls')
 
     # Analyze data
-#    regression_analysis(X_f, y_f)
-#    logistic_analysis(X_b, y_b)
 #    nn_classification(X_b, y_b)
     # nn_classification(X_c, y_c, scale_columns, pl=True, skl=True)
     nn_regression(X_f, y_f, pl=True, skl=False)

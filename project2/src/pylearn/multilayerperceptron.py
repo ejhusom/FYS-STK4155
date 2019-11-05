@@ -3,7 +3,7 @@
 # File:     multilayerperceptron.py
 # Author:   Erik Johannes Husom.
 # Created:  2019-10-22
-# Version:  0.2
+# Version:  1.0
 # ----------------------------------------------------------------------------
 # DESCRIPTION:
 # Feedforward, fully connected, multilayer perceptron artificial neural
@@ -14,8 +14,6 @@
 # - Binary classification
 # ============================================================================
 import numpy as np
-import time
-import sys
 
 class MultilayerPerceptron:
     """Artifical neural network for machine learning purposes, with multilayer
@@ -28,7 +26,7 @@ class MultilayerPerceptron:
             hidden_layer_sizes=[50],
             n_epochs=1000,
             batch_size='auto',
-            eta=0.1,
+            eta=0.01,
             learning_rate='constant',
             alpha=0.0,
             bias0=0.01,
@@ -77,8 +75,6 @@ class MultilayerPerceptron:
         self.d = [None]         # error for each layer
 
         for l in range(1, self.n_layers):
-           # self.weights.append(np.random.normal(0.0, pow(self.layers[l],
-           #     -0.5), (self.layers[l-1], self.layers[l])))
             # self.weights.append(np.random.randn(self.layers[l-1], self.layers[l])) 
             self.weights.append(np.random.normal(
                                     loc=0.0,
@@ -217,16 +213,15 @@ class MultilayerPerceptron:
 
         if output_func_str == 'sigmoid':
             self.output_func = self.sigmoid
-            self.output_func_der = self.sigmoid_der
+        if output_func_str == 'tanh':
+            self.output_func = self.tanh
         elif output_func_str == 'softmax':
             self.output_func = self.softmax
-            self.output_func_der = self.softmax_der
         elif output_func_str == 'relu':
             self.output_func = self.relu
             self.output_func_der = self.relu_der
         elif self.output_func_str == 'identity':
             self.output_func = lambda x: x
-            self.output_func_der = lambda x: 1
 
 
     def mse(self, x):
@@ -237,23 +232,17 @@ class MultilayerPerceptron:
 
     def crossentropy(self, x):
         return - (self.y * np.log(x) + (1 - self.y) * np.log(1 - x)).mean()
-#        return -self.y * np.log(x)
 
     def crossentropy_der(self, x):
         return -self.y/x + (1 - self.y)/(1 - x)
-#        return -self.y/x
 
     def sigmoid(self, x):
-        # x[x < -10000] = -1000
-        z = 1/(1 + np.exp(-x))
-        # print(z)
-        return z
+        return 1/(1 + np.exp(-x))
 
     def sigmoid_der(self, x):
         return self.sigmoid(x)*(1 - self.sigmoid(x))
 
     def tanh(self, x):
-#        return 2/(1 + np.exp(-2*x)) - 1
         return np.tanh(x)
 
     def tanh_der(self, x):
@@ -263,10 +252,8 @@ class MultilayerPerceptron:
         exp_term = np.exp(x)
         return exp_term / exp_term.sum(axis=1, keepdims=True)
 
-
     def relu(self, x):
         return (x >= 0) * x
-
 
     def relu_der(self, x):
         return 1. * (x >= 0)
