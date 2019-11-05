@@ -148,7 +148,7 @@ def nn_regression(X, y, pl=True, skl=False):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
             random_state = 0)
 
-    hl = [100,100,100,100]
+    hl = [100,100]
     n_epochs = 1000
 
 

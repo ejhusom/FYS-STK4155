@@ -176,7 +176,6 @@ class MultilayerPerceptron:
                 self._backpropagation()
 
                 j += 1
-                # print(batch)
 
             print(f'Epoch {i+1}/{self.n_epochs}. Cost: {self.cost}', end='\r')
 
