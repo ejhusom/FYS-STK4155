@@ -30,6 +30,7 @@ class MultilayerPerceptron:
             learning_rate='constant',
             alpha=0.0,
             bias0=0.01,
+            weights_init='xavier',
             act_func_str='sigmoid',
             output_func_str='softmax',
             cost_func_str='crossentropy'):
@@ -41,6 +42,7 @@ class MultilayerPerceptron:
         self.learning_rate = learning_rate
         self.alpha = alpha
         self.bias0 = bias0
+        self.weights_init = weights_init
         self.act_func_str = act_func_str
         self.output_func_str = output_func_str
         self.cost_func_str = cost_func_str
@@ -75,11 +77,13 @@ class MultilayerPerceptron:
         self.d = [None]         # error for each layer
 
         for l in range(1, self.n_layers):
-            # self.weights.append(np.random.randn(self.layers[l-1], self.layers[l])) 
-            self.weights.append(np.random.normal(
-                                    loc=0.0,
-                                    scale=np.sqrt(2./(self.layers[l-1] + self.layers[l])),
-                                    size=(self.layers[l-1], self.layers[l])))
+            if self.weights_init=='normal':
+                self.weights.append(np.random.randn(self.layers[l-1], self.layers[l])) 
+            elif self.weights_init=='xavier':
+                self.weights.append(np.random.normal(
+                                        loc=0.0,
+                                        scale=np.sqrt(2./(self.layers[l-1] + self.layers[l])),
+                                        size=(self.layers[l-1], self.layers[l])))
             self.biases.append(np.zeros(self.layers[l]) + self.bias0)
             self.z.append(None)
             self.a.append(None)
