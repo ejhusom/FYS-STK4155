@@ -86,12 +86,6 @@ def nn_classification_simple():
     y_train_1hot = encoder.fit_transform(y_train).toarray()
     y_test_1hot = encoder.fit_transform(y_test.reshape(-1,1)).toarray()
 
-    # Reduce size of train sets if necessary
-#    X_train = X_train[:10,:]
-#    y_train_1hot = y_train_1hot[:10,:]
-#    print(np.shape(y_train_1hot))
-
-
 
     model = MultilayerPerceptron(
             hidden_layer_sizes=[10,10,10],
@@ -111,16 +105,30 @@ def nn_classification_simple():
     nn_classification_plot(y_test, y_pred)
 
 
-def nn_classification_analysis(train=False):
+def nn_classification_analysis(train=False, options=[1, True]):
+
+    if options[0] == 1:
+        onehot_str = 'case1'
+    else:
+        onehot_str = 'case2'
+    if options[1] == True:
+        balance_str = 'balanced'
+    else:
+        balance_str = 'unbalanced'
+
 
     X, X_train, X_test, y, y_train, y_train_1hot, y_test, y_test_1hot = \
-        credit_card_train_test('../data/credit_card.xls', which_onehot=1,
-                balance_outcomes=True)
+        credit_card_train_test('../data/credit_card.xls',
+                which_onehot=options[0],
+                balance_outcomes=options[1])
 
     # Test cases
     etas = np.logspace(-1, -4, 4)                 # 0.1, 0.01, ...
     n_epochs = [10, 100, 250, 500, 1000, 2000]             
-    layers = [100,100,100]
+    layers = [100,100]
+    etas = np.logspace(-1, -2, 2)                 # 0.1, 0.01, ...
+    n_epochs = [10, 100]             
+    layers = [10]
 
     accuracy_eta = np.zeros(len(etas))
 
@@ -134,7 +142,8 @@ def nn_classification_analysis(train=False):
                         alpha=0.0, 
                         batch_size=100,
                         learning_rate='constant',
-                        n_epochs=100, 
+                        # n_epochs=100, 
+                        n_epochs=10, 
                         weights_init='normal',
                         act_func_str='sigmoid',
                         cost_func_str='crossentropy',
@@ -152,9 +161,9 @@ def nn_classification_analysis(train=False):
         print(eta_opt)
         print(f'Optimal eta: {eta_opt}')
 
-        timestr = time.strftime('%Y%m%d-%H%M%S')
+        timestr = time.strftime('%Y%m%d-%H%M')
         # np.save(timestr + '-accuracy_eta', accuracy_eta)
-        np.save('class_accuracy_eta', accuracy_eta)
+        np.save(f'class_accuracy_eta_o{options[0]}_b{options[1]}', accuracy_eta)
 
 
         accuracy_epoch = np.zeros(len(n_epochs))
@@ -180,12 +189,12 @@ def nn_classification_analysis(train=False):
             i += 1
             print(f'Epochs={n} done')
 
-        np.save('class_accuracy_epoch', accuracy_epoch)
-        np.save('class_y_pred_test_maxepoch', y_pred_test)
+        np.save(f'class_accuracy_epoch_o{options[0]}_b{options[1]}', accuracy_epoch)
+        np.save(f'class_y_pred_test_maxepoch_o{options[0]}_b{options[1]}', y_pred_test)
 
 
-    accuracy_eta = np.load('class_accuracy_eta.npy')
-    accuracy_epoch = np.load('class_accuracy_epoch.npy')
+    accuracy_eta = np.load(f'class_accuracy_eta_o{options[0]}_b{options[1]}.npy')
+    accuracy_epoch = np.load(f'class_accuracy_epoch_o{options[0]}_b{options[1]}.npy')
     
 
     fig = plt.figure(figsize=(9.5,4.5))
@@ -193,29 +202,71 @@ def nn_classification_analysis(train=False):
     ax1 = fig.add_subplot(121)
     ax1.set_xlabel(r'$\log_{10}$ of Learning rate')
     ax1.set_ylabel('Accuracy score')
-    ax1.plot(np.log10(etas), accuracy_eta, '.-', label='sigmoid')
+    ax1.plot(np.log10(etas), accuracy_eta, '.-', label= onehot_str + ', ' +
+            balance_str)
     ax1.legend()
 
     ax2 = fig.add_subplot(122)
     ax2.set_xlabel('number of epochs')
-    ax2.plot(n_epochs, accuracy_epoch, '.-', label='sigmoid')
+    ax2.plot(n_epochs, accuracy_epoch, '.-', label=onehot_str + ', ' +
+            balance_str)
     ax2.legend()
 
-    plt.savefig('class-eta-accuracy.pdf')
-    plt.show()
+    plt.savefig(f'class-eta-accuracy_o{options[0]}_b{options[1]}.pdf')
+    # plt.show()
     
+    return eta_opt, accuracy_epoch[-1]
+
+def nn_classification_plot_analysis(all_options):
+    fig = plt.figure(figsize=(9.5,4.5))
+
+    ax1 = fig.add_subplot(121)
+    ax1.set_xlabel(r'$\log_{10}$ of Learning rate')
+    ax1.set_ylabel('Accuracy score')
+    ax2 = fig.add_subplot(122)
+    ax2.set_xlabel('number of epochs')
+
+    for options in all_options:
+        if options[0] == 1:
+            onehot_str = 'case1'
+        else:
+            onehot_str = 'case2'
+        if options[1] == True:
+            balance_str = 'balanced'
+        else:
+            balance_str = 'unbalanced'
+        
+        # etas = np.logspace(-1, -4, 4)                 # 0.1, 0.01, ...
+        # n_epochs = [10, 100, 250, 500, 1000, 2000]             
+        etas = np.logspace(-1, -2, 2)                 # 0.1, 0.01, ...
+        n_epochs = [10, 100]             
+        accuracy_eta = np.load(f'class_accuracy_eta_o{options[0]}_b{options[1]}.npy')
+        accuracy_epoch = np.load(f'class_accuracy_epoch_o{options[0]}_b{options[1]}.npy')
+
+        ax1.plot(np.log10(etas), accuracy_eta, '.-', label= onehot_str + ', ' +
+                balance_str)
+        ax2.plot(n_epochs, accuracy_epoch, '.-', label=onehot_str + ', ' +
+                balance_str)
+
+    ax1.legend()
+    ax2.legend()
+    plt.savefig('class-eta-accuracy_full_analysis.pdf')
+    # plt.show()
 
 
 
-
-def nn_classification_heatmap(train=False):
+def nn_classification_heatmap(train=False, options=[1, False], eta=0.01):
 
     X, X_train, X_test, y, y_train, y_train_1hot, y_test, y_test_1hot = \
-        credit_card_train_test('../data/credit_card.xsl')
+        credit_card_train_test('../data/credit_card.xls',
+                which_onehot=options[0],
+                balance_outcomes=options[1])
 
     # Test cases
-    n_layers = np.arange(1, 10, 1)                  # 1, 2, 3, ...
-    n_nodes = np.arange(10, 101, 10)                # 10, 20, 30, ...
+    # n_layers = np.arange(1, 5, 1)                  # 1, 2, 3, ...
+    # n_nodes = np.arange(40, 101, 20)                # 10, 20, 30, ...
+    n_layers = np.arange(1, 4, 1)                  # 1, 2, 3, ...
+    n_nodes = np.arange(40, 81, 20)                # 10, 20, 30, ...
 
     accuracy = np.zeros((len(n_layers), len(n_nodes)))
 
@@ -228,60 +279,69 @@ def nn_classification_heatmap(train=False):
 
                 model = MultilayerPerceptron(
                             hidden_layer_sizes=layers,
-                            eta=1e-1, 
+                            eta=eta, 
                             alpha=0.0, 
                             batch_size=100,
                             learning_rate='constant',
-                            n_epochs=500, 
-                            act_func_str='relu',
-                            cost_func_str='mse',
-                            output_func_str='identity')
+                            # n_epochs=100, 
+                            n_epochs=50, 
+                            weights_init='normal',
+                            act_func_str='sigmoid',
+                            cost_func_str='crossentropy',
+                            output_func_str='sigmoid')
 
-                model.fit(X_train, y_train)
-                y_pred_test = model.predict(X_test)
-                if np.isnan(y_pred_test).any():
-                    accuracy[i,j] = np.nan
-                    print('Nan detected')
-                else:
-                    accuracy[i,j] = accuracy_score(y_test, y_pred_test)
+                model.fit(X_train, y_train_1hot)
+                y_pred_test = model.predict_class(X_test)
+                accuracy[i,j] = accuracy_score(y_test, y_pred_test)
+                print(f'Accuracy: {accuracy[i,j]}')
                 j += 1
-                print(f'Nodes: {n}')
+                print(f'Nodes done: {n}')
             i += 1
-            print(f'Layers: {l}')
+            print(f'Layers done: {l}')
 
         np.save('accuracy_heat', accuracy)
 
     accuracy = np.load('accuracy_heat.npy')
 
-    min_idcs = np.where(accuracy == np.nanmin(accuracy))
-    print(min_idcs)
+    max_idcs = np.where(accuracy == np.max(accuracy))
+    accuracy_opt = np.max(accuracy)
+    layers_opt = n_layers[max_idcs[0]]
+    nodes_opt = n_nodes[max_idcs[1]]
+
+    print(f'Best accuracy: {accuracy_opt}')
+    print(f'Best number of layers: {layers_opt}')
+    print(f'Best number of nodes: {nodes_opt}')
 
     plt.figure(figsize=(9.5,4.5))
 
-    print(n_layers)
-    print(n_nodes)
     ax = sns.heatmap(accuracy, annot=True, xticklabels=n_nodes, yticklabels=n_layers)
-    ax.add_patch(Rectangle((min_idcs[1], min_idcs[0]), 1, 1, fill=False, edgecolor='red', lw=3))
-    # ax.set_xticks(n_layers)
+    ax.add_patch(Rectangle((max_idcs[1], max_idcs[0]), 1, 1, fill=False, edgecolor='red', lw=3))
     ax.set_xlabel('Number of nodes per layer')
     ax.set_ylabel('Number of layers')
-    # ax.set_yticks(n_nodes)
     bottom, top = ax.get_ylim()
     ax.set_ylim(bottom + 0.5, top - 0.5)
-    plt.savefig('heatmap.pdf')
+    plt.savefig('class_heatmap.pdf')
     plt.show()
 
+    return layers_opt, nodes_opt
 
-def nn_classification_optimal(train=False):
+
+def nn_classification_optimal(train=False, options=[1, False], eta=0.01,
+        layers=2, nodes=50):
+
     X, X_train, X_test, y, y_train, y_train_1hot, y_test, y_test_1hot = \
-        credit_card_train_test('../data/credit_card.xls', which_onehot=1,
-                balance_outcomes=True)
+        credit_card_train_test('../data/credit_card.xls',
+                which_onehot=options[0],
+                balance_outcomes=options[1])
+
+    hl = list(np.ones(layers, dtype='int') * int(nodes))
+    print(f'Hidden layers: {hl}')
 
     if train:
         i = 0
         model = MultilayerPerceptron(
-                    hidden_layer_sizes=[100,100,100],
-                    eta=1e-2, 
+                    hidden_layer_sizes=hl,
+                    eta=eta, 
                     alpha=0.0, 
                     batch_size=100,
                     learning_rate='constant',

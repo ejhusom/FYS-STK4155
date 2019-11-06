@@ -14,11 +14,45 @@ from nn_classification import *
 
 np.random.seed(2010)
 
+
+
+# ============================================================================
+# REGRESSION
+
 # nn_regression_analysis(train=False)
 # nn_regression_heatmap(train=True)
 # nn_regression_optimal(train=False)
 
+# ============================================================================
+# CLASSIFICATION
+
 # nn_classification_simple()
 # nn_classification_skl()
-nn_classification_analysis(train=True)
-# nn_classification_optimal(train=True)
+cc_options = []
+cc_options.append([1, False])
+cc_options.append([2, False])
+cc_options.append([1, True])
+cc_options.append([2, True])
+
+eta_opts = []
+accuracies = []
+
+# for o in cc_options:
+#     eta_opt, accuracy = nn_classification_analysis(train=True, options=o)
+#     eta_opts.append(eta_opt)
+#     accuracies.append(accuracy)
+
+# nn_classification_plot_analysis(cc_options)
+
+
+# accuracies = np.array(accuracies)
+# best_idx = np.argmax(accuracies)
+# layers, nodes = nn_classification_heatmap(train=True, options=cc_options[best_idx],
+#         eta=eta_opts[best_idx])
+
+layers, nodes = nn_classification_heatmap(train=False)
+
+# nn_classification_optimal(train=True, options=cc_options[best_idx],
+#         eta=eta_ops[best_idx], layers=layers, nodes=nodes)
+
+nn_classification_optimal(train=True)
