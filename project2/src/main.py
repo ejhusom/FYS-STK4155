@@ -20,5 +20,5 @@ np.random.seed(2010)
 
 # nn_classification_simple()
 # nn_classification_skl()
-# nn_classification_analysis(train=True)
-nn_classification_optimal(train=True)
+nn_classification_analysis(train=True)
+# nn_classification_optimal(train=True)

@@ -120,7 +120,7 @@ def credit_card_train_test(filename, which_onehot=1, balance_outcomes=True):
                         transformers=[('minmaxscaler', minmaxscaler, scale_columns)])
 
 
-    scaler.fit_transform(X_train)
+    X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
 
     y_train = y_train.reshape(-1,1)

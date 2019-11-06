@@ -30,6 +30,8 @@ import scikitplot.metrics as skplt
 
 from pylearn.logisticregression import SGDClassification
 from pylearn.multilayerperceptron import MultilayerPerceptron
+from pylearn.metrics import cumulative_gain_area_ratio
+
 
 from breastcancer import *
 from creditcard import *
@@ -111,45 +113,9 @@ def nn_classification_simple():
 
 def nn_classification_analysis(train=False):
 
-    #balance_outcomes = True
-
-    #X, y, scale_columns = preprocess_CC_data('../data/credit_card.xls',
-    #        which_onehot=1)
-    
-    #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
-
-
-    ##balance training set such that outcomes are 50/50
-    #if balance_outcomes:
-    #    non_default_inds = np.where(y_train==0)[0]
-    #    default_inds = np.where(y_train==1)[0]
-
-    #    remove_size = len(non_default_inds) - len(default_inds)
-    #    remove_inds = np.random.choice(non_default_inds, size=remove_size, replace=False)
-
-
-    #    X_train = np.delete(X, remove_inds, axis=0)
-    #    y_train = np.delete(y, remove_inds, axis=0)
-
-
-
-    #minmaxscaler = MinMaxScaler()
-    #scaler = ColumnTransformer(
-    #                    remainder='passthrough',
-    #                    transformers=[('minmaxscaler', minmaxscaler, scale_columns)])
-
-
-
-    #scaler.fit_transform(X_train)
-    #X_test = scaler.transform(X_test)
-
-    #y_train = y_train.reshape(-1,1)
-    #encoder = OneHotEncoder(categories='auto')
-    #y_train_1hot = encoder.fit_transform(y_train).toarray()
-    #y_test_1hot = encoder.fit_transform(y_test.reshape(-1,1)).toarray()
-
     X, X_train, X_test, y, y_train, y_train_1hot, y_test, y_test_1hot = \
-        credit_card_train_test('../data/credit_card.xsl')
+        credit_card_train_test('../data/credit_card.xls', which_onehot=1,
+                balance_outcomes=True)
 
     # Test cases
     etas = np.logspace(-1, -4, 4)                 # 0.1, 0.01, ...
@@ -242,12 +208,8 @@ def nn_classification_analysis(train=False):
 
 def nn_classification_heatmap(train=False):
 
-    X, y, scale_columns = preprocess_creditcard_data('../data/credit_card.xls')
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
-            random_state = 0)
-
-    
+    X, X_train, X_test, y, y_train, y_train_1hot, y_test, y_test_1hot = \
+        credit_card_train_test('../data/credit_card.xsl')
 
     # Test cases
     n_layers = np.arange(1, 10, 1)                  # 1, 2, 3, ...
@@ -310,7 +272,8 @@ def nn_classification_heatmap(train=False):
 
 def nn_classification_optimal(train=False):
     X, X_train, X_test, y, y_train, y_train_1hot, y_test, y_test_1hot = \
-        credit_card_train_test('../data/credit_card.xls')
+        credit_card_train_test('../data/credit_card.xls', which_onehot=1,
+                balance_outcomes=True)
 
     if train:
         i = 0
@@ -327,44 +290,47 @@ def nn_classification_optimal(train=False):
                     output_func_str='sigmoid')
 
         model.fit(X_train, y_train_1hot)
-        y_pred_test = model.predict_class(X_test)
-        np.save('class_y_pred_optimal', y_pred_test)
-        accuracy = accuracy_score(y_test, y_pred_test)
+        y_pred = model.predict_class(X_test)
+        y_pred_probas = model.predict(X_test)
+        np.save('class_y_pred_optimal', y_pred)
+        np.save('class_y_pred_optimal_probas', y_pred_probas)
+        accuracy = accuracy_score(y_test, y_pred)
         print(f'Accuracy: {accuracy}')
 
-
-
-
     y_pred = np.load('class_y_pred_optimal.npy')
-    nn_regression_plot(X, y, y_pred)
+    y_pred_probas = np.load('class_y_pred_optimal_probas.npy')
+    print(f'Gain: {cumulative_gain_area_ratio(y_test, y_pred_probas, onehot=True)}')
+    nn_classification_plot(y_test, y_pred)
 
 
 
 def nn_classification_skl():
-    X, y = breast_cancer_dataset()
+    # X, y = breast_cancer_dataset()
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
+    #         random_state = 0)
+    # X_train, X_test = scale_data(X_train, X_test, scaler='minmax')
+    # y_train = y_train.reshape(-1,1)
+    # encoder = OneHotEncoder(categories='auto')
+    # y_train_1hot = encoder.fit_transform(y_train).toarray()
+    # y_test_1hot = encoder.fit_transform(y_test.reshape(-1,1)).toarray()
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
-            random_state = 0)
+    X, X_train, X_test, y, y_train, y_train_1hot, y_test, y_test_1hot = \
+        credit_card_train_test('../data/credit_card.xls', which_onehot=2,
+                balance_outcomes=False)
 
-    X_train, X_test = scale_data(X_train, X_test, scaler='minmax')
-    
-    # One hot encoding targets
-    y_train = y_train.reshape(-1,1)
-    encoder = OneHotEncoder(categories='auto')
-    y_train_1hot = encoder.fit_transform(y_train).toarray()
-    y_test_1hot = encoder.fit_transform(y_test.reshape(-1,1)).toarray()
-
-    dnn = MLPClassifier(hidden_layer_sizes=[50,50,50], 
+    dnn = MLPClassifier(hidden_layer_sizes=[100,100,100], 
                         activation='logistic',
                         alpha=0.0, 
                         learning_rate_init=0.001, 
                         max_iter=1000,
                         batch_size=100, 
+                        verbose=True,
                         learning_rate='constant')
     dnn.fit(X_train, y_train_1hot)
-    y_pred = dnn.predict(X_test)
-    y_pred = np.argmax(y_pred, axis=1)
+    y_pred_probas = dnn.predict_proba(X_test)
+    y_pred = np.argmax(y_pred_probas, axis=1)
     print(f'Scikit accuracy: {accuracy_score(y_test, y_pred)}')
+    print(cumulative_gain_area_ratio(y_test, y_pred_probas, onehot=True))
     nn_classification_plot(y_test, y_pred)
 
 
@@ -372,7 +338,8 @@ def nn_classification_skl():
 
 def nn_classification_plot(y_test, y_pred):
 
-    ax = plot_confusion_matrix(y_test, y_pred, normalize=True, cmap='Blues')
+    ax = plot_confusion_matrix(y_test, y_pred, normalize=True, cmap='Blues',
+            title=' ')
     bottom, top = ax.get_ylim()
     ax.set_ylim(bottom + 0.5, top - 0.5)
     plt.show()
