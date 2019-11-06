@@ -24,8 +24,8 @@ PDF			= $(DOC_NAME).pdf
 # TODO: Add support for making of figures as prerequisites
 
 pdf: $(PDF)
-$(PDF): *.md *.tex
-	pandoc *.md *.tex -o $(PDF) \
+$(PDF): *.md
+	pandoc *.md -o $(PDF) \
 		--filter=pandoc-fignos \
 		--filter=pandoc-eqnos \
 		--filter=pandoc-tablenos \
@@ -37,4 +37,3 @@ $(PDF): *.md *.tex
 clean:
 	@rm -rf $(DOC_NAME).pdf
 	@echo "Cleanup complete!"
-

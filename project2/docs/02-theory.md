@@ -42,7 +42,16 @@ output from the previous layer):
 $$a_l = a(W_a{l-1} + b_l)$${#eg:feedforward}
 
 In the case of the first hidden layer, the input matrix $X$ will take the place
-of $a_{l-1}$. 
+of $a_{l-1}$. The weights are usually initialized with random
+values, for example using a normal or uniform distribution, because if all the
+weights were the same, all neurons would give the same output. In this project
+we use a standard normal distribution when doing classification, but in the
+case for regression we use an initialization proposed by Xavier Glorot and
+Yoshua Bengio[@glorot_understanding_nodate], where we scale the
+randomly distributed weights by a factor $1/\sqrt{n_{l-1} + n}$ ($n_{l-1}$ is
+the size of the previous layer, and $n_l$ is the size of the current layer).
+The biases are given a small non-zero value, in our case $b_i = 0.01$ for all
+layers, in order ot ensure activation.
 
 ![Schematic neural network. The circles represent neurons, and the colors
 indicate what layer they are a part of: Grey means input layer, white means
@@ -73,9 +82,15 @@ softmax function is a better choice, because it forces the sum of probabilites
 for the possible classes to be 1, but for binary classification problems, like
 we have in this project, the sigmoid function is sufficient.
 
-For regression it is more common to use 
+For regression we use another common activation function, the ReLU function:
 
+$$\text{ReLU} = \begin{cases}
+    0 & x < 0 \\
+    x & x \geq 0
+\end{cases}
+$$
 
+This activation 
 
 
 ### Output layer and back propagation
@@ -103,11 +118,6 @@ $$\mathcal{C} = \frac{1}{2} \sum_{i=1}^n (\hat{y}_i - y_i)^2$$
 The factor $\frac{1}{2}$ is used to simplify the derivative of the
 cost function, which we will need for the back propagation:
 
-$$\text{ReLU} = \begin{cases}
-    0 & x < 0 \\
-    x & x \geq 0
-\end{cases}
-$$
 
 
 

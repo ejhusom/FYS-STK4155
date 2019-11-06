@@ -119,7 +119,7 @@ def nn_classification_analysis(train=False):
 
     # Test cases
     etas = np.logspace(-1, -4, 4)                 # 0.1, 0.01, ...
-    n_epochs = [10, 100, 250, 500]             
+    n_epochs = [10, 100, 250, 500, 1000, 2000]             
     layers = [100,100,100]
 
     accuracy_eta = np.zeros(len(etas))
@@ -176,10 +176,12 @@ def nn_classification_analysis(train=False):
             model.fit(X_train, y_train_1hot)
             y_pred_test = model.predict_class(X_test)
             accuracy_epoch[i] = accuracy_score(y_test, y_pred_test)
+            print(f'Accuracy: {accuracy_epoch[i]}')
             i += 1
             print(f'Epochs={n} done')
 
         np.save('class_accuracy_epoch', accuracy_epoch)
+        np.save('class_y_pred_test_maxepoch', y_pred_test)
 
 
     accuracy_eta = np.load('class_accuracy_eta.npy')
