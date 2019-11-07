@@ -125,10 +125,7 @@ def nn_classification_analysis(train=False, options=[1, True]):
     # Test cases
     etas = np.logspace(-1, -4, 4)                 # 0.1, 0.01, ...
     n_epochs = [10, 100, 250, 500, 1000, 2000]             
-    layers = [100,100]
-    etas = np.logspace(-1, -2, 2)                 # 0.1, 0.01, ...
-    n_epochs = [10, 100]             
-    layers = [10]
+    layers = [100,100,100]
 
     accuracy_eta = np.zeros(len(etas))
 
@@ -142,8 +139,7 @@ def nn_classification_analysis(train=False, options=[1, True]):
                         alpha=0.0, 
                         batch_size=100,
                         learning_rate='constant',
-                        # n_epochs=100, 
-                        n_epochs=10, 
+                        n_epochs=100, 
                         weights_init='normal',
                         act_func_str='sigmoid',
                         cost_func_str='crossentropy',
@@ -236,10 +232,8 @@ def nn_classification_plot_analysis(all_options):
         else:
             balance_str = 'unbalanced'
         
-        # etas = np.logspace(-1, -4, 4)                 # 0.1, 0.01, ...
-        # n_epochs = [10, 100, 250, 500, 1000, 2000]             
-        etas = np.logspace(-1, -2, 2)                 # 0.1, 0.01, ...
-        n_epochs = [10, 100]             
+        etas = np.logspace(-1, -4, 4)                 # 0.1, 0.01, ...
+        n_epochs = [10, 100, 250, 500, 1000, 2000]             
         accuracy_eta = np.load(f'class_accuracy_eta_o{options[0]}_b{options[1]}.npy')
         accuracy_epoch = np.load(f'class_accuracy_epoch_o{options[0]}_b{options[1]}.npy')
 
@@ -263,10 +257,8 @@ def nn_classification_heatmap(train=False, options=[1, False], eta=0.01):
                 balance_outcomes=options[1])
 
     # Test cases
-    # n_layers = np.arange(1, 5, 1)                  # 1, 2, 3, ...
-    # n_nodes = np.arange(40, 101, 20)                # 10, 20, 30, ...
-    n_layers = np.arange(1, 4, 1)                  # 1, 2, 3, ...
-    n_nodes = np.arange(40, 81, 20)                # 10, 20, 30, ...
+    n_layers = np.arange(1, 5, 1)                  # 1, 2, 3, ...
+    n_nodes = np.arange(40, 121, 20)                # 10, 20, 30, ...
 
     accuracy = np.zeros((len(n_layers), len(n_nodes)))
 
@@ -283,8 +275,7 @@ def nn_classification_heatmap(train=False, options=[1, False], eta=0.01):
                             alpha=0.0, 
                             batch_size=100,
                             learning_rate='constant',
-                            # n_epochs=100, 
-                            n_epochs=50, 
+                            n_epochs=100, 
                             weights_init='normal',
                             act_func_str='sigmoid',
                             cost_func_str='crossentropy',
@@ -321,13 +312,13 @@ def nn_classification_heatmap(train=False, options=[1, False], eta=0.01):
     bottom, top = ax.get_ylim()
     ax.set_ylim(bottom + 0.5, top - 0.5)
     plt.savefig('class_heatmap.pdf')
-    plt.show()
+    # plt.show()
 
     return layers_opt, nodes_opt
 
 
-def nn_classification_optimal(train=False, options=[1, False], eta=0.01,
-        layers=2, nodes=50):
+def nn_classification_optimal(train=False, options=[1, False], eta=0.1,
+        layers=2, nodes=100):
 
     X, X_train, X_test, y, y_train, y_train_1hot, y_test, y_test_1hot = \
         credit_card_train_test('../data/credit_card.xls',
@@ -345,7 +336,7 @@ def nn_classification_optimal(train=False, options=[1, False], eta=0.01,
                     alpha=0.0, 
                     batch_size=100,
                     learning_rate='constant',
-                    n_epochs=100, 
+                    n_epochs=10000, 
                     weights_init='normal',
                     act_func_str='sigmoid',
                     cost_func_str='crossentropy',
@@ -354,13 +345,15 @@ def nn_classification_optimal(train=False, options=[1, False], eta=0.01,
         model.fit(X_train, y_train_1hot)
         y_pred = model.predict_class(X_test)
         y_pred_probas = model.predict(X_test)
+        np.save('class_y_test_optimal', y_test)
         np.save('class_y_pred_optimal', y_pred)
         np.save('class_y_pred_optimal_probas', y_pred_probas)
-        accuracy = accuracy_score(y_test, y_pred)
-        print(f'Accuracy: {accuracy}')
 
+    y_test = np.load('class_y_test_optimal.npy')
     y_pred = np.load('class_y_pred_optimal.npy')
     y_pred_probas = np.load('class_y_pred_optimal_probas.npy')
+    accuracy = accuracy_score(y_test, y_pred)
+    print(f'Accuracy: {accuracy}')
     print(f'Gain: {cumulative_gain_area_ratio(y_test, y_pred_probas, onehot=True)}')
     nn_classification_plot(y_test, y_pred)
 
@@ -404,6 +397,7 @@ def nn_classification_plot(y_test, y_pred):
             title=' ')
     bottom, top = ax.get_ylim()
     ax.set_ylim(bottom + 0.5, top - 0.5)
+    plt.savefig('confusionmatrix.pdf')
     plt.show()
 
 

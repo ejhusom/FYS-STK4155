@@ -28,14 +28,14 @@ np.random.seed(2010)
 
 # nn_classification_simple()
 # nn_classification_skl()
-cc_options = []
-cc_options.append([1, False])
-cc_options.append([2, False])
-cc_options.append([1, True])
-cc_options.append([2, True])
+# cc_options = []
+# cc_options.append([1, False])
+# cc_options.append([2, False])
+# cc_options.append([1, True])
+# cc_options.append([2, True])
 
-eta_opts = []
-accuracies = []
+# eta_opts = []
+# accuracies = []
 
 # for o in cc_options:
 #     eta_opt, accuracy = nn_classification_analysis(train=True, options=o)
@@ -50,9 +50,8 @@ accuracies = []
 # layers, nodes = nn_classification_heatmap(train=True, options=cc_options[best_idx],
 #         eta=eta_opts[best_idx])
 
-layers, nodes = nn_classification_heatmap(train=False)
 
 # nn_classification_optimal(train=True, options=cc_options[best_idx],
-#         eta=eta_ops[best_idx], layers=layers, nodes=nodes)
+#         eta=eta_opts[best_idx], layers=layers, nodes=nodes)
 
-nn_classification_optimal(train=True)
+nn_classification_optimal(train=True, options=[2, True], layers=3, nodes=80, eta=1e-1)
