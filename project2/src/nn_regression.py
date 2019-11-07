@@ -275,6 +275,67 @@ def nn_regression_optimal(train=False):
     
 
 
+def nn_regression_gridsize(train=False):
+
+    gridsizes = [20,50,100,200,500,1000]
+
+    mses = []
+    r2s = []
+
+    if train:
+        for n in gridsizes:
+            franke = FrankeDataset(n=n, eps=0.2)
+            X, y = franke.generate_data_set()
+
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
+                    random_state = 0)
+
+            model = MultilayerPerceptron(
+                        hidden_layer_sizes=[50,50,50],
+                        eta=0.01, 
+                        alpha=0.0, 
+                        batch_size=100,
+                        learning_rate='constant',
+                        n_epochs=500, 
+                        act_func_str='relu',
+                        cost_func_str='mse',
+                        output_func_str='identity')
+
+            model.fit(X_train, y_train)
+            y_pred_test = model.predict(X_test)
+            y_pred = model.predict(X)
+            if np.isnan(y_pred_test).any():
+                mse = np.nan
+                r2 = np.nan
+            else:
+                mse = mean_squared_error(y_test, y_pred_test)
+                r2 = r2_score(y_test, y_pred_test)
+            print(f'Grid size: {n}')
+            print(f'MSE: {mse}')
+            print(f'R2: {r2}')
+            mses.append(mse)
+            r2s.append(r2)
+
+            # np.save(f'y_pred_optimal_grid{n}', y_pred)
+        
+        np.save('mse_gridsize_analysis', np.array(mses))
+        np.save('r2_gridsize_analysis', np.array(r2s))
+
+    mses = np.load('mse_gridsize_analysis.npy')
+    r2s = np.load('r2_gridsize_analysis.npy')
+    
+    plt.figure()
+    plt.plot(gridsizes, mses, '.-',label='sigmoid')
+    plt.xlabel('grid size')
+    plt.ylabel('Mean Squared Error')
+    plt.savefig('eta-mse.pdf')
+    plt.show()
+
+        # y_pred = np.load('y_pred_optimal.npy')
+        # nn_regression_plot(X, y, y_pred)
+
+
+
 def nn_regression_skl(X, y):
     franke = FrankeDataset(n=20, eps=0.2)
     X, y = franke.generate_data_set()

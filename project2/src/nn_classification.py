@@ -223,24 +223,24 @@ def nn_classification_plot_analysis(all_options):
     ax2.set_xlabel('number of epochs')
 
     for options in all_options:
-        if options[0] == 1:
-            onehot_str = 'case1'
-        else:
-            onehot_str = 'case2'
-        if options[1] == True:
-            balance_str = 'balanced'
-        else:
-            balance_str = 'unbalanced'
+        if options[0] == 1 and not options[1]:
+            label_num = '1'
+        elif options[0] == 2 and not options[1]:
+            label_num = '2'
+        elif options[0] == 1 and options[1]:
+            label_num = '3'
+        elif options[0] == 2 and options[1]:
+            label_num = '4'
+
+        label = 'preproc. method ' + label_num
         
         etas = np.logspace(-1, -4, 4)                 # 0.1, 0.01, ...
         n_epochs = [10, 100, 250, 500, 1000, 2000]             
         accuracy_eta = np.load(f'class_accuracy_eta_o{options[0]}_b{options[1]}.npy')
         accuracy_epoch = np.load(f'class_accuracy_epoch_o{options[0]}_b{options[1]}.npy')
 
-        ax1.plot(np.log10(etas), accuracy_eta, '.-', label= onehot_str + ', ' +
-                balance_str)
-        ax2.plot(n_epochs, accuracy_epoch, '.-', label=onehot_str + ', ' +
-                balance_str)
+        ax1.plot(np.log10(etas), accuracy_eta, '.-', label=label)
+        ax2.plot(n_epochs, accuracy_epoch, '.-', label=label)
 
     ax1.legend()
     ax2.legend()
@@ -317,8 +317,8 @@ def nn_classification_heatmap(train=False, options=[1, False], eta=0.01):
     return layers_opt, nodes_opt
 
 
-def nn_classification_optimal(train=False, options=[1, False], eta=0.1,
-        layers=2, nodes=100):
+def nn_classification_optimal(train=False, options=[2, True], eta=0.1,
+        layers=3, nodes=80):
 
     X, X_train, X_test, y, y_train, y_train_1hot, y_test, y_test_1hot = \
         credit_card_train_test('../data/credit_card.xls',
@@ -343,18 +343,37 @@ def nn_classification_optimal(train=False, options=[1, False], eta=0.1,
                     output_func_str='sigmoid')
 
         model.fit(X_train, y_train_1hot)
+
+        np.save('weights', model.weights)
+        np.save('bias', model.biases)
+
         y_pred = model.predict_class(X_test)
         y_pred_probas = model.predict(X_test)
+        y_pred_train = model.predict_class(X_train)
+        y_pred_train_probas = model.predict(X_train)
+
+        np.save('class_X_train_optimal', X_train)
+        np.save('class_X_test_optimal', X_test)
         np.save('class_y_test_optimal', y_test)
         np.save('class_y_pred_optimal', y_pred)
         np.save('class_y_pred_optimal_probas', y_pred_probas)
+        np.save('class_y_train_optimal', y_train)
+        np.save('class_y_train_1hot_optimal', y_train_1hot)
+        np.save('class_y_pred_train_optimal', y_pred_train)
+        np.save('class_y_pred_train_optimal_probas', y_pred_train_probas)
 
     y_test = np.load('class_y_test_optimal.npy')
     y_pred = np.load('class_y_pred_optimal.npy')
     y_pred_probas = np.load('class_y_pred_optimal_probas.npy')
+    y_train = np.load('class_y_train_optimal.npy')
+    y_pred_train = np.load('class_y_pred_train_optimal.npy')
+    y_pred_train_probas = np.load('class_y_pred_train_optimal_probas.npy')
     accuracy = accuracy_score(y_test, y_pred)
+    accuracy_train = accuracy_score(y_train, y_pred_train)
     print(f'Accuracy: {accuracy}')
-    print(f'Gain: {cumulative_gain_area_ratio(y_test, y_pred_probas, onehot=True)}')
+    print(f'Accuracy train: {accuracy_train}')
+    print(f'Gain: {cumulative_gain_area_ratio(y_test, y_pred_probas, onehot=True, text_fontsize="large")}')
+    print(f'Gain train: {cumulative_gain_area_ratio(y_train, y_pred_train_probas, onehot=True, text_fontsize="large")}')
     nn_classification_plot(y_test, y_pred)
 
 
