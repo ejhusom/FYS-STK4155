@@ -1,16 +1,9 @@
-# Project title
+# FYS-STK4155 Project 2: Logistic Regression and Neural Networks
 
-[This is a README template. Replace text in brackets with suitable text for your project. Description of project goes here.]
-
-
-## Setup
-
-### Prerequisites
-
-### Installation
-
-## Usage
-
-## License
+The aim of this project was to compare a feedforward fully-connected artifical
+neural network with 1) traditional logistic regression applied to a classification
+problem, and 2) common regression methods, like the Ordinary Least Squares
+method, Ridge regression and Lasso regression, when applied to a regression
+problem.
 
 

@@ -1,7 +1,7 @@
-# FYS-STK4155
+# FYS-STK4155 - Applied Data Analysis and Machine Learning
 
-Source code written by Erik Johannes Husom, for projects in the course FYS-STK4155 Applied Data Analysis and Machine Learning at the University of Oslo, fall 2019.
+Source code for projects in the course FYS-STK4155 at the University of Oslo, fall 2019.
 
-* Project 1 - Regression methods
-* Project 2
-* Project 3
+* Project 1 - Regression and resampling methods
+* Project 2 - Logistic regression and neural networks
+* Project 3 - N/A
