@@ -88,9 +88,12 @@ def cumulative_gain_area_ratio(y_true, y_probas, onehot=False, title=' ',
     ax.set_title(title, fontsize=title_fontsize)
 
 
+    # Uncomment in case need to plot extra gain curve
+    # gains3 = np.load('gain1.npy')
 
     # ax.plot(percentages, gains1, lw=3, label='Class {}'.format(classes[0]))
-    ax.plot(percentages, gains2, lw=2, label='Model')
+    ax.plot(percentages, gains2, lw=2, label='Neural network')
+    # ax.plot(percentages, gains3, lw=2, label='Log. reg.')
     ax.plot(best_curve_x, best_curve_y, lw=2, label='Best curve')
 
     ax.set_xlim([0.0, 1.0])

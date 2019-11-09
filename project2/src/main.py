@@ -21,7 +21,8 @@ np.random.seed(2010)
 
 # nn_regression_analysis(train=False)
 # nn_regression_heatmap(train=True)
-# nn_regression_optimal(train=False)
+# nn_regression_optimal(train=True)
+# nn_regression_skl()
 # nn_regression_gridsize(train=True)
 
 # ============================================================================
@@ -54,9 +55,6 @@ np.random.seed(2010)
 # nn_classification_optimal(train=True, options=cc_options[best_idx],
 #         eta=eta_opts[best_idx], layers=layers, nodes=nodes)
 
-# nn_classification_optimal(train=True, options=[2, True], layers=3, nodes=80, eta=1e-1)
+# nn_classification_optimal(train=False, options=[2, True], layers=3, nodes=80, eta=1e-1)
 
-
-# ============================================================================
-# BENCHMARK SCIKIT-LEARN
 

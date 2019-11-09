@@ -239,8 +239,6 @@ def nn_regression_heatmap(train=False):
 def nn_regression_optimal(train=False):
     franke = FrankeDataset(n=20, eps=0.2)
     X, y = franke.generate_data_set()
-    franke_clean = FrankeDataset(n=200, eps=0.0)
-    X_clean, y_clean = franke_clean.generate_data_set()
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
             random_state = 0)
@@ -251,7 +249,7 @@ def nn_regression_optimal(train=False):
     if train:
         model = MultilayerPerceptron(
                     hidden_layer_sizes=[70,70,70],
-                    eta=1e-2, 
+                    eta=1e-1, 
                     alpha=0.0, 
                     batch_size=100,
                     learning_rate='constant',
@@ -277,44 +275,59 @@ def nn_regression_optimal(train=False):
 
 def nn_regression_gridsize(train=False):
 
-    gridsizes = [20,50,100,200,500,1000]
+    gridsizes = [20,40,60,80]
+    noises = [0.0, 0.1, 0.2]
+    noises = [0.2]
 
-    mses = []
-    r2s = []
+    mses = np.zeros((len(noises), len(gridsizes)))
+    mses_train = np.zeros((len(noises), len(gridsizes)))
+    r2s = np.zeros((len(noises), len(gridsizes)))
+    biases = np.zeros((len(noises), len(gridsizes)))
+    variances = np.zeros((len(noises), len(gridsizes)))
 
     if train:
-        for n in gridsizes:
-            franke = FrankeDataset(n=n, eps=0.2)
-            X, y = franke.generate_data_set()
+        i = 0
+        for eps in noises:
+            j = 0
+            for n in gridsizes:
+                franke = FrankeDataset(n=n, eps=eps)
+                X, y = franke.generate_data_set()
 
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
-                    random_state = 0)
+                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
+                        random_state = 0)
 
-            model = MultilayerPerceptron(
-                        hidden_layer_sizes=[50,50,50],
-                        eta=0.01, 
-                        alpha=0.0, 
-                        batch_size=100,
-                        learning_rate='constant',
-                        n_epochs=500, 
-                        act_func_str='relu',
-                        cost_func_str='mse',
-                        output_func_str='identity')
+                model = MultilayerPerceptron(
+                            hidden_layer_sizes=[70,70,70],
+                            eta=1e-2, 
+                            alpha=0.0, 
+                            batch_size=100,
+                            learning_rate='constant',
+                            n_epochs=200, 
+                            act_func_str='relu',
+                            cost_func_str='mse',
+                            output_func_str='identity')
 
-            model.fit(X_train, y_train)
-            y_pred_test = model.predict(X_test)
-            y_pred = model.predict(X)
-            if np.isnan(y_pred_test).any():
-                mse = np.nan
-                r2 = np.nan
-            else:
-                mse = mean_squared_error(y_test, y_pred_test)
-                r2 = r2_score(y_test, y_pred_test)
-            print(f'Grid size: {n}')
-            print(f'MSE: {mse}')
-            print(f'R2: {r2}')
-            mses.append(mse)
-            r2s.append(r2)
+                model.fit(X_train, y_train)
+                y_pred_test = model.predict(X_test)
+                y_pred_train = model.predict(X_train)
+                y_pred = model.predict(X)
+                if np.isnan(y_pred_test).any():
+                    mses[i,j] = np.nan
+                    mses_train[i,j] = np.nan
+                    r2s[i,j] = np.nan
+                    biases[i,j] = np.nan
+                    variances[i,j] = np.nan
+                else:
+                    mses[i,j] = mean_squared_error(y_test, y_pred_test)
+                    mses_train[i,j] = mean_squared_error(y_train, y_pred_train)
+                    r2s[i,j] = r2_score(y_test, y_pred_test)
+                    biases[i,j] = np.mean((y_test - np.mean(y_pred_test)) ** 2)
+                    variances[i,j] = np.var(y_pred_test)
+                print(f'Grid size: {n}')
+                print(f'MSE: {mses[i,j]}')
+                print(f'R2: {r2s[i,j]}')
+                j += 1
+            i += 1
 
             # np.save(f'y_pred_optimal_grid{n}', y_pred)
         
@@ -324,34 +337,74 @@ def nn_regression_gridsize(train=False):
     mses = np.load('mse_gridsize_analysis.npy')
     r2s = np.load('r2_gridsize_analysis.npy')
     
-    plt.figure()
-    plt.plot(gridsizes, mses, '.-',label='sigmoid')
-    plt.xlabel('grid size')
-    plt.ylabel('Mean Squared Error')
-    plt.savefig('eta-mse.pdf')
+    fig = plt.figure(figsize=(9.5,4.5))
+
+    ax1 = fig.add_subplot(121)
+    i = 0
+    for eps in noises:
+        ax1.plot(gridsizes, mses[i,:], '.-', label=f'test; noise: {eps}')
+        ax1.plot(gridsizes, mses_train[i,:], '.-', label=f'train; noise: {eps}')
+        # ax1.plot(gridsizes, variances[i,:], '.-', label=f'variance; noise: {eps}')
+        # ax1.plot(gridsizes, biases[i,:], '.-', label=f'bias; noise: {eps}')
+        i += 1  
+    ax1.set_xlabel('grid size')
+    ax1.legend()
+
+    ax2 = fig.add_subplot(122)
+    i = 0
+    for eps in noises:
+        ax2.plot(gridsizes, r2s[i,:], '.-', label=f'noise: {eps}')
+        i += 1  
+    ax2.set_xlabel('grid size')
+    ax2.legend()
+
+    plt.savefig('grid-mse.pdf')
     plt.show()
 
-        # y_pred = np.load('y_pred_optimal.npy')
-        # nn_regression_plot(X, y, y_pred)
 
 
-
-def nn_regression_skl(X, y):
-    franke = FrankeDataset(n=20, eps=0.2)
+def nn_regression_skl():
+    franke = FrankeDataset(n=100, eps=0.1)
     X, y = franke.generate_data_set()
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
             random_state = 0)
+
+    hl = [70,70,70]
+    eta = 0.01
+    batch_size = 100
+    n_epochs = 1000
+
+
+    model = MultilayerPerceptron(
+                hidden_layer_sizes=hl,
+                eta=eta, 
+                alpha=0.0, 
+                batch_size=batch_size,
+                learning_rate='constant',
+                n_epochs=n_epochs, 
+                act_func_str='relu',
+                cost_func_str='mse',
+                output_func_str='identity')
+
+    model.fit(X_train, y_train)
+    y_pred_test = model.predict(X_test)
+    y_pred = model.predict(X)
+    print(f'pylearn R2: {r2_score(y_test, y_pred_test)}')
+    print(f'pylearn MSE: {mean_squared_error(y_test, y_pred_test)}')
+    nn_regression_plot(X, y, y_pred)
+
+
+
+
     y_train = np.ravel(y_train)
     y_test = np.ravel(y_test)
     dnn = MLPRegressor(
             hidden_layer_sizes=hl, 
-            activation='logistic',
-            alpha=0.1, 
-            learning_rate_init=0.01,
+            alpha=0.0, 
+            learning_rate_init=eta,
             max_iter=n_epochs,
-            batch_size=200, 
-            tol=1e-7,
+            batch_size=batch_size, 
             learning_rate='constant')
 
     dnn.fit(X_train, y_train)

@@ -379,26 +379,49 @@ def nn_classification_optimal(train=False, options=[2, True], eta=0.1,
 
 
 def nn_classification_skl():
-    # X, y = breast_cancer_dataset()
-    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
-    #         random_state = 0)
-    # X_train, X_test = scale_data(X_train, X_test, scaler='minmax')
-    # y_train = y_train.reshape(-1,1)
-    # encoder = OneHotEncoder(categories='auto')
-    # y_train_1hot = encoder.fit_transform(y_train).toarray()
-    # y_test_1hot = encoder.fit_transform(y_test.reshape(-1,1)).toarray()
+    X, y = breast_cancer_dataset()
 
-    X, X_train, X_test, y, y_train, y_train_1hot, y_test, y_test_1hot = \
-        credit_card_train_test('../data/credit_card.xls', which_onehot=2,
-                balance_outcomes=False)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
+            random_state = 0)
 
-    dnn = MLPClassifier(hidden_layer_sizes=[100,100,100], 
+    X_train, X_test = scale_data(X_train, X_test, scaler='minmax')
+    
+    y_train = y_train.reshape(-1,1)
+    encoder = OneHotEncoder(categories='auto')
+    y_train_1hot = encoder.fit_transform(y_train).toarray()
+    y_test_1hot = encoder.fit_transform(y_test.reshape(-1,1)).toarray()
+
+    hl = [80,80,80]
+    eta = 1e-1
+    n_epochs = 1000
+
+    model = MultilayerPerceptron(
+                hidden_layer_sizes=hl,
+                eta=eta, 
+                alpha=0.0, 
+                batch_size=100,
+                learning_rate='constant',
+                n_epochs=n_epochs, 
+                weights_init='normal',
+                act_func_str='sigmoid',
+                cost_func_str='crossentropy',
+                output_func_str='sigmoid')
+
+    model.fit(X_train, y_train_1hot)
+
+    y_pred_probas = model.predict(X_test)
+    y_pred = model.predict_class(X_test)
+    print(f'pylearn accuracy: {accuracy_score(y_test, y_pred)}')
+    print(cumulative_gain_area_ratio(y_test, y_pred_probas, onehot=True))
+    nn_classification_plot(y_test, y_pred)
+
+
+    dnn = MLPClassifier(hidden_layer_sizes=hl, 
                         activation='logistic',
                         alpha=0.0, 
-                        learning_rate_init=0.001, 
-                        max_iter=1000,
+                        learning_rate_init=eta, 
+                        max_iter=n_epochs,
                         batch_size=100, 
-                        verbose=True,
                         learning_rate='constant')
     dnn.fit(X_train, y_train_1hot)
     y_pred_probas = dnn.predict_proba(X_test)
