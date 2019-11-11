@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # ============================================================================
 # File:     nn_regression.py
-# Author:   Erik Johannes Husom
 # Created:  2019-10-22
 # ----------------------------------------------------------------------------
 # DESCRIPTION:
@@ -33,6 +32,21 @@ from franke import *
 
 
 def regression_analysis(X, y):
+    """Performing Ridge regression, with cross-validation, using both
+    Scikit-learn and pylearn.
+
+    Parameters
+    ----------
+    X : array
+        Design matrix.
+    y : array
+        Target vector.
+
+    Returns
+    -------
+    Nothing.
+
+    """
 
     print(CV(X, y, Ridge(alpha=0.00001), n_splits=20,
         classification=False))  # sklearn
@@ -41,6 +55,22 @@ def regression_analysis(X, y):
 
 
 def nn_regression_analysis(train=False):
+    """Analyzing behaviour of the MSE of a model based on which
+    learning parameter (eta) is used, and how many epochs we run the training.
+
+    Parameters
+    ----------
+    train : boolean
+        If True: Model is trained, and then used for results.
+        If False: Model is assumed to be already trained, and stored arrays are
+        used for producing results. The stored arrays needs to be present in
+        the same directory is this function.
+
+    Returns
+    -------
+    Nothing.
+
+    """
 
     franke = FrankeDataset(n=20, eps=0.2)
     X, y = franke.generate_data_set()
@@ -156,13 +186,24 @@ def nn_regression_analysis(train=False):
     ax2.legend()
 
     plt.savefig('eta-mse.pdf')
-    plt.show()
-
-
-
 
 
 def nn_regression_heatmap(train=False):
+    """Grid search for optimal hidden layer configuration in neural network.
+
+    Parameters
+    ----------
+    train : boolean
+        If True: Model is trained, and then used for results.
+        If False: Model is assumed to be already trained, and stored arrays are
+        used for producing results. The stored arrays needs to be present in
+        the same directory is this function.
+
+    Returns
+    -------
+    Nothing.
+
+    """
 
     franke = FrankeDataset(n=20, eps=0.2)
     X, y = franke.generate_data_set()
@@ -237,14 +278,27 @@ def nn_regression_heatmap(train=False):
 
 
 def nn_regression_optimal(train=False):
+    """Training a model with given parameters, with a high number of epochs.
+
+    Parameters
+    ----------
+    train : boolean
+        If True: Model is trained, and then used for results.
+        If False: Model is assumed to be already trained, and stored arrays are
+        used for producing results. The stored arrays needs to be present in
+        the same directory is this function.
+
+    Returns
+    -------
+    Nothing.
+
+    """
+
     franke = FrankeDataset(n=20, eps=0.2)
     X, y = franke.generate_data_set()
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
             random_state = 0)
-
-    
-
 
     if train:
         model = MultilayerPerceptron(
@@ -274,6 +328,19 @@ def nn_regression_optimal(train=False):
 
 
 def nn_regression_gridsize(train=False):
+    """Analyzing behaviour of MSE and R2 based on the size of the Franke data
+    set, and how much noise we have introduced to the data.
+    train : boolean
+        If True: Model is trained, and then used for results.
+        If False: Model is assumed to be already trained, and stored arrays are
+        used for producing results. The stored arrays needs to be present in
+        the same directory is this function.
+
+    Returns
+    -------
+    Nothing.
+
+    """
 
     gridsizes = [20,40,60,80]
     noises = [0.0, 0.1, 0.2]
@@ -364,6 +431,8 @@ def nn_regression_gridsize(train=False):
 
 
 def nn_regression_skl():
+    """Comparison of Scikit-Learn and pylearn."""
+
     franke = FrankeDataset(n=100, eps=0.1)
     X, y = franke.generate_data_set()
 
@@ -417,6 +486,9 @@ def nn_regression_skl():
 
 
 def nn_regression_plot(X, y, y_pred):
+    """3D-ploto of Franke function together with the predicted result, the
+    former as a surface, the latter as a wiregrid.
+    """
 
     n = int(np.sqrt(np.size(y)))
     x1 = X[:,0].reshape(n,n)

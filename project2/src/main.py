@@ -1,35 +1,54 @@
 #!/usr/bin/env python3
 # ============================================================================
 # File:     main.py
-# Author:   Erik Johannes Husom
 # Created:  2019-11-06
 # ----------------------------------------------------------------------------
 # Description:
 # Main function for running analysis of regression and classification methods
 # in FYS-STK4155 project 2, fall 2019.
+#
+# USAGE:
+# Each function call has an explanational comment. Uncomment function calls to
+# perform the specified analysis.
 # ============================================================================
 from nn_regression import *
 from nn_classification import *
 
-
 np.random.seed(2010)
-
-
 
 # ============================================================================
 # REGRESSION
 
+# Search for optimal learning rate and epoch number:
 # nn_regression_analysis(train=False)
+
+# Grid search for hidden layer configuration:
 # nn_regression_heatmap(train=True)
+
+# Train model with optimal parameters:
 # nn_regression_optimal(train=True)
+
+# Compare Scikit-Learn's implementation with pylearn:
 # nn_regression_skl()
+
+# Analyze behaviour of MSE and R2 for different gridsize of Franke data set:
 # nn_regression_gridsize(train=True)
 
 # ============================================================================
 # CLASSIFICATION
 
+# Simple test case for neural network classification:
 # nn_classification_simple()
+
+# Comparison of Scikit-Learn and pylearn when using breast cancer data set:
 # nn_classification_skl()
+
+# ----------------------------------------------------------------------------
+# Analysis of optimal parameters when training model on credit card data set,
+# by finding optimal learning rate and best configuration of hidden layers. The
+# last step, in the function nn_classification_optimal() trains the neural
+# network using the best parameters.
+
 # cc_options = []
 # cc_options.append([1, False])
 # cc_options.append([2, False])
@@ -51,10 +70,6 @@ np.random.seed(2010)
 # layers, nodes = nn_classification_heatmap(train=True, options=cc_options[best_idx],
 #         eta=eta_opts[best_idx])
 
-
 # nn_classification_optimal(train=True, options=cc_options[best_idx],
 #         eta=eta_opts[best_idx], layers=layers, nodes=nodes)
-
-# nn_classification_optimal(train=False, options=[2, True], layers=3, nodes=80, eta=1e-1)
-
 

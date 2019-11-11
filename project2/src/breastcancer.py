@@ -15,6 +15,8 @@ from sklearn.datasets import load_breast_cancer
 
 
 def visualize(df):
+    """Visualize correlation matrix of pandas dataframe."""
+
     plt.figure(figsize=(10,10))
     features = list(df.columns[1:10])
     ax = sns.heatmap(df[features].corr(), square=True, annot=True)
@@ -23,12 +25,17 @@ def visualize(df):
     plt.show()
 
 def sklearn_bunch_to_pandas_df(bunch):
+    """Convert sklearn-object bunch to pandas dataframe."""
+
     data = np.c_[bunch.data, bunch.target]
     columns = np.append(bunch.feature_names, ['target'])
     return pd.DataFrame(data, columns=columns)
 
 def breast_cancer_dataset():
-    # Reading data
+    """Load breast cancer data set from Scikit-Learn, and split the set into
+    design matrix and target vector.
+    """
+
     data = load_breast_cancer()
     y_names = data['target_names']
     y = data['target']

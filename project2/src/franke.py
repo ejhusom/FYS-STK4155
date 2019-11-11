@@ -31,15 +31,6 @@ class FrankeDataset():
     X : 2D array
     y : array
 
-
-    Notes
-    -----
-
-
-    Example
-    -------
-    >>>
-
     """
 
 
@@ -77,6 +68,9 @@ class FrankeDataset():
 
 
     def generate_data_set(self):
+        """Convert the x1/x2-meshgrid and y to a design matrix and a target
+        vector.
+        """
 
         self.X = np.c_[self.x1.ravel()[:, np.newaxis], self.x2.ravel()[:, np.newaxis]]
         self.y = self.y_mesh.ravel()[:, np.newaxis]
@@ -85,6 +79,15 @@ class FrankeDataset():
 
 
     def create_polynomial_design_matrix(self, deg=5):
+        """Create a specialized design matrix for performing linear regression
+        with polynomials of a given degree.
+
+        Parameters
+        ----------
+        deg : int, default=5
+            Polynomial degree.
+
+        """
 
         p = int((deg+1)*(deg+2)/2)
         if len(self.x1.shape) > 1:
@@ -102,6 +105,7 @@ class FrankeDataset():
 
 
     def plot_franke(self):
+        """Plot the Franke function."""
 
         fig = plt.figure()
         ax = fig.gca(projection='3d')

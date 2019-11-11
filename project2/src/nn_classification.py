@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # ============================================================================
 # File:     nn_classification.py
-# Author:   Erik Johannes Husom
 # Created:  2019-11-06
 # ----------------------------------------------------------------------------
 # Description:
@@ -39,6 +38,27 @@ from franke import *
 
 
 def scale_data(train_data, test_data, scaler='standard'):
+    """Scale train and test data.
+
+    Parameters
+    ----------
+    train_data : array
+        Train data to be scaled. Used as scale reference for test data.
+    test_data : array
+        Test data too be scaled, with train scaling as reference.
+    scaler : str, default='standard'
+        Options: 'standard, 'minmax'.
+        Specifies whether to use sklearn's StandardScaler or MinMaxScaler.
+
+
+    Returns
+    -------
+    train_data : array
+        Scaled train data.
+    test_data : array
+        Scaled test data.
+
+    """
 
     if scaler == 'standard':
         sc = StandardScaler()
@@ -54,31 +74,36 @@ def scale_data(train_data, test_data, scaler='standard'):
     return train_data, test_data
 
 def logistic_analysis(X, y):
+    """Performing logistic regression, with cross-validation, using both
+    Scikit-learn and pylearn.
+
+    Parameters
+    ----------
+    X : array
+        Design matrix.
+    y : array
+        Target vector.
+
+    Returns
+    -------
+    Nothing.
+
+    """
 
     print(CV(X, y, SGDClassifier(), n_splits=10))       # sklearn
     print(CV(X, y, SGDClassification(), n_splits=10))   # pylearn
 
 
 def nn_classification_simple():
+    """Perform simple classification case on Scikit-Learn's breast cancer data
+    set. Function is used for testing.
+    """
 
-    scale_columns = None
-    #X, y, scale_columns = preprocess_CC_data('../data/credit_card.xls')
+    # Loading, splitting and scaling data
     X, y = breast_cancer_dataset()
-
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
             random_state = 0)
-
     X_train, X_test = scale_data(X_train, X_test, scaler='minmax')
-
-    if scale_columns is not None:
-        minmaxscaler = MinMaxScaler()
-        scaler = ColumnTransformer(
-                            remainder='passthrough',
-                            transformers=[('minmaxscaler', minmaxscaler, scale_columns)])
-        scaler.fit(X_train)
-        X_train = scaler.transform(X_train)
-        X_test = scaler.transform(X_test)
-
 
     # One hot encoding targets
     y_train = y_train.reshape(-1,1)
@@ -106,6 +131,29 @@ def nn_classification_simple():
 
 
 def nn_classification_analysis(train=False, options=[1, True]):
+    """Analyzing behaviour of the accuracy score of a model based on which
+    learning parameter (eta) is used, and how many epochs we run the training.
+
+    Parameters
+    ----------
+    train : boolean
+        If True: Model is trained, and then used for results.
+        If False: Model is assumed to be already trained, and stored arrays are
+        used for producing results. The stored arrays needs to be present in
+        the same directory is this function.
+    options : list
+        options[0] : int, 1 or 2
+            If 1, only gender, education and marital status are onehot encoded
+            features. If 2, payment history is also onehot encoded.
+        options[1] : boolean
+            If False, unbalanced data set is used. If True, the data set is
+            balanced.
+
+    Returns
+    -------
+    Nothing.
+
+    """
 
     if options[0] == 1:
         onehot_str = 'case1'
@@ -127,8 +175,9 @@ def nn_classification_analysis(train=False, options=[1, True]):
     n_epochs = [10, 100, 250, 500, 1000, 2000]             
     layers = [100,100,100]
 
-    accuracy_eta = np.zeros(len(etas))
 
+    # Analyze accuracy score as function of learning rate
+    accuracy_eta = np.zeros(len(etas))
     if train:
         i = 0
         for eta in etas:
@@ -153,15 +202,17 @@ def nn_classification_analysis(train=False, options=[1, True]):
             print(f'Eta={eta} done')
 
 
+        # Finding the optimal learning rate eta
         eta_opt = etas[np.argmax(accuracy_eta)]
         print(eta_opt)
         print(f'Optimal eta: {eta_opt}')
 
-        timestr = time.strftime('%Y%m%d-%H%M')
+        # Saving the accuracy. Optional: With timestring in filename.
+        # timestr = time.strftime('%Y%m%d-%H%M')
         # np.save(timestr + '-accuracy_eta', accuracy_eta)
         np.save(f'class_accuracy_eta_o{options[0]}_b{options[1]}', accuracy_eta)
 
-
+        # Analyze accuracy score as function of number of epochs
         accuracy_epoch = np.zeros(len(n_epochs))
         i = 0
         for n in n_epochs:
@@ -188,11 +239,12 @@ def nn_classification_analysis(train=False, options=[1, True]):
         np.save(f'class_accuracy_epoch_o{options[0]}_b{options[1]}', accuracy_epoch)
         np.save(f'class_y_pred_test_maxepoch_o{options[0]}_b{options[1]}', y_pred_test)
 
-
+    # Loading accuracy scores
     accuracy_eta = np.load(f'class_accuracy_eta_o{options[0]}_b{options[1]}.npy')
     accuracy_epoch = np.load(f'class_accuracy_epoch_o{options[0]}_b{options[1]}.npy')
     
 
+    # Plotting the analysis
     fig = plt.figure(figsize=(9.5,4.5))
 
     ax1 = fig.add_subplot(121)
@@ -209,11 +261,30 @@ def nn_classification_analysis(train=False, options=[1, True]):
     ax2.legend()
 
     plt.savefig(f'class-eta-accuracy_o{options[0]}_b{options[1]}.pdf')
-    # plt.show()
     
     return eta_opt, accuracy_epoch[-1]
 
+
 def nn_classification_plot_analysis(all_options):
+    """Plotting the full analysis when running nn_classification_analysis() for
+    all four possible versions of the credit card data set. This function
+    assumes that nn_classification_analysis() has been run, and that the arrays
+    stored in that function is still present in this directory.
+
+    Parameters
+    ----------
+    all_options : nested list
+        List of all the options that define a given data set. See the function
+        nn_classification_analysis() for how options are defined. One entry in
+        all_options should contain another list, which is of the same format as
+        the 'options'-parameter in nn_classification_analysis.
+
+    Returns
+    -------
+    Nothing.
+
+    """
+
     fig = plt.figure(figsize=(9.5,4.5))
 
     ax1 = fig.add_subplot(121)
@@ -245,11 +316,38 @@ def nn_classification_plot_analysis(all_options):
     ax1.legend()
     ax2.legend()
     plt.savefig('class-eta-accuracy_full_analysis.pdf')
-    # plt.show()
 
 
+def nn_classification_heatmap(train=False, options=[1, False], eta=0.1):
+    """Grid search for optimal hidden layer configuration in neural network.
 
-def nn_classification_heatmap(train=False, options=[1, False], eta=0.01):
+    Parameters
+    ----------
+    train : boolean
+        If True: Model is trained, and then used for results.
+        If False: Model is assumed to be already trained, and stored arrays are
+        used for producing results. The stored arrays needs to be present in
+        the same directory is this function.
+    options : list
+        options[0] : int, 1 or 2
+            If 1, only gender, education and marital status are onehot encoded
+            features. If 2, payment history is also onehot encoded.
+        options[1] : boolean
+            If False, unbalanced data set is used. If True, the data set is
+            balanced.
+    eta : float, default=0.1
+        Learning rate.
+
+    Returns
+    -------
+    layers_opt : int
+        The number of layers which gave the highest accuracy score (dependent
+        on the number of nodes).
+    nodes_opt : int
+        The number of nodes which gave the highest accuracy score (dependent on
+        the number of layers).
+
+    """
 
     X, X_train, X_test, y, y_train, y_train_1hot, y_test, y_test_1hot = \
         credit_card_train_test('../data/credit_card.xls',
@@ -257,7 +355,7 @@ def nn_classification_heatmap(train=False, options=[1, False], eta=0.01):
                 balance_outcomes=options[1])
 
     # Test cases
-    n_layers = np.arange(1, 5, 1)                  # 1, 2, 3, ...
+    n_layers = np.arange(1, 5, 1)                   # 1, 2, 3, ...
     n_nodes = np.arange(40, 121, 20)                # 10, 20, 30, ...
 
     accuracy = np.zeros((len(n_layers), len(n_nodes)))
@@ -294,6 +392,8 @@ def nn_classification_heatmap(train=False, options=[1, False], eta=0.01):
 
     accuracy = np.load('accuracy_heat.npy')
 
+    # Finding the configuration that gave the highest accuracy, and storing the
+    # result.
     max_idcs = np.where(accuracy == np.max(accuracy))
     accuracy_opt = np.max(accuracy)
     layers_opt = n_layers[max_idcs[0]]
@@ -312,13 +412,41 @@ def nn_classification_heatmap(train=False, options=[1, False], eta=0.01):
     bottom, top = ax.get_ylim()
     ax.set_ylim(bottom + 0.5, top - 0.5)
     plt.savefig('class_heatmap.pdf')
-    # plt.show()
 
     return layers_opt, nodes_opt
 
 
 def nn_classification_optimal(train=False, options=[2, True], eta=0.1,
         layers=3, nodes=80):
+    """Training a model with given parameters, with a high number of epochs.
+
+    Parameters
+    ----------
+    train : boolean
+        If True: Model is trained, and then used for results.
+        If False: Model is assumed to be already trained, and stored arrays are
+        used for producing results. The stored arrays needs to be present in
+        the same directory is this function.
+    options : list
+        options[0] : int, 1 or 2
+            If 1, only gender, education and marital status are onehot encoded
+            features. If 2, payment history is also onehot encoded.
+        options[1] : boolean
+            If False, unbalanced data set is used. If True, the data set is
+            balanced.
+    eta : float, default=0.1
+        Learning rate.
+    layers : int
+        Number of hidden layers.
+    nodes : int
+        Number of nodes in each hidden layer.
+
+    Returns
+    -------
+    Nothing.
+
+    """
+
 
     X, X_train, X_test, y, y_train, y_train_1hot, y_test, y_test_1hot = \
         credit_card_train_test('../data/credit_card.xls',
@@ -379,6 +507,8 @@ def nn_classification_optimal(train=False, options=[2, True], eta=0.1,
 
 
 def nn_classification_skl():
+    """Comparison of sklearn and pylearn on breast cancer data set."""
+
     X, y = breast_cancer_dataset()
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2,
@@ -434,6 +564,7 @@ def nn_classification_skl():
 
 
 def nn_classification_plot(y_test, y_pred):
+    """Plotting confusion matrix of a classification model."""
 
     ax = plot_confusion_matrix(y_test, y_pred, normalize=True, cmap='Blues',
             title=' ')
