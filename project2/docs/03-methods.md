@@ -1,9 +1,0 @@
-# Methods
-
-
-
-## Minibatching
-
-
-
-

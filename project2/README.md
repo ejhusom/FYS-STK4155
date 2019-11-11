@@ -6,4 +6,4 @@ problem, and 2) common regression methods, like the Ordinary Least Squares
 method, Ridge regression and Lasso regression, when applied to a regression
 problem.
 
-See report in the ´docs´ folder for all information about the project.
+See report in the `docs` folder for all information about the project.

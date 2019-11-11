@@ -13,6 +13,7 @@
 # ============================================================================
 from nn_regression import *
 from nn_classification import *
+from logistic_classification import *
 
 np.random.seed(2010)
 
@@ -35,7 +36,7 @@ np.random.seed(2010)
 # nn_regression_gridsize(train=True)
 
 # ============================================================================
-# CLASSIFICATION
+# CLASSIFICATION NEURAL NETWORK
 
 # Simple test case for neural network classification:
 # nn_classification_simple()
@@ -73,3 +74,11 @@ np.random.seed(2010)
 # nn_classification_optimal(train=True, options=cc_options[best_idx],
 #         eta=eta_opts[best_idx], layers=layers, nodes=nodes)
 
+
+# ============================================================================
+# CLASSIFICATION LOGISTIC REGRESSION
+
+# filename = 'data/credit_card.xls'
+# X, y, scale_columns = preprocess_CC_data(filename, which_onehot = 2)
+# model = SGDClassification(batch_size=100, eta0=0.001)
+# analyze_logistic(X, y, model, scale_columns, analyze_params=True, balance_outcomes=False)

@@ -542,7 +542,7 @@ def nn_classification_skl():
     y_pred_probas = model.predict(X_test)
     y_pred = model.predict_class(X_test)
     print(f'pylearn accuracy: {accuracy_score(y_test, y_pred)}')
-    print(cumulative_gain_area_ratio(y_test, y_pred_probas, onehot=True))
+    print(f'Area ratio: {cumulative_gain_area_ratio(y_test, y_pred_probas, onehot=True)}')
     nn_classification_plot(y_test, y_pred)
 
 
@@ -557,7 +557,7 @@ def nn_classification_skl():
     y_pred_probas = dnn.predict_proba(X_test)
     y_pred = np.argmax(y_pred_probas, axis=1)
     print(f'Scikit accuracy: {accuracy_score(y_test, y_pred)}')
-    print(cumulative_gain_area_ratio(y_test, y_pred_probas, onehot=True))
+    print(f'Area ratio: {cumulative_gain_area_ratio(y_test, y_pred_probas, onehot=True)}')
     nn_classification_plot(y_test, y_pred)
 
 

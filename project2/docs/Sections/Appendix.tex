@@ -1,0 +1,20 @@
+\section{Appendix}\label{sec:Appendix}
+
+
+\begin{table}[]
+\label{tab:appendix_results_classification}
+\caption{Results from classification of the creditcard data with logistic regression. Description of the preprocessing methods:\newline
+1) One hot encoding of gender, education and marital status.\newline
+2) One hot encoding of gender, education, marital status and payment history.\newline
+3) Balanced training set with $1:1$ ratio of defaults and non-defaults, and one hot encoding of gender, education and marital status.\newline
+4) Balanced training set and one hot encoding of gender, education, marital status and payment history.}
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+Preprocessing method & \multicolumn{2}{c|}{Accuracy} & \multicolumn{2}{c|}{Area ratio} & True positive & True negative \\ \hline
+                     & Train          & Test         & Train           & Test          & \multicolumn{2}{c|}{Test}     \\ \hline
+1                    & 0.80           & 0.81         & 0.45            & 0.42          & 0.24          & 0.97          \\ \hline
+2                    & 0.82           & 0.82         & 0.54            & 0.51          & 0.34          & 0.96          \\ \hline
+3                    & 0.81           & 0.80         & 0.46            & 0.44          & 0.26          & 0.97          \\ \hline
+4                    & 0.82           & 0.82         & 0.53            & 0.51          & 0.35          & 0.96          \\ \hline
+\end{tabular}
+\end{table}

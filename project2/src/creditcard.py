@@ -6,16 +6,47 @@
 # Description:
 # 
 # ============================================================================
-import sys
 import numpy as np
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OneHotEncoder, StandardScaler, MinMaxScaler
+from sklearn.model_selection import KFold, train_test_split
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, MinMaxScaler
 from sklearn.compose import ColumnTransformer
-from sklearn.metrics import confusion_matrix, accuracy_score, roc_auc_score
+from sklearn.pipeline import Pipeline
+from sklearn.decomposition import PCA
+from sklearn.datasets import load_breast_cancer
+from sklearn import linear_model
+import pandas as pd
+import time
+import matplotlib.pyplot as plt
+from scikitplot.metrics import plot_confusion_matrix
+import scikitplot.metrics as skplt
+import seaborn as sns
+from matplotlib.patches import Rectangle
+
+
+from pylearn.logisticregression import SGDClassification
+from pylearn.linearmodel import Regression
+from pylearn.metrics import *
+from pylearn.multilayerperceptron import MultilayerPerceptron
+from pylearn.resampling import *
+
 
 
 def preprocess_CC_data(filename, which_onehot = 1):
+    """
+    Function for preprocessing the credit card data. Removes outliers in the
+    data set, and uses one hot encoding on categorical features.
+
+    Inputs:
+    - filename of the data set
+    - which_onehot:
+        - "1" specifies to one hot encode the features sex, education and marriage
+        - "2" specifies to one hot encode the features sex, education, marriage and payment history
+
+    Returns:
+    - The design matrix, shape (n_observations, n_features).
+    - Target vector, shape (n_observations,).
+    - Indices of continuous features in the data set
+    """
 
     nanDict = {}
     df = pd.read_excel(filename, header=1, skiprows=0, index_col=0, na_values=nanDict)
@@ -53,17 +84,13 @@ def preprocess_CC_data(filename, which_onehot = 1):
 
     #split data into categorical and continuous features
     if which_onehot==1:
-        """
-        only marriage, sex and education onehot encoded
-        """
+        #only marriage, sex and education onehot encoded
         categorical_inds = (1, 2, 3)
         continuous_inds = (0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22)
 
 
     elif which_onehot==2:
-        """
-        all categories onehot encoded
-        """
+        #all categories onehot encoded
         categorical_inds = (1, 2, 3, 5, 6, 7, 8, 9, 10)
         continuous_inds = (0, 4, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22)
 
@@ -87,10 +114,9 @@ def preprocess_CC_data(filename, which_onehot = 1):
     #join categorical and continuous features
     X = np.concatenate((X_cont, X_cat), axis=1)
 
-    cont_feat_inds = list(range(X_cont.shape[1]))
+    continuous_feature_inds = list(range(X_cont.shape[1]))
 
-    print('preprocessing done')
-    return X, np.ravel(y), cont_feat_inds
+    return X, np.ravel(y), continuous_feature_inds
 
 
 
