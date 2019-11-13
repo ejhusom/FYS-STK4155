@@ -114,7 +114,7 @@ same output. In this project we use a standard normal distribution when
 doing classification, but in the case for regression we use an
 initialization proposed by Xavier Glorot and Yoshua
 Bengio\cite{glorot}, where we scale the randomly
-distributed weights by a factor \(1/\sqrt{n_{l-1} + n_l}\) (\(n_{l-1}\) is
+distributed weights by a factor \(1/\sqrt{n_{l-1} + n_l}\) (where \(n_{l-1}\) is
 the size of the previous layer, and \(n_l\) is the size of the current
 layer). The biases are given a small non-zero value, in our case
 \(b_i = 0.01\) for all layers, in order to ensure activation.
@@ -291,6 +291,8 @@ The source code of this project is written in Python, and can be found in the Gi
     \item \texttt{breastcancer.py}: Preprocessing of the breast cancer data
     \item \texttt{creditcard.py}: Preprocessing of the credit card data.
     \item \texttt{franke.py}: Preprocessing of the Franke data.
+    \item \texttt{logistic\_classification.py}: Functions for analyzing the
+        logisitic classification.
     \item \texttt{main.py}: Main entry to running the analysis.
     \item \texttt{nn\_classification.py}: Functions for analyzing the neural network when applied to classification problems.
     \item \texttt{nn\_regression.py}: Functions for analyzing the neural network when applied to regression problems.
