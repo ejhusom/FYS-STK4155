@@ -4,4 +4,4 @@ Source code for projects in the course FYS-STK4155 at the University of Oslo, fa
 
 * Project 1 - Regression and resampling methods
 * Project 2 - Logistic regression and neural networks
-* Project 3 - N/A
+* Project 3 - See repository "FYS-STK4155-project-3".
